@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castaway Admin Portal</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0f172a; color: #fff; padding: 16px; max-width: 600px; margin: 0 auto; }
+    .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
+    
+    /* Main Nav Tabs */
+    .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 16px; }
+    .nav-btn { padding: 10px 6px; border-radius: 8px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 11px; cursor: pointer; text-align: center; }
+    .nav-btn.active { background: #06b6d4; color: #0f172a; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Performance Time Filter Sub-Bar */
+    .filter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+    .filter-btn { padding: 8px 4px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
+    .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+
+    /* Dashboard KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .kpi-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; }
+    .kpi-val { font-size: 20px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
+    .kpi-lbl { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
+
+    /* Data List Rows & Cards */
+    .item-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
+    .price-input { width: 65px; background: #0f172a; border: 1px solid #06b6d4; color: #fff; padding: 6px; border-radius: 6px; text-align: right; font-weight: bold; }
+    
+    /* Buttons */
+    .btn-save { background: #06b6d4; color: #0f172a; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 4px; }
+    .btn-delete { background: #991b1b; color: #f87171; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 4px; }
+
+    .form-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; margin-top: 20px; }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+    .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
+    .btn-add { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h2 style="margin:0; font-size:18px;">Castaway Admin</h2>
+      <span style="font-size:11px; color:#94a3b8;">Management Portal</span>
+    </div>
+    <span id="status" class="status">Loading...</span>
+  </div>
+
+  <div class="nav-grid">
+    <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="nav-btn active">Today Dashboard</button>
+    <button onclick="switchTab('performance')" id="btn-tab-performance" class="nav-btn">Performance</button>
+    <button onclick="switchTab('items')" id="btn-tab-items" class="nav-btn">Menu Items</button>
+  </div>
+
+  <!-- TAB 1: TODAY DASHBOARD -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-lbl">Today's Revenue</div>
+        <div id="kpi-rev" class="kpi-val">฿0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-lbl">Units Sold</div>
+        <div id="kpi-units" class="kpi-val">0</div>
+      </div>
+    </div>
+    <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Today's Sales Breakdown</h3>
+    <div id="today-breakdown-list"></div>
+  </div>
+
+  <!-- TAB 2: MENU PERFORMANCE WITH TIME FILTERS -->
+  <div id="tab-performance" class="tab-content">
+    <div class="filter-grid">
+      <button onclick="setPerfFilter('today')" id="flt-today" class="filter-btn active">Today</button>
+      <button onclick="setPerfFilter('week')" id="flt-week" class="filter-btn">This Week</button>
+      <button onclick="setPerfFilter('month')" id="flt-month" class="filter-btn">30 Days</button>
+      <button onclick="setPerfFilter('all')" id="flt-all" class="filter-btn">All-Time</button>
+    </div>
+
+    <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;" id="perf-title">Performance Summary (Today)</h3>
+    <div id="performance-list"></div>
+  </div>
+
+  <!-- TAB 3: MENU ITEMS & ADD ITEM FORM -->
+  <div id="tab-items" class="tab-content">
+    <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Active Menu Items & Prices</h3>
+    <div id="menu-items-list"></div>
+
+    <div class="form-card">
+      <h3 style="font-size:14px; margin-bottom:10px; color:#06b6d4;">+ Add New Item to Menu</h3>
+      
+      <div class="form-group">
+        <label>Category</label>
+        <select id="new-cat-select" class="form-control" onchange="handleCategoryChange()">
+        </select>
+      </div>
+      <div class="form-group" id="other-cat-group" style="display:none;">
+        <label>Type Custom Category Name</label>
+        <input id="new-cat-custom" class="form-control" placeholder="e.g. Desserts">
+      </div>
+
+      <div class="form-group">
+        <label>Code / ID (Auto-suggested)</label>
+        <input id="new-id" class="form-control" placeholder="BK-20">
+      </div>
+
+      <div class="form-group"><label>Item Name</label><input id="new-name" class="form-control" placeholder="Pancake Stack"></div>
+      <div class="form-group"><label>Price (฿)</label><input id="new-price" type="number" class="form-control" placeholder="180"></div>
+      <button onclick="addNewMenuItem()" class="btn-add">+ Add Item to Sheet</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwEOvMwt5iebuNuTs0iJNT57OK0Lp9mzDMRT3nREF_PsvSLrYM-1tDUPl8vV2nmsNRF/exec";
+
+    let adminData = { items: [], categories: [], counts: {}, performance: [] };
+    let currentPerfFilter = 'today';
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      document.getElementById(`btn-tab-${tabName}`).classList.add('active');
+    }
+
+    function setPerfFilter(filterType) {
+      currentPerfFilter = filterType;
+      document.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(`flt-${filterType}`).classList.add('active');
+
+      const labels = {
+        'today': 'Performance Summary (Today)',
+        'week': 'Performance Summary (Rolling 7 Days)',
+        'month': 'Performance Summary (30 Days)',
+        'all': 'Performance Summary (All-Time)'
+      };
+      document.getElementById('perf-title').innerText = labels[filterType];
+
+      fetchAdminData();
+    }
+
+    function fetchAdminData() {
+      document.getElementById('status').innerText = "Syncing...";
+      const script = document.createElement('script');
+      script.src = API_URL + "?action=getAdminData&range=" + currentPerfFilter + "&callback=handleAdminData&t=" + Date.now();
+      document.body.appendChild(script);
+    }
+
+    window.handleAdminData = function(data) {
+      if (data.status === 'success') {
+        adminData = data;
+        document.getElementById('status').innerText = "Live";
+        renderDashboard();
+        renderPerformance();
+        renderMenuItems();
+        populateCategoryDropdown();
+      }
+    };
+
+    function renderDashboard() {
+      let totalRev = 0;
+      let totalUnits = 0;
+      let breakdownHtml = '';
+
+      adminData.items.forEach(item => {
+        const count = adminData.counts[item.id] || 0;
+        if (count > 0) {
+          const rev = count * item.price;
+          totalRev += rev;
+          totalUnits += count;
+
+          breakdownHtml += `
+            <div class="item-row">
+              <div>
+                <div style="font-weight:bold; font-size:13px;">${item.name}</div>
+                <div style="font-size:11px; color:#94a3b8;">${count} sold @ ฿${item.price}</div>
+              </div>
+              <div style="font-weight:bold; color:#06b6d4;">฿${rev.toLocaleString()}</div>
+            </div>
+          `;
+        }
+      });
+
+      document.getElementById('kpi-rev').innerText = `฿${totalRev.toLocaleString()}`;
+      document.getElementById('kpi-units').innerText = totalUnits;
+      document.getElementById('today-breakdown-list').innerHTML = breakdownHtml || '<div style="color:#64748b; text-align:center; padding:10px;">No sales logged today yet.</div>';
+    }
+
+    function renderPerformance() {
+      const container = document.getElementById('performance-list');
+      if (!adminData.performance || adminData.performance.length === 0) {
+        container.innerHTML = '<div style="color:#64748b; text-align:center; padding:10px;">No performance summary found for this timeframe.</div>';
+        return;
+      }
+
+      const sortedPerformance = [...adminData.performance].sort((a, b) => b.totalUnits - a.totalUnits);
+
+      container.innerHTML = sortedPerformance.map(p => `
+        <div class="item-row">
+          <div>
+            <div style="font-weight:bold; font-size:13px;">${p.name}</div>
+            <div style="font-size:11px; color:#94a3b8;">${p.category} (${p.id})</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:bold; color:#06b6d4;">${p.totalUnits} Units</div>
+            <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderMenuItems() {
+      const container = document.getElementById('menu-items-list');
+      container.innerHTML = adminData.items.map(item => `
+        <div class="item-row">
+          <div>
+            <div style="font-weight:bold; font-size:13px;">${item.name}</div>
+            <div style="font-size:11px; color:#94a3b8;">${item.category} (${item.id})</div>
+          </div>
+          <div style="display:flex; align-items:center;">
+            ฿<input id="price-${item.id}" type="number" value="${item.price}" class="price-input">
+            <button onclick="updatePrice('${item.id}')" class="btn-save">Save</button>
+            <button onclick="deleteMenuItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="btn-delete">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function populateCategoryDropdown() {
+      const select = document.getElementById('new-cat-select');
+      const cats = adminData.categories || [];
+
+      let optionsHtml = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+      optionsHtml += `<option value="OTHER">-- OTHER (Type Custom) --</option>`;
+
+      select.innerHTML = optionsHtml;
+      handleCategoryChange();
+    }
+
+    function handleCategoryChange() {
+      const selectVal = document.getElementById('new-cat-select').value;
+      const otherGroup = document.getElementById('other-cat-group');
+      const idInput = document.getElementById('new-id');
+
+      if (selectVal === 'OTHER') {
+        otherGroup.style.display = 'block';
+        idInput.value = '';
+        idInput.placeholder = 'e.g. DS-01';
+      } else {
+        otherGroup.style.display = 'none';
+        idInput.value = getNextAvailableCode(selectVal);
+      }
+    }
+
+    function getNextAvailableCode(category) {
+      const categoryItems = adminData.items.filter(i => i.category === category);
+      if (categoryItems.length === 0) return '';
+
+      let maxNum = 0;
+      let prefix = '';
+
+      categoryItems.forEach(item => {
+        const parts = item.id.split('-');
+        if (parts.length === 2) {
+          prefix = parts[0];
+          const num = parseInt(parts[1], 10);
+          if (!isNaN(num) && num > maxNum) {
+            maxNum = num;
+          }
+        }
+      });
+
+      if (!prefix) {
+        prefix = category.substring(0, 2).toUpperCase();
+      }
+
+      const nextNum = maxNum + 1;
+      const paddedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
+      return `${prefix}-${paddedNum}`;
+    }
+
+    function updatePrice(id) {
+      const newPrice = document.getElementById(`price-${id}`).value;
+      fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updatePrice', id: id, price: newPrice })
+      }).then(() => {
+        alert("Price updated!");
+        fetchAdminData();
+      });
+    }
+
+    function deleteMenuItem(id, name) {
+      if (confirm(`Are you sure you want to remove "${name}" (${id}) from the menu?`)) {
+        // Optimistic UI Removal
+        adminData.items = adminData.items.filter(i => i.id !== id);
+        renderMenuItems();
+
+        fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'deleteMenuItem', id: id })
+        }).then(() => {
+          setTimeout(fetchAdminData, 3500);
+        });
+      }
+    }
+
+    function addNewMenuItem() {
+      const idInput = document.getElementById('new-id');
+      const nameInput = document.getElementById('new-name');
+      const priceInput = document.getElementById('new-price');
+      const customCatInput = document.getElementById('new-cat-custom');
+
+      const id = idInput.value.trim();
+      const selectVal = document.getElementById('new-cat-select').value;
+      let cat = selectVal === 'OTHER' ? customCatInput.value.trim() : selectVal;
+
+      const name = nameInput.value.trim();
+      const price = priceInput.value.trim();
+
+      if (!id || !cat || !name || !price) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      // Optimistic UI Add
+      const newItem = { id: id, category: cat, name: name, price: Number(price) };
+      adminData.items.push(newItem);
+      renderMenuItems();
+
+      idInput.value = '';
+      nameInput.value = '';
+      priceInput.value = '';
+      customCatInput.value = '';
+
+      fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'addMenuItem', id: id, category: cat, name: name, price: price })
+      }).then(() => {
+        setTimeout(fetchAdminData, 3500);
+      });
+    }
+
+    fetchAdminData();
+    setInterval(fetchAdminData, 15000);
+  </script>
+</body>
+</html>
