@@ -10,15 +10,15 @@
     .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
     .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
     
-    /* Main Nav Tabs */
-    .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 16px; }
-    .nav-btn { padding: 10px 6px; border-radius: 8px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 11px; cursor: pointer; text-align: center; }
+    /* Main Nav Tabs - 4 Columns */
+    .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-bottom: 16px; }
+    .nav-btn { padding: 10px 4px; border-radius: 8px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
     .nav-btn.active { background: #06b6d4; color: #0f172a; }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Performance Time Filter Sub-Bar */
+    /* Performance & Analytics Filter Bar */
     .filter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
     .filter-btn { padding: 8px 4px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
     .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
@@ -42,6 +42,15 @@
     .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
     .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
     .btn-add { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+
+    /* Chart Container */
+    .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-top: 10px; }
+    .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 11px; }
+    .bar-label { width: 75px; color: #94a3b8; font-weight: bold; }
+    .bar-track { flex-grow: 1; background: #0f172a; height: 18px; border-radius: 4px; overflow: hidden; margin: 0 8px; border: 1px solid #334155; }
+    .bar-fill { height: 100%; background: #06b6d4; border-radius: 3px; transition: width 0.4s ease; }
+    .bar-fill.peak { background: #f59e0b; }
+    .bar-val { width: 35px; text-align: right; font-weight: bold; color: #fff; }
   </style>
 </head>
 <body>
@@ -54,8 +63,9 @@
   </div>
 
   <div class="nav-grid">
-    <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="nav-btn active">Today Dashboard</button>
+    <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="nav-btn active">Dashboard</button>
     <button onclick="switchTab('performance')" id="btn-tab-performance" class="nav-btn">Performance</button>
+    <button onclick="switchTab('analytics')" id="btn-tab-analytics" class="nav-btn">Analytics</button>
     <button onclick="switchTab('items')" id="btn-tab-items" class="nav-btn">Menu Items</button>
   </div>
 
@@ -75,7 +85,7 @@
     <div id="today-breakdown-list"></div>
   </div>
 
-  <!-- TAB 2: MENU PERFORMANCE WITH TIME FILTERS -->
+  <!-- TAB 2: MENU PERFORMANCE -->
   <div id="tab-performance" class="tab-content">
     <div class="filter-grid">
       <button onclick="setPerfFilter('today')" id="flt-today" class="filter-btn active">Today</button>
@@ -88,7 +98,17 @@
     <div id="performance-list"></div>
   </div>
 
-  <!-- TAB 3: MENU ITEMS & ADD ITEM FORM -->
+  <!-- TAB 3: ANALYTICS & PEAK SELLING HOURS -->
+  <div id="tab-analytics" class="tab-content">
+    <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Selling Hours</h3>
+    <p style="font-size:11px; color:#94a3b8; margin-bottom:12px;">Hourly item sales volume to optimize kitchen prep & staff shifts.</p>
+    
+    <div class="chart-card" id="analytics-chart">
+      <!-- Chart rendered dynamically -->
+    </div>
+  </div>
+
+  <!-- TAB 4: MENU ITEMS & ADD ITEM FORM -->
   <div id="tab-items" class="tab-content">
     <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Active Menu Items & Prices</h3>
     <div id="menu-items-list"></div>
@@ -98,8 +118,7 @@
       
       <div class="form-group">
         <label>Category</label>
-        <select id="new-cat-select" class="form-control" onchange="handleCategoryChange()">
-        </select>
+        <select id="new-cat-select" class="form-control" onchange="handleCategoryChange()"></select>
       </div>
       <div class="form-group" id="other-cat-group" style="display:none;">
         <label>Type Custom Category Name</label>
@@ -120,7 +139,7 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwEOvMwt5iebuNuTs0iJNT57OK0Lp9mzDMRT3nREF_PsvSLrYM-1tDUPl8vV2nmsNRF/exec";
 
-    let adminData = { items: [], categories: [], counts: {}, performance: [] };
+    let adminData = { items: [], categories: [], counts: {}, performance: [], hourlyPeak: [] };
     let currentPerfFilter = 'today';
 
     function switchTab(tabName) {
@@ -160,6 +179,7 @@
         document.getElementById('status').innerText = "Live";
         renderDashboard();
         renderPerformance();
+        renderAnalytics();
         renderMenuItems();
         populateCategoryDropdown();
       }
@@ -215,6 +235,34 @@
           </div>
         </div>
       `).join('');
+    }
+
+    function renderAnalytics() {
+      const container = document.getElementById('analytics-chart');
+      const hourly = adminData.hourlyPeak || Array(24).fill(0);
+      
+      const maxSales = Math.max(...hourly, 1);
+      let chartHtml = '';
+
+      // Only display operating hours (e.g., 07:00 to 23:00)
+      for (let h = 7; h <= 23; h++) {
+        const val = hourly[h] || 0;
+        const pct = Math.round((val / maxSales) * 100);
+        const isPeak = val > 0 && val === maxSales;
+        const timeLabel = `${h < 10 ? '0' + h : h}:00 - ${(h+1) < 10 ? '0' + (h+1) : (h+1)}:00`;
+
+        chartHtml += `
+          <div class="bar-row">
+            <div class="bar-label">${timeLabel}</div>
+            <div class="bar-track">
+              <div class="bar-fill ${isPeak ? 'peak' : ''}" style="width: ${pct}%;"></div>
+            </div>
+            <div class="bar-val">${val}</div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = chartHtml;
     }
 
     function renderMenuItems() {
@@ -302,7 +350,6 @@
 
     function deleteMenuItem(id, name) {
       if (confirm(`Are you sure you want to remove "${name}" (${id}) from the menu?`)) {
-        // Optimistic UI Removal
         adminData.items = adminData.items.filter(i => i.id !== id);
         renderMenuItems();
 
@@ -335,7 +382,6 @@
         return;
       }
 
-      // Optimistic UI Add
       const newItem = { id: id, category: cat, name: name, price: Number(price) };
       adminData.items.push(newItem);
       renderMenuItems();
