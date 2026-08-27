@@ -10,7 +10,7 @@
     .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
     .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
     
-    /* Main Nav Tabs - 4 Columns */
+    /* Navigation Grid */
     .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-bottom: 16px; }
     .nav-btn { padding: 10px 4px; border-radius: 8px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
     .nav-btn.active { background: #06b6d4; color: #0f172a; }
@@ -18,18 +18,18 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Performance & Analytics Filter Bar */
+    /* Performance Filter Grid */
     .filter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
     .filter-btn { padding: 8px 4px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
     .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
 
-    /* Dashboard KPI Cards */
+    /* KPI Cards */
     .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     .kpi-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; }
     .kpi-val { font-size: 20px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
     .kpi-lbl { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
 
-    /* Data List Rows & Cards */
+    /* List Items */
     .item-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
     .price-input { width: 65px; background: #0f172a; border: 1px solid #06b6d4; color: #fff; padding: 6px; border-radius: 6px; text-align: right; font-weight: bold; }
     
@@ -37,13 +37,14 @@
     .btn-save { background: #06b6d4; color: #0f172a; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 4px; }
     .btn-delete { background: #991b1b; color: #f87171; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 4px; }
 
+    /* Form UI */
     .form-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; margin-top: 20px; }
     .form-group { margin-bottom: 10px; }
     .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
     .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
     .btn-add { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
 
-    /* Chart Container */
+    /* Analytics Bar Chart */
     .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-top: 10px; }
     .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 11px; }
     .bar-label { width: 75px; color: #94a3b8; font-weight: bold; }
@@ -103,9 +104,7 @@
     <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Selling Hours</h3>
     <p style="font-size:11px; color:#94a3b8; margin-bottom:12px;">Hourly item sales volume to optimize kitchen prep & staff shifts.</p>
     
-    <div class="chart-card" id="analytics-chart">
-      <!-- Chart rendered dynamically -->
-    </div>
+    <div class="chart-card" id="analytics-chart"></div>
   </div>
 
   <!-- TAB 4: MENU ITEMS & ADD ITEM FORM -->
@@ -244,7 +243,6 @@
       const maxSales = Math.max(...hourly, 1);
       let chartHtml = '';
 
-      // Only display operating hours (e.g., 07:00 to 23:00)
       for (let h = 7; h <= 23; h++) {
         const val = hourly[h] || 0;
         const pct = Math.round((val / maxSales) * 100);
