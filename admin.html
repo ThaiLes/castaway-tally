@@ -46,18 +46,27 @@
     .btn-email { width: 100%; padding: 12px; background: #38bdf8; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
     .btn-menu-pdf { width: 100%; padding: 12px; background: #f59e0b; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
 
-    /* Analytics Bar Chart */
-    .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-top: 10px; }
+    /* STACKED ANALYTICS CHART CARDS */
+    .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-top: 8px; margin-bottom: 16px; }
+    .chart-card-header { font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; }
+    
     .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 11px; }
     .bar-label { width: 75px; color: #94a3b8; font-weight: bold; }
     .bar-track { flex-grow: 1; background: #0f172a; height: 18px; border-radius: 4px; overflow: hidden; margin: 0 8px; border: 1px solid #334155; }
-    .bar-fill { height: 100%; background: #06b6d4; border-radius: 3px; transition: width 0.4s ease; }
-    .bar-fill.peak { background: #f59e0b; }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+    .bar-fill.food { background: #f59e0b; } /* Amber Accent */
+    .bar-fill.bev { background: #38bdf8; }  /* Sky Blue Accent */
     .bar-val { width: 35px; text-align: right; font-weight: bold; color: #fff; }
 
-    .section-title { font-size: 13px; font-weight: bold; margin: 14px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .section-title { font-size: 13px; font-weight: bold; margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
     .title-food { color: #f59e0b; }
     .title-bev { color: #38bdf8; }
+
+    /* MASTER ADD TYPE TOGGLE */
+    .add-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .type-btn { padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 12px; cursor: pointer; text-align: center; }
+    .type-btn.active-food { background: #f59e0b; color: #0f172a; border-color: #f59e0b; }
+    .type-btn.active-bev { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
   </style>
 </head>
 <body>
@@ -109,12 +118,28 @@
     <div id="performance-list"></div>
   </div>
 
-  <!-- TAB 3: ANALYTICS & ON-DEMAND REPORTS -->
+  <!-- TAB 3: ANALYTICS (STACKED CHART CARDS FOR FOOD & BEVERAGES) -->
   <div id="tab-analytics" class="tab-content">
-    <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Selling Hours</h3>
-    <p style="font-size:11px; color:#94a3b8; margin-bottom:12px;">Hourly item sales volume to optimize kitchen prep & staff shifts.</p>
+    <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Hourly Sales Volume</h3>
+    <p style="font-size:11px; color:#94a3b8; margin-bottom:12px;">Track kitchen prep and bar rush hours independently.</p>
     
-    <div class="chart-card" id="analytics-chart"></div>
+    <!-- STACKED CARD 1: FOOD PEAK HOURLY SALES (AMBER) -->
+    <div class="chart-card">
+      <div class="chart-card-header title-food">
+        <span>Food Peak Hourly Sales 🍔</span>
+        <span style="font-size:10px; color:#94a3b8;">Amber</span>
+      </div>
+      <div id="food-analytics-chart"></div>
+    </div>
+
+    <!-- STACKED CARD 2: BEVERAGE PEAK HOURLY SALES (SKY BLUE) -->
+    <div class="chart-card">
+      <div class="chart-card-header title-bev">
+        <span>Beverage Peak Hourly Sales 🍹</span>
+        <span style="font-size:10px; color:#94a3b8;">Sky Blue</span>
+      </div>
+      <div id="bev-analytics-chart"></div>
+    </div>
 
     <!-- ON-DEMAND EMAIL REPORT FORM -->
     <div class="form-card">
@@ -140,15 +165,28 @@
     </div>
   </div>
 
-  <!-- TAB 4: MENU ITEMS, ADD ITEM & PRINT MENU FORM -->
+  <!-- TAB 4: MENU ITEMS (FOOD vs BEVERAGE SPLIT & ADDING ITEM) -->
   <div id="tab-items" class="tab-content">
     <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Active Menu Items & Prices</h3>
-    <div id="menu-items-list"></div>
+    
+    <!-- FOOD MENU ITEMS LIST -->
+    <div class="section-title title-food">Food Menu Items 🍔</div>
+    <div id="food-items-list"></div>
 
-    <!-- FORM 1: ADD NEW ITEM -->
+    <!-- BEVERAGE MENU ITEMS LIST -->
+    <div class="section-title title-bev">Beverage Menu Items 🍹</div>
+    <div id="bev-items-list"></div>
+
+    <!-- FORM 1: ADD NEW ITEM (FOOD vs BEVERAGE MASTER SELECTOR) -->
     <div class="form-card">
-      <h3 style="font-size:14px; margin-bottom:10px; color:#06b6d4;">+ Add New Item to Menu</h3>
+      <h3 style="font-size:14px; margin-bottom:10px; color:#06b6d4;">+ Add New Menu Item</h3>
       
+      <label style="font-size: 11px; color: #94a3b8; margin-bottom: 4px; display: block;">Select Master Type</label>
+      <div class="add-type-grid">
+        <button onclick="setAddItemType('FOOD')" id="type-btn-food" class="type-btn active-food">FOOD 🍔</button>
+        <button onclick="setAddItemType('BEVERAGE')" id="type-btn-bev" class="type-btn">BEVERAGE 🍹</button>
+      </div>
+
       <div class="form-group">
         <label>Category</label>
         <select id="new-cat-select" class="form-control" onchange="handleCategoryChange()"></select>
@@ -189,11 +227,12 @@
     const BEVERAGE_CATEGORIES = [
       'Cocktails', 'Coffee', 'Teas & Chocolate', 'Smoothies', 
       'Fruit & Soda', 'Lassi', 'Milkshakes', 'Chilled Soda', 
-      'Beers & Cider', 'Spirits & Mixers'
+      'Beers & Cider', 'Spirits & Mixers', 'Coconut'
     ];
 
-    let adminData = { items: [], categories: [], counts: {}, performance: [], hourlyPeak: [] };
+    let adminData = { items: [], categories: [], counts: {}, performance: [], foodHourly: [], bevHourly: [] };
     let currentPerfFilter = 'today';
+    let currentAddItemType = 'FOOD';
 
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -322,23 +361,25 @@
     }
 
     function renderAnalytics() {
-      const container = document.getElementById('analytics-chart');
-      const hourly = adminData.hourlyPeak || Array(24).fill(0);
-      
-      const maxSales = Math.max(...hourly, 1);
+      renderSingleHourlyChart('food-analytics-chart', adminData.foodHourly || Array(24).fill(0), 'food');
+      renderSingleHourlyChart('bev-analytics-chart', adminData.bevHourly || Array(24).fill(0), 'bev');
+    }
+
+    function renderSingleHourlyChart(elementId, hourlyArray, typeClass) {
+      const container = document.getElementById(elementId);
+      const maxSales = Math.max(...hourlyArray, 1);
       let chartHtml = '';
 
       for (let h = 7; h <= 23; h++) {
-        const val = hourly[h] || 0;
+        const val = hourlyArray[h] || 0;
         const pct = Math.round((val / maxSales) * 100);
-        const isPeak = val > 0 && val === maxSales;
         const timeLabel = `${h < 10 ? '0' + h : h}:00 - ${(h+1) < 10 ? '0' + (h+1) : (h+1)}:00`;
 
         chartHtml += `
           <div class="bar-row">
             <div class="bar-label">${timeLabel}</div>
             <div class="bar-track">
-              <div class="bar-fill ${isPeak ? 'peak' : ''}" style="width: ${pct}%;"></div>
+              <div class="bar-fill ${typeClass}" style="width: ${pct}%;"></div>
             </div>
             <div class="bar-val">${val}</div>
           </div>
@@ -346,6 +387,113 @@
       }
 
       container.innerHTML = chartHtml;
+    }
+
+    function renderMenuItems() {
+      const foodContainer = document.getElementById('food-items-list');
+      const bevContainer = document.getElementById('bev-items-list');
+
+      const foodItems = adminData.items.filter(i => !BEVERAGE_CATEGORIES.includes(i.category));
+      const bevItems = adminData.items.filter(i => BEVERAGE_CATEGORIES.includes(i.category));
+
+      foodContainer.innerHTML = foodItems.map(item => renderMenuItemRow(item)).join('');
+      bevContainer.innerHTML = bevItems.map(item => renderMenuItemRow(item)).join('');
+    }
+
+    function renderMenuItemRow(item) {
+      return `
+        <div class="item-row">
+          <div>
+            <div style="font-weight:bold; font-size:13px;">${item.name}</div>
+            <div style="font-size:11px; color:#94a3b8;">${item.category} (${item.id})</div>
+          </div>
+          <div style="display:flex; align-items:center;">
+            ฿<input id="price-${item.id}" type="number" value="${item.price}" class="price-input">
+            <button onclick="updatePrice('${item.id}')" class="btn-save">Save</button>
+            <button onclick="deleteMenuItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="btn-delete">✕</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function setAddItemType(type) {
+      currentAddItemType = type;
+      document.getElementById('type-btn-food').className = type === 'FOOD' ? 'type-btn active-food' : 'type-btn';
+      document.getElementById('type-btn-bev').className = type === 'BEVERAGE' ? 'type-btn active-bev' : 'type-btn';
+      populateCategoryDropdown();
+    }
+
+    function populateCategoryDropdown() {
+      const select = document.getElementById('new-cat-select');
+      const allCats = adminData.categories || [];
+
+      let filteredCats = [];
+      if (currentAddItemType === 'FOOD') {
+        filteredCats = allCats.filter(c => !BEVERAGE_CATEGORIES.includes(c));
+      } else {
+        filteredCats = allCats.filter(c => BEVERAGE_CATEGORIES.includes(c));
+      }
+
+      let optionsHtml = filteredCats.map(c => `<option value="${c}">${c}</option>`).join('');
+      optionsHtml += `<option value="OTHER">-- OTHER (Type Custom) --</option>`;
+
+      select.innerHTML = optionsHtml;
+      handleCategoryChange();
+    }
+
+    function handleCategoryChange() {
+      const selectVal = document.getElementById('new-cat-select').value;
+      const otherGroup = document.getElementById('other-cat-group');
+      const idInput = document.getElementById('new-id');
+
+      if (selectVal === 'OTHER') {
+        otherGroup.style.display = 'block';
+        idInput.value = '';
+        idInput.placeholder = currentAddItemType === 'FOOD' ? 'e.g. DS-01' : 'e.g. CK-01';
+      } else {
+        otherGroup.style.display = 'none';
+        idInput.value = getNextAvailableCode(selectVal);
+      }
+    }
+
+    function getNextAvailableCode(category) {
+      const categoryItems = adminData.items.filter(i => i.category === category);
+      
+      const prefixMap = {
+        'Cocktails': 'CK',
+        'Coffee': 'CF',
+        'Teas & Chocolate': 'TE',
+        'Smoothies': 'SM',
+        'Fruit & Soda': 'FS',
+        'Lassi': 'LS',
+        'Milkshakes': 'MS',
+        'Chilled Soda': 'SD',
+        'Beers & Cider': 'BR',
+        'Spirits & Mixers': 'SP',
+        'Coconut': 'CO'
+      };
+
+      let maxNum = 0;
+      let prefix = prefixMap[category] || '';
+
+      categoryItems.forEach(item => {
+        const parts = item.id.split('-');
+        if (parts.length === 2) {
+          if (!prefix) prefix = parts[0];
+          const num = parseInt(parts[1], 10);
+          if (!isNaN(num) && num > maxNum) {
+            maxNum = num;
+          }
+        }
+      });
+
+      if (!prefix) {
+        prefix = category.substring(0, 2).toUpperCase();
+      }
+
+      const nextNum = maxNum + 1;
+      const paddedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
+      return `${prefix}-${paddedNum}`;
     }
 
     function triggerEmailReport() {
@@ -410,88 +558,6 @@
         sendBtn.innerText = "Email Updated Menu PDF";
         sendBtn.disabled = false;
       });
-    }
-
-    function renderMenuItems() {
-      const container = document.getElementById('menu-items-list');
-      container.innerHTML = adminData.items.map(item => `
-        <div class="item-row">
-          <div>
-            <div style="font-weight:bold; font-size:13px;">${item.name}</div>
-            <div style="font-size:11px; color:#94a3b8;">${item.category} (${item.id})</div>
-          </div>
-          <div style="display:flex; align-items:center;">
-            ฿<input id="price-${item.id}" type="number" value="${item.price}" class="price-input">
-            <button onclick="updatePrice('${item.id}')" class="btn-save">Save</button>
-            <button onclick="deleteMenuItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="btn-delete">✕</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function populateCategoryDropdown() {
-      const select = document.getElementById('new-cat-select');
-      const cats = adminData.categories || [];
-
-      let optionsHtml = cats.map(c => `<option value="${c}">${c}</option>`).join('');
-      optionsHtml += `<option value="OTHER">-- OTHER (Type Custom) --</option>`;
-
-      select.innerHTML = optionsHtml;
-      handleCategoryChange();
-    }
-
-    function handleCategoryChange() {
-      const selectVal = document.getElementById('new-cat-select').value;
-      const otherGroup = document.getElementById('other-cat-group');
-      const idInput = document.getElementById('new-id');
-
-      if (selectVal === 'OTHER') {
-        otherGroup.style.display = 'block';
-        idInput.value = '';
-        idInput.placeholder = 'e.g. DS-01';
-      } else {
-        otherGroup.style.display = 'none';
-        idInput.value = getNextAvailableCode(selectVal);
-      }
-    }
-
-    function getNextAvailableCode(category) {
-      const categoryItems = adminData.items.filter(i => i.category === category);
-      
-      const prefixMap = {
-        'Cocktails': 'CK',
-        'Coffee': 'CF',
-        'Teas & Chocolate': 'TE',
-        'Smoothies': 'SM',
-        'Fruit & Soda': 'FS',
-        'Lassi': 'LS',
-        'Milkshakes': 'MS',
-        'Chilled Soda': 'SD',
-        'Beers & Cider': 'BR',
-        'Spirits & Mixers': 'SP'
-      };
-
-      let maxNum = 0;
-      let prefix = prefixMap[category] || '';
-
-      categoryItems.forEach(item => {
-        const parts = item.id.split('-');
-        if (parts.length === 2) {
-          if (!prefix) prefix = parts[0];
-          const num = parseInt(parts[1], 10);
-          if (!isNaN(num) && num > maxNum) {
-            maxNum = num;
-          }
-        }
-      });
-
-      if (!prefix) {
-        prefix = category.substring(0, 2).toUpperCase();
-      }
-
-      const nextNum = maxNum + 1;
-      const paddedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
-      return `${prefix}-${paddedNum}`;
     }
 
     function updatePrice(id) {
