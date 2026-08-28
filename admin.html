@@ -23,11 +23,11 @@
     .filter-btn { padding: 8px 4px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
     .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
 
-    /* KPI Cards */
-    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-    .kpi-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; }
-    .kpi-val { font-size: 20px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
-    .kpi-lbl { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
+    /* KPI Cards Grid */
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .kpi-card { background: #1e293b; padding: 12px 8px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
+    .kpi-val { font-size: 16px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
+    .kpi-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
 
     /* List Items */
     .item-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
@@ -37,8 +37,8 @@
     .btn-save { background: #06b6d4; color: #0f172a; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 4px; }
     .btn-delete { background: #991b1b; color: #f87171; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 4px; }
 
-    /* Form UI */
-    .form-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; margin-top: 20px; }
+    /* Form UI Cards */
+    .form-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; margin-top: 16px; }
     .form-group { margin-bottom: 10px; }
     .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
     .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
@@ -54,6 +54,10 @@
     .bar-fill { height: 100%; background: #06b6d4; border-radius: 3px; transition: width 0.4s ease; }
     .bar-fill.peak { background: #f59e0b; }
     .bar-val { width: 35px; text-align: right; font-weight: bold; color: #fff; }
+
+    .section-title { font-size: 13px; font-weight: bold; margin: 14px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .title-food { color: #f59e0b; }
+    .title-bev { color: #38bdf8; }
   </style>
 </head>
 <body>
@@ -76,12 +80,16 @@
   <div id="tab-dashboard" class="tab-content active">
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-lbl">Today's Revenue</div>
+        <div class="kpi-lbl">Total Sales</div>
         <div id="kpi-rev" class="kpi-val">฿0</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-lbl">Units Sold</div>
-        <div id="kpi-units" class="kpi-val">0</div>
+        <div class="kpi-lbl">Food Sales</div>
+        <div id="kpi-food" class="kpi-val" style="color:#f59e0b;">฿0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-lbl">Drink Sales</div>
+        <div id="kpi-bev" class="kpi-val" style="color:#38bdf8;">฿0</div>
       </div>
     </div>
     <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Today's Sales Breakdown</h3>
@@ -111,7 +119,7 @@
     <!-- ON-DEMAND EMAIL REPORT FORM -->
     <div class="form-card">
       <h3 style="font-size:14px; margin-bottom:6px; color:#38bdf8;">Email PDF Sales Report</h3>
-      <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Dispatch an official sales & analytics summary on demand.</p>
+      <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Dispatch an official PDF report with Food & Beverage split on demand.</p>
 
       <div class="form-group">
         <label>Report Timeframe</label>
@@ -177,6 +185,13 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwEOvMwt5iebuNuTs0iJNT57OK0Lp9mzDMRT3nREF_PsvSLrYM-1tDUPl8vV2nmsNRF/exec";
 
+    // Master List of Beverage Categories
+    const BEVERAGE_CATEGORIES = [
+      'Cocktails', 'Coffee', 'Teas & Chocolate', 'Smoothies', 
+      'Fruit & Soda', 'Lassi', 'Milkshakes', 'Chilled Soda', 
+      'Beers & Cider', 'Spirits & Mixers'
+    ];
+
     let adminData = { items: [], categories: [], counts: {}, performance: [], hourlyPeak: [] };
     let currentPerfFilter = 'today';
 
@@ -225,7 +240,8 @@
 
     function renderDashboard() {
       let totalRev = 0;
-      let totalUnits = 0;
+      let foodRev = 0;
+      let bevRev = 0;
       let breakdownHtml = '';
 
       adminData.items.forEach(item => {
@@ -233,13 +249,18 @@
         if (count > 0) {
           const rev = count * item.price;
           totalRev += rev;
-          totalUnits += count;
+          
+          if (BEVERAGE_CATEGORIES.includes(item.category)) {
+            bevRev += rev;
+          } else {
+            foodRev += rev;
+          }
 
           breakdownHtml += `
             <div class="item-row">
               <div>
                 <div style="font-weight:bold; font-size:13px;">${item.name}</div>
-                <div style="font-size:11px; color:#94a3b8;">${count} sold @ ฿${item.price}</div>
+                <div style="font-size:11px; color:#94a3b8;">${count} sold @ ฿${item.price} (${item.category})</div>
               </div>
               <div style="font-weight:bold; color:#06b6d4;">฿${rev.toLocaleString()}</div>
             </div>
@@ -248,7 +269,8 @@
       });
 
       document.getElementById('kpi-rev').innerText = `฿${totalRev.toLocaleString()}`;
-      document.getElementById('kpi-units').innerText = totalUnits;
+      document.getElementById('kpi-food').innerText = `฿${foodRev.toLocaleString()}`;
+      document.getElementById('kpi-bev').innerText = `฿${bevRev.toLocaleString()}`;
       document.getElementById('today-breakdown-list').innerHTML = breakdownHtml || '<div style="color:#64748b; text-align:center; padding:10px;">No sales logged today yet.</div>';
     }
 
@@ -259,20 +281,44 @@
         return;
       }
 
-      const sortedPerformance = [...adminData.performance].sort((a, b) => b.totalUnits - a.totalUnits);
+      const foodItems = adminData.performance.filter(p => !BEVERAGE_CATEGORIES.includes(p.category)).sort((a,b) => b.totalUnits - a.totalUnits);
+      const bevItems = adminData.performance.filter(p => BEVERAGE_CATEGORIES.includes(p.category)).sort((a,b) => b.totalUnits - a.totalUnits);
 
-      container.innerHTML = sortedPerformance.map(p => `
-        <div class="item-row">
-          <div>
-            <div style="font-weight:bold; font-size:13px;">${p.name}</div>
-            <div style="font-size:11px; color:#94a3b8;">${p.category} (${p.id})</div>
+      let html = '';
+
+      if (foodItems.length > 0) {
+        html += `<div class="section-title title-food">Food Performance</div>`;
+        html += foodItems.map(p => `
+          <div class="item-row">
+            <div>
+              <div style="font-weight:bold; font-size:13px;">${p.name}</div>
+              <div style="font-size:11px; color:#94a3b8;">${p.category} (${p.id})</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:bold; color:#f59e0b;">${p.totalUnits} Units</div>
+              <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
+            </div>
           </div>
-          <div style="text-align:right;">
-            <div style="font-weight:bold; color:#06b6d4;">${p.totalUnits} Units</div>
-            <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
+        `).join('');
+      }
+
+      if (bevItems.length > 0) {
+        html += `<div class="section-title title-bev">Beverage Performance</div>`;
+        html += bevItems.map(p => `
+          <div class="item-row">
+            <div>
+              <div style="font-weight:bold; font-size:13px;">${p.name}</div>
+              <div style="font-size:11px; color:#94a3b8;">${p.category} (${p.id})</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:bold; color:#38bdf8;">${p.totalUnits} Units</div>
+              <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `).join('');
+      }
+
+      container.innerHTML = html;
     }
 
     function renderAnalytics() {
@@ -412,7 +458,6 @@
     function getNextAvailableCode(category) {
       const categoryItems = adminData.items.filter(i => i.category === category);
       
-      // Dedicated prefixes for beverage & food categories
       const prefixMap = {
         'Cocktails': 'CK',
         'Coffee': 'CF',
