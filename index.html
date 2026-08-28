@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,34 +12,34 @@
     .status { font-size: 11px; padding: 4px 8px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
     
     /* MASTER TOGGLE NAVIGATION (FOOD vs BEVERAGES) */
-    .master-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .master-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     .master-btn { padding: 14px; border-radius: 10px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 14px; cursor: pointer; text-align: center; }
     .master-btn.active-food { background: #f59e0b; color: #0f172a; }
     .master-btn.active-bev { background: #38bdf8; color: #0f172a; }
 
-    /* DYNAMIC SUB-CATEGORY CHIPS */
-    .subnav-container { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
-    .subnav-container::-webkit-scrollbar { display: none; }
-    .sub-chip { flex: 0 0 auto; padding: 8px 14px; border-radius: 20px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 11px; cursor: pointer; }
+    /* CATEGORY SUB-TOTAL BAR (UNDER MASTER TOGGLE) */
+    .section-total-bar { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 10px; font-size: 12px; color: #94a3b8; }
+    .section-total-val { font-weight: bold; font-size: 14px; }
+
+    /* DYNAMIC SUB-CATEGORY CHIPS (MULTI-ROW WRAPPED) */
+    .subnav-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .sub-chip { padding: 7px 12px; border-radius: 20px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 11px; cursor: pointer; white-space: nowrap; }
     .sub-chip.active { background: #06b6d4; color: #0f172a; border-color: #06b6d4; }
 
-    /* MENU ITEMS LIST */
-    .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 80px; }
-    .item-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px; }
-    .item-card:active { background: #334155; }
+    /* MENU ITEMS GRID */
+    .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .item-card { background: #1e293b; padding: 12px; border-radius: 10px; border: 1px solid #334155; display: flex; flex-direction: column; justify-content: space-between; min-height: 95px; }
     .item-title { font-size: 13px; font-weight: bold; color: #f8fafc; }
     .item-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
     .item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
     .item-price { font-size: 14px; font-weight: bold; color: #06b6d4; }
     
-    /* ADD TALLY BUTTON */
-    .tally-btn { background: #06b6d4; color: #0f172a; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
-    .tally-btn:active { transform: scale(0.95); }
-    
-    /* BOTTOM SUMMARY BAR */
-    .cart-summary { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 1px solid #334155; padding: 12px 16px; max-width: 600px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-    .cart-info { font-size: 12px; color: #94a3b8; }
-    .cart-total { font-size: 18px; font-weight: bold; color: #34d399; }
+    /* QUANTITY CONTROL CONTROLS (- and +) */
+    .qty-controls { display: flex; align-items: center; background: #0f172a; border-radius: 6px; border: 1px solid #334155; overflow: hidden; }
+    .qty-btn { background: #06b6d4; color: #0f172a; border: none; padding: 6px 10px; font-weight: bold; font-size: 14px; cursor: pointer; min-width: 28px; }
+    .qty-btn.minus { background: #334155; color: #f87171; }
+    .qty-btn:active { transform: scale(0.95); }
+    .qty-count { padding: 0 8px; font-size: 12px; font-weight: bold; color: #fff; }
   </style>
 </head>
 <body>
@@ -52,37 +52,38 @@
     <span id="status" class="status">Live</span>
   </div>
 
-  <!-- 1. MASTER FOOD vs BEVERAGES TOGGLE -->
+  <!-- 1. MASTER TOGGLE -->
   <div class="master-nav">
     <button onclick="switchMasterTab('FOOD')" id="master-btn-food" class="master-btn active-food">FOOD 🍔</button>
     <button onclick="switchMasterTab('BEVERAGES')" id="master-btn-bev" class="master-btn">BEVERAGES 🍹</button>
   </div>
 
-  <!-- 2. DYNAMIC SUB-CATEGORY FILTER CHIPS -->
+  <!-- 2. SECTION SUB-TOTAL BAR -->
+  <div class="section-total-bar">
+    <span id="section-label">Food Sales Today: <strong id="section-units" style="color:#fff;">0</strong> items</span>
+    <span id="section-rev" class="section-total-val" style="color:#f59e0b;">฿0</span>
+  </div>
+
+  <!-- 3. SUB-CATEGORY FILTER CHIPS -->
   <div id="subnav-container" class="subnav-container"></div>
 
-  <!-- 3. MENU ITEMS GRID -->
+  <!-- 4. MENU ITEMS GRID -->
   <div id="items-grid" class="items-grid"></div>
-
-  <!-- 4. BOTTOM DAILY TALLY SUMMARY -->
-  <div class="cart-summary">
-    <div class="cart-info">Logged Today: <strong id="today-count" style="color:#fff;">0</strong> items</div>
-    <div id="today-revenue" class="cart-total">฿0</div>
-  </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwEOvMwt5iebuNuTs0iJNT57OK0Lp9mzDMRT3nREF_PsvSLrYM-1tDUPl8vV2nmsNRF/exec";
 
-    // Master list of beverage categories
+    // Master list of beverage categories (Including Coconut)
     const BEVERAGE_CATEGORIES = [
       'Cocktails', 'Coffee', 'Teas & Chocolate', 'Smoothies', 
       'Fruit & Soda', 'Lassi', 'Milkshakes', 'Chilled Soda', 
-      'Beers & Cider', 'Spirits & Mixers'
+      'Beers & Cider', 'Spirits & Mixers', 'Coconut'
     ];
 
     let menuItems = [];
+    let tallyCounts = {};
     let currentMaster = 'FOOD';
-    let currentSubFilter = 'ALL';
+    let currentSubFilter = '';
 
     function fetchPOSData() {
       const script = document.createElement('script');
@@ -93,16 +94,16 @@
     window.handlePOSData = function(data) {
       if (data.status === 'success') {
         menuItems = data.items || [];
+        tallyCounts = data.counts || {};
         renderSubChips();
         renderItems();
-        updateTallySummary(data.counts);
+        updateSummaries();
       }
     };
 
     function switchMasterTab(master) {
       currentMaster = master;
-      currentSubFilter = 'ALL';
-
+      
       const foodBtn = document.getElementById('master-btn-food');
       const bevBtn = document.getElementById('master-btn-bev');
 
@@ -114,32 +115,35 @@
         bevBtn.className = 'master-btn active-bev';
       }
 
-      renderSubChips();
+      renderSubChips(true);
       renderItems();
+      updateSummaries();
     }
 
     function setSubFilter(sub) {
       currentSubFilter = sub;
-      renderSubChips();
+      renderSubChips(false);
       renderItems();
     }
 
-    function renderSubChips() {
+    function renderSubChips(resetToFirst = false) {
       const container = document.getElementById('subnav-container');
       let subCats = [];
 
       if (currentMaster === 'FOOD') {
-        // Collect unique food categories from active items
         const foodCats = menuItems
           .filter(i => !BEVERAGE_CATEGORIES.includes(i.category))
           .map(i => i.category);
-        subCats = ['ALL', ...new Set(foodCats)];
+        subCats = [...new Set(foodCats)];
       } else {
-        // Collect unique beverage categories from active items
         const bevCats = menuItems
           .filter(i => BEVERAGE_CATEGORIES.includes(i.category))
           .map(i => i.category);
-        subCats = ['ALL', ...new Set(bevCats)];
+        subCats = [...new Set(bevCats)];
+      }
+
+      if (resetToFirst || !subCats.includes(currentSubFilter)) {
+        currentSubFilter = subCats.length > 0 ? subCats[0] : '';
       }
 
       container.innerHTML = subCats.map(cat => `
@@ -153,12 +157,10 @@
       const filtered = menuItems.filter(item => {
         const isDrink = BEVERAGE_CATEGORIES.includes(item.category);
 
-        // Master Filter
         if (currentMaster === 'FOOD' && isDrink) return false;
         if (currentMaster === 'BEVERAGES' && !isDrink) return false;
 
-        // Sub-Category Filter
-        if (currentSubFilter !== 'ALL' && item.category !== currentSubFilter) return false;
+        if (currentSubFilter && item.category !== currentSubFilter) return false;
 
         return true;
       });
@@ -168,21 +170,32 @@
         return;
       }
 
-      grid.innerHTML = filtered.map(item => `
-        <div class="item-card">
-          <div>
-            <div class="item-title">${item.name}</div>
-            <div class="item-sub">${item.category} (${item.id})</div>
+      grid.innerHTML = filtered.map(item => {
+        const currentCount = tallyCounts[item.id] || 0;
+        return `
+          <div class="item-card">
+            <div>
+              <div class="item-title">${item.name}</div>
+              <div class="item-sub">${item.category} (${item.id})</div>
+            </div>
+            <div class="item-footer">
+              <div class="item-price">฿${item.price}</div>
+              <div class="qty-controls">
+                <button onclick="logTally('${item.id}', '${item.name.replace(/'/g, "\\'")}', -1)" class="qty-btn minus">-</button>
+                <span class="qty-count">${currentCount}</span>
+                <button onclick="logTally('${item.id}', '${item.name.replace(/'/g, "\\'")}', 1)" class="qty-btn">+</button>
+              </div>
+            </div>
           </div>
-          <div class="item-footer">
-            <div class="item-price">฿${item.price}</div>
-            <button onclick="logTally('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="tally-btn">+1</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    function logTally(itemId, itemName) {
+    function logTally(itemId, itemName, tallyChange) {
+      tallyCounts[itemId] = Math.max(0, (tallyCounts[itemId] || 0) + tallyChange);
+      renderItems();
+      updateSummaries();
+
       document.getElementById('status').innerText = "Logging...";
       
       fetch(API_URL, {
@@ -192,7 +205,7 @@
         body: JSON.stringify({
           itemId: itemId,
           itemName: itemName,
-          tally: 1
+          tally: tallyChange
         })
       }).then(() => {
         document.getElementById('status').innerText = "Logged!";
@@ -201,21 +214,27 @@
       });
     }
 
-    function updateTallySummary(counts) {
-      if (!counts) return;
-      let totalUnits = 0;
-      let totalRev = 0;
+    function updateSummaries() {
+      let sectionUnits = 0;
+      let sectionRev = 0;
 
       menuItems.forEach(item => {
-        const c = counts[item.id] || 0;
+        const c = tallyCounts[item.id] || 0;
         if (c > 0) {
-          totalUnits += c;
-          totalRev += (c * item.price);
+          const isDrink = BEVERAGE_CATEGORIES.includes(item.category);
+          if ((currentMaster === 'FOOD' && !isDrink) || (currentMaster === 'BEVERAGES' && isDrink)) {
+            sectionUnits += c;
+            sectionRev += (c * item.price);
+          }
         }
       });
 
-      document.getElementById('today-count').innerText = totalUnits;
-      document.getElementById('today-revenue').innerText = `฿${totalRev.toLocaleString()}`;
+      const isFood = currentMaster === 'FOOD';
+      document.getElementById('section-label').innerHTML = `${isFood ? 'Food' : 'Beverage'} Sales Today: <strong style="color:#fff;">${sectionUnits}</strong> items`;
+      
+      const secRevEl = document.getElementById('section-rev');
+      secRevEl.innerText = `฿${sectionRev.toLocaleString()}`;
+      secRevEl.style.color = isFood ? '#f59e0b' : '#38bdf8';
     }
 
     fetchPOSData();
