@@ -43,6 +43,7 @@
     .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
     .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
     .btn-add { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+    .btn-email { width: 100%; padding: 12px; background: #38bdf8; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
 
     /* Analytics Bar Chart */
     .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-top: 10px; }
@@ -99,12 +100,35 @@
     <div id="performance-list"></div>
   </div>
 
-  <!-- TAB 3: ANALYTICS & PEAK SELLING HOURS -->
+  <!-- TAB 3: ANALYTICS & ON-DEMAND REPORTS -->
   <div id="tab-analytics" class="tab-content">
     <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Selling Hours</h3>
     <p style="font-size:11px; color:#94a3b8; margin-bottom:12px;">Hourly item sales volume to optimize kitchen prep & staff shifts.</p>
     
     <div class="chart-card" id="analytics-chart"></div>
+
+    <!-- ON-DEMAND EMAIL REPORT FORM -->
+    <div class="form-card">
+      <h3 style="font-size:14px; margin-bottom:6px; color:#38bdf8;">Email PDF Sales Report</h3>
+      <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Dispatch an official PDF summary on demand.</p>
+
+      <div class="form-group">
+        <label>Report Timeframe</label>
+        <select id="report-range" class="form-control">
+          <option value="today">Daily (Today)</option>
+          <option value="week">Weekly (Rolling 7 Days)</option>
+          <option value="month">30 Days</option>
+          <option value="all">All-Time</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Recipient Email Address(es)</label>
+        <input id="report-recipients" class="form-control" value="turvey.les@gmail.com" placeholder="email1@domain.com, email2@domain.com">
+      </div>
+
+      <button onclick="triggerEmailReport()" id="btn-send-email" class="btn-email">Email PDF Report Now</button>
+    </div>
   </div>
 
   <!-- TAB 4: MENU ITEMS & ADD ITEM FORM -->
@@ -261,6 +285,39 @@
       }
 
       container.innerHTML = chartHtml;
+    }
+
+    function triggerEmailReport() {
+      const range = document.getElementById('report-range').value;
+      const recipients = document.getElementById('report-recipients').value.trim();
+      const sendBtn = document.getElementById('btn-send-email');
+
+      if (!recipients) {
+        alert("Please enter at least one recipient email address.");
+        return;
+      }
+
+      sendBtn.innerText = "Generating & Sending PDF...";
+      sendBtn.disabled = true;
+
+      fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sendReportEmail',
+          range: range,
+          recipients: recipients
+        })
+      }).then(() => {
+        alert(`PDF Report dispatched successfully to: ${recipients}`);
+        sendBtn.innerText = "Email PDF Report Now";
+        sendBtn.disabled = false;
+      }).catch(err => {
+        alert("Failed to send report email. Check network connection.");
+        sendBtn.innerText = "Email PDF Report Now";
+        sendBtn.disabled = false;
+      });
     }
 
     function renderMenuItems() {
