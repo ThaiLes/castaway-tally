@@ -44,6 +44,7 @@
     .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
     .btn-add { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
     .btn-email { width: 100%; padding: 12px; background: #38bdf8; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
+    .btn-menu-pdf { width: 100%; padding: 12px; background: #f59e0b; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
 
     /* Analytics Bar Chart */
     .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-top: 10px; }
@@ -110,7 +111,7 @@
     <!-- ON-DEMAND EMAIL REPORT FORM -->
     <div class="form-card">
       <h3 style="font-size:14px; margin-bottom:6px; color:#38bdf8;">Email PDF Sales Report</h3>
-      <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Dispatch an official PDF summary on demand.</p>
+      <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Dispatch an official sales & analytics summary on demand.</p>
 
       <div class="form-group">
         <label>Report Timeframe</label>
@@ -131,11 +132,12 @@
     </div>
   </div>
 
-  <!-- TAB 4: MENU ITEMS & ADD ITEM FORM -->
+  <!-- TAB 4: MENU ITEMS, ADD ITEM & PRINT MENU FORM -->
   <div id="tab-items" class="tab-content">
     <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Active Menu Items & Prices</h3>
     <div id="menu-items-list"></div>
 
+    <!-- FORM 1: ADD NEW ITEM -->
     <div class="form-card">
       <h3 style="font-size:14px; margin-bottom:10px; color:#06b6d4;">+ Add New Item to Menu</h3>
       
@@ -156,6 +158,19 @@
       <div class="form-group"><label>Item Name</label><input id="new-name" class="form-control" placeholder="Pancake Stack"></div>
       <div class="form-group"><label>Price (฿)</label><input id="new-price" type="number" class="form-control" placeholder="180"></div>
       <button onclick="addNewMenuItem()" class="btn-add">+ Add Item to Sheet</button>
+    </div>
+
+    <!-- FORM 2: EMAIL PRINTABLE MENU PDF -->
+    <div class="form-card">
+      <h3 style="font-size:14px; margin-bottom:6px; color:#f59e0b;">Email Printable Menu PDF</h3>
+      <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Generate and dispatch a formatted PDF menu for manual printing.</p>
+
+      <div class="form-group">
+        <label>Recipient Email Address(es)</label>
+        <input id="menu-pdf-recipients" class="form-control" value="turvey.les@gmail.com" placeholder="email1@domain.com, email2@domain.com">
+      </div>
+
+      <button onclick="triggerMenuPDFEmail()" id="btn-send-menu-pdf" class="btn-menu-pdf">Email Updated Menu PDF</button>
     </div>
   </div>
 
@@ -310,12 +325,43 @@
           recipients: recipients
         })
       }).then(() => {
-        alert(`PDF Report dispatched successfully to: ${recipients}`);
+        alert(`Sales Report PDF dispatched successfully to: ${recipients}`);
         sendBtn.innerText = "Email PDF Report Now";
         sendBtn.disabled = false;
       }).catch(err => {
         alert("Failed to send report email. Check network connection.");
         sendBtn.innerText = "Email PDF Report Now";
+        sendBtn.disabled = false;
+      });
+    }
+
+    function triggerMenuPDFEmail() {
+      const recipients = document.getElementById('menu-pdf-recipients').value.trim();
+      const sendBtn = document.getElementById('btn-send-menu-pdf');
+
+      if (!recipients) {
+        alert("Please enter at least one recipient email address.");
+        return;
+      }
+
+      sendBtn.innerText = "Generating & Sending Printable Menu...";
+      sendBtn.disabled = true;
+
+      fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sendMenuPDFEmail',
+          recipients: recipients
+        })
+      }).then(() => {
+        alert(`Printable Menu PDF dispatched to: ${recipients}`);
+        sendBtn.innerText = "Email Updated Menu PDF";
+        sendBtn.disabled = false;
+      }).catch(err => {
+        alert("Failed to send menu email. Check connection.");
+        sendBtn.innerText = "Email Updated Menu PDF";
         sendBtn.disabled = false;
       });
     }
@@ -365,15 +411,28 @@
 
     function getNextAvailableCode(category) {
       const categoryItems = adminData.items.filter(i => i.category === category);
-      if (categoryItems.length === 0) return '';
+      
+      // Dedicated prefixes for beverage & food categories
+      const prefixMap = {
+        'Cocktails': 'CK',
+        'Coffee': 'CF',
+        'Teas & Chocolate': 'TE',
+        'Smoothies': 'SM',
+        'Fruit & Soda': 'FS',
+        'Lassi': 'LS',
+        'Milkshakes': 'MS',
+        'Chilled Soda': 'SD',
+        'Beers & Cider': 'BR',
+        'Spirits & Mixers': 'SP'
+      };
 
       let maxNum = 0;
-      let prefix = '';
+      let prefix = prefixMap[category] || '';
 
       categoryItems.forEach(item => {
         const parts = item.id.split('-');
         if (parts.length === 2) {
-          prefix = parts[0];
+          if (!prefix) prefix = parts[0];
           const num = parseInt(parts[1], 10);
           if (!isNaN(num) && num > maxNum) {
             maxNum = num;
