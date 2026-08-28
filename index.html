@@ -1,191 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Castaway POS</title>
-  
-  <!-- Web App & iOS App Icons -->
-  <link rel="apple-touch-icon" sizes="180x180" href="pos-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="pos-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Castaway POS">
-  
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Castaway Menu Tally</title>
+  <title>Castaway Menu POS</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 16px; }
-    .container { max-width: 480px; margin: 0 auto; }
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; }
-    .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
-    .status.syncing { background: #854d0e; color: #fde047; }
-    .status.error { background: #991b1b; color: #f87171; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-    button.cat-btn { padding: 12px; border-radius: 8px; border: none; background: #1e293b; color: #cbd5e1; font-weight: bold; cursor: pointer; text-align: center; }
-    button.cat-btn.active { background: #06b6d4; color: #0f172a; }
-    .item-card { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px 16px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #334155; }
-    .btn-tally { width: 38px; height: 38px; border-radius: 8px; border: none; font-size: 20px; font-weight: bold; cursor: pointer; }
-    .btn-plus { background: #06b6d4; color: #0f172a; }
-    .btn-minus { background: #334155; color: #cbd5e1; }
-    .count { font-size: 18px; font-weight: bold; color: #06b6d4; min-width: 28px; text-align: center; display: inline-block; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0f172a; color: #fff; padding: 12px; max-width: 600px; margin: 0 auto; user-select: none; }
+    
+    .header { border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .status { font-size: 11px; padding: 4px 8px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
+    
+    /* MASTER TOGGLE NAVIGATION (FOOD vs BEVERAGES) */
+    .master-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .master-btn { padding: 14px; border-radius: 10px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 14px; cursor: pointer; text-align: center; }
+    .master-btn.active-food { background: #f59e0b; color: #0f172a; }
+    .master-btn.active-bev { background: #38bdf8; color: #0f172a; }
+
+    /* DYNAMIC SUB-CATEGORY CHIPS */
+    .subnav-container { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
+    .subnav-container::-webkit-scrollbar { display: none; }
+    .sub-chip { flex: 0 0 auto; padding: 8px 14px; border-radius: 20px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 11px; cursor: pointer; }
+    .sub-chip.active { background: #06b6d4; color: #0f172a; border-color: #06b6d4; }
+
+    /* MENU ITEMS LIST */
+    .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 80px; }
+    .item-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px; }
+    .item-card:active { background: #334155; }
+    .item-title { font-size: 13px; font-weight: bold; color: #f8fafc; }
+    .item-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .item-price { font-size: 14px; font-weight: bold; color: #06b6d4; }
+    
+    /* ADD TALLY BUTTON */
+    .tally-btn { background: #06b6d4; color: #0f172a; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
+    .tally-btn:active { transform: scale(0.95); }
+    
+    /* BOTTOM SUMMARY BAR */
+    .cart-summary { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 1px solid #334155; padding: 12px 16px; max-width: 600px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .cart-info { font-size: 12px; color: #94a3b8; }
+    .cart-total { font-size: 18px; font-weight: bold; color: #34d399; }
   </style>
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="icon" type="image/png" href="icon.png">
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div>
-        <h2 style="margin:0; font-size:18px;">Castaway Menu</h2>
-        <span style="font-size:11px; color:#94a3b8;">POS</span>
-      </div>
-      <span id="status" class="status">Live</span>
+
+  <div class="header">
+    <div>
+      <h2 style="margin:0; font-size:18px;">Castaway Menu</h2>
+      <span style="font-size:11px; color:#94a3b8;">POS</span>
     </div>
-    
-    <div id="category-list" class="grid"></div>
-    <div id="item-list"></div>
+    <span id="status" class="status">Live</span>
+  </div>
+
+  <!-- 1. MASTER FOOD vs BEVERAGES TOGGLE -->
+  <div class="master-nav">
+    <button onclick="switchMasterTab('FOOD')" id="master-btn-food" class="master-btn active-food">FOOD 🍔</button>
+    <button onclick="switchMasterTab('BEVERAGES')" id="master-btn-bev" class="master-btn">BEVERAGES 🍹</button>
+  </div>
+
+  <!-- 2. DYNAMIC SUB-CATEGORY FILTER CHIPS -->
+  <div id="subnav-container" class="subnav-container"></div>
+
+  <!-- 3. MENU ITEMS GRID -->
+  <div id="items-grid" class="items-grid"></div>
+
+  <!-- 4. BOTTOM DAILY TALLY SUMMARY -->
+  <div class="cart-summary">
+    <div class="cart-info">Logged Today: <strong id="today-count" style="color:#fff;">0</strong> items</div>
+    <div id="today-revenue" class="cart-total">฿0</div>
   </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwEOvMwt5iebuNuTs0iJNT57OK0Lp9mzDMRT3nREF_PsvSLrYM-1tDUPl8vV2nmsNRF/exec";
 
-    let menuItems = JSON.parse(localStorage.getItem('castaway_menu') || '[]');
-    let categories = JSON.parse(localStorage.getItem('castaway_cats') || '[]');
-    let counts = JSON.parse(localStorage.getItem('castaway_counts') || '{}');
-    let selectedCategory = categories[0] || null;
+    // Master list of beverage categories
+    const BEVERAGE_CATEGORIES = [
+      'Cocktails', 'Coffee', 'Teas & Chocolate', 'Smoothies', 
+      'Fruit & Soda', 'Lassi', 'Milkshakes', 'Chilled Soda', 
+      'Beers & Cider', 'Spirits & Mixers'
+    ];
 
-    // Render immediately from local cache
-    if (categories.length > 0) {
-      renderCategories();
-      renderItems();
-    }
+    let menuItems = [];
+    let currentMaster = 'FOOD';
+    let currentSubFilter = 'ALL';
 
-    function syncWithBackend() {
-      const statusEl = document.getElementById('status');
-      if (statusEl) {
-        statusEl.innerText = "Syncing...";
-        statusEl.className = "status syncing";
-      }
-
+    function fetchPOSData() {
       const script = document.createElement('script');
-      script.src = API_URL + "?callback=handleDataResponse&t=" + Date.now();
-      script.onerror = function() {
-        if (statusEl) {
-          statusEl.innerText = "Offline";
-          statusEl.className = "status error";
-        }
-      };
+      script.src = API_URL + "?action=getAdminData&callback=handlePOSData&t=" + Date.now();
       document.body.appendChild(script);
     }
 
-    window.handleDataResponse = function(data) {
-    const statusEl = document.getElementById('status');
-    if (data.status === 'success') {
-      menuItems = data.items || [];
-      categories = data.categories || [];
-      const incomingCounts = data.counts || {};
-      
-      // Check if midnight has passed since last load
-      const todayStr = new Date().toLocaleDateString('en-GB'); // "25/08/2026"
-      const lastSavedDate = localStorage.getItem('castaway_date');
+    window.handlePOSData = function(data) {
+      if (data.status === 'success') {
+        menuItems = data.items || [];
+        renderSubChips();
+        renderItems();
+        updateTallySummary(data.counts);
+      }
+    };
 
-      if (lastSavedDate !== todayStr) {
-        // New day detected: Purge yesterday's cached counts
-        counts = {};
-        localStorage.setItem('castaway_date', todayStr);
+    function switchMasterTab(master) {
+      currentMaster = master;
+      currentSubFilter = 'ALL';
+
+      const foodBtn = document.getElementById('master-btn-food');
+      const bevBtn = document.getElementById('master-btn-bev');
+
+      if (master === 'FOOD') {
+        foodBtn.className = 'master-btn active-food';
+        bevBtn.className = 'master-btn';
+      } else {
+        foodBtn.className = 'master-btn';
+        bevBtn.className = 'master-btn active-bev';
       }
 
-      menuItems.forEach(item => {
-        const cleanId = item.id ? item.id.toString().trim() : "";
-        const sheetVal = incomingCounts[cleanId] !== undefined ? incomingCounts[cleanId] : 0;
-        const localVal = counts[cleanId] !== undefined ? counts[cleanId] : 0;
-        
-        // Merge sheet tallies for TODAY only
-        counts[cleanId] = Math.max(sheetVal, localVal);
-      });
-
-    localStorage.setItem('castaway_menu', JSON.stringify(menuItems));
-    localStorage.setItem('castaway_cats', JSON.stringify(categories));
-    localStorage.setItem('castaway_counts', JSON.stringify(counts));
-
-    if (!selectedCategory && categories.length > 0) selectedCategory = categories[0];
-
-    if (statusEl) {
-      statusEl.innerText = "Live";
-      statusEl.className = "status";
+      renderSubChips();
+      renderItems();
     }
-    renderCategories();
-    renderItems();
-  }
-};
 
-    function renderCategories() {
-      const container = document.getElementById('category-list');
-      container.innerHTML = categories.map(cat => `
-        <button onclick="selectCat('${cat}')" class="cat-btn ${selectedCategory === cat ? 'active' : ''}">${cat}</button>
+    function setSubFilter(sub) {
+      currentSubFilter = sub;
+      renderSubChips();
+      renderItems();
+    }
+
+    function renderSubChips() {
+      const container = document.getElementById('subnav-container');
+      let subCats = [];
+
+      if (currentMaster === 'FOOD') {
+        // Collect unique food categories from active items
+        const foodCats = menuItems
+          .filter(i => !BEVERAGE_CATEGORIES.includes(i.category))
+          .map(i => i.category);
+        subCats = ['ALL', ...new Set(foodCats)];
+      } else {
+        // Collect unique beverage categories from active items
+        const bevCats = menuItems
+          .filter(i => BEVERAGE_CATEGORIES.includes(i.category))
+          .map(i => i.category);
+        subCats = ['ALL', ...new Set(bevCats)];
+      }
+
+      container.innerHTML = subCats.map(cat => `
+        <button onclick="setSubFilter('${cat}')" class="sub-chip ${currentSubFilter === cat ? 'active' : ''}">${cat}</button>
       `).join('');
     }
 
-    function selectCat(cat) {
-      selectedCategory = cat;
-      renderCategories();
-      renderItems();
-    }
-
     function renderItems() {
-      const container = document.getElementById('item-list');
-      const filtered = menuItems.filter(i => i.category === selectedCategory);
+      const grid = document.getElementById('items-grid');
+
+      const filtered = menuItems.filter(item => {
+        const isDrink = BEVERAGE_CATEGORIES.includes(item.category);
+
+        // Master Filter
+        if (currentMaster === 'FOOD' && isDrink) return false;
+        if (currentMaster === 'BEVERAGES' && !isDrink) return false;
+
+        // Sub-Category Filter
+        if (currentSubFilter !== 'ALL' && item.category !== currentSubFilter) return false;
+
+        return true;
+      });
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#64748b; padding:20px;">Select a category</div>';
+        grid.innerHTML = `<div style="grid-column: 1 / -1; color: #64748b; text-align: center; padding: 20px;">No items in this section.</div>`;
         return;
       }
 
-      container.innerHTML = filtered.map(item => {
-        const cleanId = item.id ? item.id.toString().trim() : "";
-        const currentVal = counts[cleanId] !== undefined ? counts[cleanId] : 0;
-
-        return `
-          <div class="item-card">
-            <div>
-              <div style="font-weight:bold; font-size:14px;">${item.name}</div>
-              <div style="font-size:12px; color:#06b6d4; margin-top:2px;">฿${item.price}</div>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <button onclick="logTally('${cleanId}', '${item.name.replace(/'/g, "\\'")}', -1)" class="btn-tally btn-minus">-</button>
-              <span class="count">${currentVal}</span>
-              <button onclick="logTally('${cleanId}', '${item.name.replace(/'/g, "\\'")}', 1)" class="btn-tally btn-plus">+</button>
-            </div>
+      grid.innerHTML = filtered.map(item => `
+        <div class="item-card">
+          <div>
+            <div class="item-title">${item.name}</div>
+            <div class="item-sub">${item.category} (${item.id})</div>
           </div>
-        `;
-      }).join('');
+          <div class="item-footer">
+            <div class="item-price">฿${item.price}</div>
+            <button onclick="logTally('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="tally-btn">+1</button>
+          </div>
+        </div>
+      `).join('');
     }
 
-    function logTally(id, name, val) {
-      const cleanId = id.toString().trim();
-
-      if (val < 0) {
-        counts[cleanId] = Math.max(0, (counts[cleanId] || 0) - 1);
-      } else {
-        counts[cleanId] = (counts[cleanId] || 0) + val;
-      }
-
-      localStorage.setItem('castaway_counts', JSON.stringify(counts));
-      renderItems();
-
+    function logTally(itemId, itemName) {
+      document.getElementById('status').innerText = "Logging...";
+      
       fetch(API_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemId: cleanId, itemName: name, tally: val })
+        body: JSON.stringify({
+          itemId: itemId,
+          itemName: itemName,
+          tally: 1
+        })
+      }).then(() => {
+        document.getElementById('status').innerText = "Logged!";
+        setTimeout(() => { document.getElementById('status').innerText = "Live"; }, 1500);
+        fetchPOSData();
       });
     }
 
-    syncWithBackend();
-    setInterval(syncWithBackend, 10000);
+    function updateTallySummary(counts) {
+      if (!counts) return;
+      let totalUnits = 0;
+      let totalRev = 0;
+
+      menuItems.forEach(item => {
+        const c = counts[item.id] || 0;
+        if (c > 0) {
+          totalUnits += c;
+          totalRev += (c * item.price);
+        }
+      });
+
+      document.getElementById('today-count').innerText = totalUnits;
+      document.getElementById('today-revenue').innerText = `฿${totalRev.toLocaleString()}`;
+    }
+
+    fetchPOSData();
+    setInterval(fetchPOSData, 15000);
   </script>
 </body>
 </html>
