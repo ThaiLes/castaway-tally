@@ -47,20 +47,24 @@
     .btn-menu-pdf { width: 100%; padding: 12px; background: #f59e0b; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
 
     /* STACKED ANALYTICS CHART CARDS */
-    .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-top: 8px; margin-bottom: 16px; }
-    .chart-card-header { font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; }
-    
+    .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; }
+    .chart-card-title { font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .chart-card-title.food { color: #f59e0b; }
+    .chart-card-title.bev { color: #38bdf8; }
+
     .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 11px; }
     .bar-label { width: 75px; color: #94a3b8; font-weight: bold; }
     .bar-track { flex-grow: 1; background: #0f172a; height: 18px; border-radius: 4px; overflow: hidden; margin: 0 8px; border: 1px solid #334155; }
     .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
-    .bar-fill.food { background: #f59e0b; } /* Amber Accent */
-    .bar-fill.bev { background: #38bdf8; }  /* Sky Blue Accent */
+    .bar-fill.food { background: #f59e0b; }
+    .bar-fill.bev { background: #38bdf8; }
     .bar-val { width: 35px; text-align: right; font-weight: bold; color: #fff; }
 
-    .section-title { font-size: 13px; font-weight: bold; margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
-    .title-food { color: #f59e0b; }
-    .title-bev { color: #38bdf8; }
+    /* PERFORMANCE SECTION TITLES WITH TOTALS */
+    .section-title { font-size: 12px; font-weight: bold; margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; }
+    .title-food { color: #f59e0b; border-left: 4px solid #f59e0b; }
+    .title-bev { color: #38bdf8; border-left: 4px solid #38bdf8; }
+    .section-total { font-size: 13px; font-weight: bold; color: #fff; }
 
     /* MASTER ADD TYPE TOGGLE */
     .add-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
@@ -118,26 +122,20 @@
     <div id="performance-list"></div>
   </div>
 
-  <!-- TAB 3: ANALYTICS (STACKED CHART CARDS FOR FOOD & BEVERAGES) -->
+  <!-- TAB 3: STACKED ANALYTICS CHART CARDS -->
   <div id="tab-analytics" class="tab-content">
-    <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Hourly Sales Volume</h3>
-    <p style="font-size:11px; color:#94a3b8; margin-bottom:12px;">Track kitchen prep and bar rush hours independently.</p>
+    <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Sales Hours</h3>
+    <p style="font-size:11px; color:#94a3b8; margin-bottom:14px;">Hourly sales volume to optimize kitchen prep & bar shifts separately.</p>
     
-    <!-- STACKED CARD 1: FOOD PEAK HOURLY SALES (AMBER) -->
+    <!-- CARD 1: FOOD PEAK HOURLY SALES (AMBER) -->
     <div class="chart-card">
-      <div class="chart-card-header title-food">
-        <span>Food Peak Hourly Sales 🍔</span>
-        <span style="font-size:10px; color:#94a3b8;">Amber</span>
-      </div>
+      <div class="chart-card-title food">Food Peak Hourly Sales 🍔</div>
       <div id="food-analytics-chart"></div>
     </div>
 
-    <!-- STACKED CARD 2: BEVERAGE PEAK HOURLY SALES (SKY BLUE) -->
+    <!-- CARD 2: BEVERAGE PEAK HOURLY SALES (SKY BLUE) -->
     <div class="chart-card">
-      <div class="chart-card-header title-bev">
-        <span>Beverage Peak Hourly Sales 🍹</span>
-        <span style="font-size:10px; color:#94a3b8;">Sky Blue</span>
-      </div>
+      <div class="chart-card-title bev">Beverage Peak Hourly Sales 🍹</div>
       <div id="bev-analytics-chart"></div>
     </div>
 
@@ -165,7 +163,7 @@
     </div>
   </div>
 
-  <!-- TAB 4: MENU ITEMS (FOOD vs BEVERAGE SPLIT & ADDING ITEM) -->
+  <!-- TAB 4: MENU ITEMS -->
   <div id="tab-items" class="tab-content">
     <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Active Menu Items & Prices</h3>
     
@@ -177,7 +175,7 @@
     <div class="section-title title-bev">Beverage Menu Items 🍹</div>
     <div id="bev-items-list"></div>
 
-    <!-- FORM 1: ADD NEW ITEM (FOOD vs BEVERAGE MASTER SELECTOR) -->
+    <!-- FORM 1: ADD NEW ITEM -->
     <div class="form-card">
       <h3 style="font-size:14px; margin-bottom:10px; color:#06b6d4;">+ Add New Menu Item</h3>
       
@@ -323,10 +321,25 @@
       const foodItems = adminData.performance.filter(p => !BEVERAGE_CATEGORIES.includes(p.category)).sort((a,b) => b.totalUnits - a.totalUnits);
       const bevItems = adminData.performance.filter(p => BEVERAGE_CATEGORIES.includes(p.category)).sort((a,b) => b.totalUnits - a.totalUnits);
 
+      let foodRevTotal = 0, foodUnitsTotal = 0;
+      foodItems.forEach(p => { foodRevTotal += p.totalRevenue; foodUnitsTotal += p.totalUnits; });
+
+      let bevRevTotal = 0, bevUnitsTotal = 0;
+      bevItems.forEach(p => { bevRevTotal += p.totalRevenue; bevUnitsTotal += p.totalUnits; });
+
       let html = '';
 
-      if (foodItems.length > 0) {
-        html += `<div class="section-title title-food">Food Performance</div>`;
+      // FOOD PERFORMANCE HEADER WITH DYNAMIC TOTAL SALES
+      html += `
+        <div class="section-title title-food">
+          <span>Food Performance 🍔</span>
+          <span class="section-total">฿${foodRevTotal.toLocaleString()} <span style="font-size:10px; color:#94a3b8;">(${foodUnitsTotal} units)</span></span>
+        </div>
+      `;
+
+      if (foodItems.length === 0) {
+        html += '<div style="color:#64748b; padding:8px 12px; font-size:11px;">No food sales in this timeframe.</div>';
+      } else {
         html += foodItems.map(p => `
           <div class="item-row">
             <div>
@@ -341,8 +354,17 @@
         `).join('');
       }
 
-      if (bevItems.length > 0) {
-        html += `<div class="section-title title-bev">Beverage Performance</div>`;
+      // BEVERAGE PERFORMANCE HEADER WITH DYNAMIC TOTAL SALES
+      html += `
+        <div class="section-title title-bev" style="margin-top:20px;">
+          <span>Beverage Performance 🍹</span>
+          <span class="section-total">฿${bevRevTotal.toLocaleString()} <span style="font-size:10px; color:#94a3b8;">(${bevUnitsTotal} units)</span></span>
+        </div>
+      `;
+
+      if (bevItems.length === 0) {
+        html += '<div style="color:#64748b; padding:8px 12px; font-size:11px;">No beverage sales in this timeframe.</div>';
+      } else {
         html += bevItems.map(p => `
           <div class="item-row">
             <div>
