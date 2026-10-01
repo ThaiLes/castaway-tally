@@ -6,7 +6,7 @@
 <title>Castaway Admin Portal</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: #0f172a; color: #fff; padding: 16px; max-width: 600px; margin: 0 auto; }
+  body { background: #0f172a; color: #fff; padding: 16px; max-width: 650px; margin: 0 auto; }
   .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
   .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
   
@@ -17,11 +17,27 @@
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
+  /* Performance Filters Grid */
+  .filter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+  .filter-btn { padding: 8px 4px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
+  .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+
   /* KPI Cards Grid */
   .kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
   .kpi-card { background: #1e293b; padding: 12px 8px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
   .kpi-val { font-size: 16px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
   .kpi-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
+
+  /* Table / Spreadsheet View */
+  .table-container { background: #1e293b; border-radius: 10px; border: 1px solid #334155; overflow: hidden; margin-top: 10px; }
+  .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+  .data-table th { background: #0f172a; color: #94a3b8; padding: 10px 12px; text-transform: uppercase; font-size: 10px; font-weight: bold; border-bottom: 1px solid #334155; }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #f8fafc; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover { background: #334155/30; }
+  .tag-cat { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+  .tag-food { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b55; }
+  .tag-bev { background: #38bdf822; color: #38bdf8; border: 1px solid #38bdf855; }
 
   /* List Items */
   .item-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
@@ -68,7 +84,7 @@
   <button onclick="switchTab('lookup')" id="btn-tab-lookup" class="nav-btn">Date Lookup</button>
 </div>
 
-<!-- TAB 1: TODAY DASHBOARD -->
+<!-- TAB 1: TODAY DASHBOARD (SPREADSHEET LOOK) -->
 <div id="tab-dashboard" class="tab-content active">
   <div class="kpi-grid">
     <div class="kpi-card">
@@ -84,13 +100,36 @@
       <div id="kpi-bev" class="kpi-val" style="color:#38bdf8;">฿0</div>
     </div>
   </div>
-  <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Today's Live Sales Breakdown</h3>
-  <div id="today-breakdown-list"></div>
+
+  <h3 style="font-size:14px; margin-bottom:6px; color:#94a3b8;">Today's Live Sales Ledger</h3>
+  
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Item Description</th>
+          <th style="text-align:center;">Qty</th>
+          <th>Type</th>
+          <th style="text-align:right;">Revenue</th>
+        </tr>
+      </thead>
+      <tbody id="today-table-body">
+        <tr><td colspan="4" style="text-align:center; color:#64748b; padding:16px;">Loading spreadsheet ledger...</td></tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<!-- TAB 2: MENU PERFORMANCE -->
+<!-- TAB 2: MENU PERFORMANCE WITH SUB-TAB FILTERS -->
 <div id="tab-performance" class="tab-content">
-  <h3 style="font-size:14px; margin-bottom: 10px; color:#94a3b8;">Overall Performance Summary</h3>
+  <div class="filter-grid">
+    <button onclick="setPerfFilter('today')" id="flt-today" class="filter-btn active">Today</button>
+    <button onclick="setPerfFilter('week')" id="flt-week" class="filter-btn">This Week</button>
+    <button onclick="setPerfFilter('month')" id="flt-month" class="filter-btn">30 Days</button>
+    <button onclick="setPerfFilter('all')" id="flt-all" class="filter-btn">All-Time</button>
+  </div>
+
+  <h3 style="font-size:14px; margin-bottom: 10px; color:#94a3b8;" id="perf-title">Performance Summary (Today)</h3>
   <div id="performance-list"></div>
 </div>
 
@@ -110,16 +149,23 @@
   </div>
 </div>
 
-<!-- TAB 4: HISTORICAL DATE LOOKUP -->
+<!-- TAB 4: CALENDAR-BASED DATE LOOKUP -->
 <div id="tab-lookup" class="tab-content">
   <div class="form-card">
-    <h3 style="font-size:14px; margin-bottom:6px; color:#06b6d4;">Select Historical Date</h3>
-    <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Select any date to inspect historical sales totals and item breakdowns.</p>
+    <h3 style="font-size:14px; margin-bottom:6px; color:#06b6d4;">Calendar Date Lookup</h3>
+    <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Select a single day or a custom date range to inspect historical sales.</p>
+    
     <div class="form-group">
-      <label>Target Date</label>
-      <input type="date" id="lookup-date-input" class="form-control">
+      <label>Start / Target Date</label>
+      <input type="date" id="lookup-start-date" class="form-control">
     </div>
-    <button onclick="fetchCustomDateData()" class="btn-action">Inspect Date Metrics</button>
+
+    <div class="form-group">
+      <label>End Date (Optional for multi-day range)</label>
+      <input type="date" id="lookup-end-date" class="form-control">
+    </div>
+
+    <button onclick="fetchCalendarRangeData()" class="btn-action">Inspect Range Metrics</button>
   </div>
 
   <div id="lookup-results" style="margin-top:16px;"></div>
@@ -129,6 +175,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
 
 let adminData = { performance: [], foodHourly: [], bevHourly: [] };
+let currentPerfFilter = 'today';
 
 function switchTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -137,13 +184,29 @@ function switchTab(tabName) {
   document.getElementById(`btn-tab-${tabName}`).classList.add('active');
 }
 
+// Sub-Tab Filter Handler for Performance Tab
+function setPerfFilter(filterType) {
+  currentPerfFilter = filterType;
+  document.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(`flt-${filterType}`).classList.add('active');
+  
+  const labels = {
+    'today': 'Performance Summary (Today)',
+    'week': 'Performance Summary (Rolling 7 Days)',
+    'month': 'Performance Summary (30 Days)',
+    'all': 'Performance Summary (All-Time)'
+  };
+  document.getElementById('perf-title').innerText = labels[filterType];
+  fetchAdminData(filterType);
+}
+
 // Initial Fetch on load
 fetchAdminData('today');
 
-function fetchAdminData(range, targetDate = '') {
+function fetchAdminData(range, startDate = '', endDate = '') {
   document.getElementById('status').innerText = "Syncing...";
   const script = document.createElement('script');
-  script.src = `${API_URL}?action=getAdminData&range=${range}&targetDate=${targetDate}&callback=handleAdminData&t=${Date.now()}`;
+  script.src = `${API_URL}?action=getAdminData&range=${range}&startDate=${startDate}&endDate=${endDate}&callback=handleAdminData&t=${Date.now()}`;
   document.body.appendChild(script);
 }
 
@@ -155,37 +218,48 @@ window.handleAdminData = function(data) {
     if (data.range === 'custom') {
       renderLookupResults();
     } else {
-      renderDashboard();
+      renderDashboardTable();
       renderPerformance();
       renderAnalytics();
     }
   }
 };
 
-function renderDashboard() {
+// Render Spreadsheet / Ledger Table for Dashboard
+function renderDashboardTable() {
   let totalRev = 0, foodRev = 0, bevRev = 0;
-  let breakdownHtml = '';
+  let rowsHtml = '';
+
+  if (!adminData.performance || adminData.performance.length === 0) {
+    document.getElementById('today-table-body').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#64748b; padding:16px;">No sales logged for this timeframe.</td></tr>`;
+    document.getElementById('kpi-rev').innerText = '฿0';
+    document.getElementById('kpi-food').innerText = '฿0';
+    document.getElementById('kpi-bev').innerText = '฿0';
+    return;
+  }
 
   adminData.performance.forEach(p => {
     totalRev += p.totalRevenue;
-    if (p.category === 'Beverages') bevRev += p.totalRevenue;
+    const isBev = p.category === 'Beverages';
+    if (isBev) bevRev += p.totalRevenue;
     else foodRev += p.totalRevenue;
 
-    breakdownHtml += `
-      <div class="item-row">
-        <div>
-          <div style="font-weight:bold; font-size:13px;">${p.name}</div>
-          <div style="font-size:11px; color:#94a3b8;">${p.totalUnits} sold (${p.category})</div>
-        </div>
-        <div style="font-weight:bold; color:#06b6d4;">฿${p.totalRevenue.toLocaleString()}</div>
-      </div>
+    const tagClass = isBev ? 'tag-bev' : 'tag-food';
+
+    rowsHtml += `
+      <tr>
+        <td style="font-weight:bold; color:#f8fafc;">${p.name}</td>
+        <td style="text-align:center; font-weight:bold; color:#38bdf8;">${p.totalUnits}</td>
+        <td><span class="tag-cat ${tagClass}">${p.category}</span></td>
+        <td style="text-align:right; font-weight:bold; color:#06b6d4;">฿${p.totalRevenue.toLocaleString()}</td>
+      </tr>
     `;
   });
 
   document.getElementById('kpi-rev').innerText = `฿${totalRev.toLocaleString()}`;
   document.getElementById('kpi-food').innerText = `฿${foodRev.toLocaleString()}`;
   document.getElementById('kpi-bev').innerText = `฿${bevRev.toLocaleString()}`;
-  document.getElementById('today-breakdown-list').innerHTML = breakdownHtml || '<div style="color:#64748b; text-align:center; padding:10px;">No sales logged for this timeframe.</div>';
+  document.getElementById('today-table-body').innerHTML = rowsHtml;
 }
 
 function renderPerformance() {
@@ -248,22 +322,42 @@ function renderHourlyChart(elementId, hourlyArray, typeClass) {
   container.innerHTML = chartHtml;
 }
 
-function fetchCustomDateData() {
-  const dateInput = document.getElementById('lookup-date-input').value;
-  if (!dateInput) {
-    alert("Please choose a date first.");
+function fetchCalendarRangeData() {
+  const startRaw = document.getElementById('lookup-start-date').value;
+  const endRaw = document.getElementById('lookup-end-date').value;
+
+  if (!startRaw) {
+    alert("Please select at least a Start Date.");
     return;
   }
-  const parts = dateInput.split('-');
-  const formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-  
-  fetchAdminData('custom', formattedDate);
+
+  const formatD = (val) => {
+    if (!val) return '';
+    const parts = val.split('-');
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  };
+
+  const startDate = formatD(startRaw);
+  const endDate = formatD(endRaw);
+
+  fetchAdminData('custom', startDate, endDate);
 }
 
 function renderLookupResults() {
   const container = document.getElementById('lookup-results');
   let total = 0;
-  let html = `<h4 style="color:#06b6d4; margin-bottom:10px;">Sales Summary for ${adminData.targetDate}</h4>`;
+  
+  let rangeLabel = adminData.startDate;
+  if (adminData.endDate && adminData.endDate !== adminData.startDate) {
+    rangeLabel += ` to ${adminData.endDate}`;
+  }
+
+  let html = `<h4 style="color:#06b6d4; margin-bottom:10px;">Sales Summary (${rangeLabel})</h4>`;
+
+  if (!adminData.performance || adminData.performance.length === 0) {
+    container.innerHTML = html + `<div style="color:#64748b; padding:12px;">No sales found for selected range.</div>`;
+    return;
+  }
 
   adminData.performance.forEach(p => {
     total += p.totalRevenue;
@@ -271,7 +365,7 @@ function renderLookupResults() {
       <div class="item-row">
         <div>
           <div style="font-weight:bold; font-size:13px;">${p.name}</div>
-          <div style="font-size:11px; color:#94a3b8;">${p.totalUnits} sold</div>
+          <div style="font-size:11px; color:#94a3b8;">${p.totalUnits} sold (${p.category})</div>
         </div>
         <div style="font-weight:bold; color:#06b6d4;">฿${p.totalRevenue.toLocaleString()}</div>
       </div>
@@ -283,7 +377,7 @@ function renderLookupResults() {
 }
 
 // Auto-refresh live dashboard every 30 seconds
-setInterval(() => fetchAdminData('today'), 30000);
+setInterval(() => fetchAdminData(currentPerfFilter), 30000);
 </script>
 </body>
 </html>
