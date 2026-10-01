@@ -42,7 +42,6 @@
   .section-title { font-size: 12px; font-weight: bold; margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; }
   .title-food { color: #f59e0b; border-left: 4px solid #f59e0b; }
   .title-bev { color: #38bdf8; border-left: 4px solid #38bdf8; }
-  .section-total { font-size: 13px; font-weight: bold; color: #fff; }
 
   /* Form & Date Selector */
   .form-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; margin-top: 16px; }
@@ -52,15 +51,6 @@
   .btn-action { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
 </style>
 </head>
-
-<!-- DEBUG PANEL -->
-<div style="margin-top:30px; background:#020617; border:1px solid #334155; padding:12px; border-radius:8px;">
-  <h4 style="color:#f59e0b; font-size:12px; margin-bottom:6px;">System Diagnostics</h4>
-  <pre id="debug-output" style="color:#94a3b8; font-size:10px; white-space:pre-wrap; max-height:150px; overflow-y:auto;"></pre>
-</div>
-
-
-
 <body>
 
 <div class="header">
@@ -136,26 +126,6 @@
 </div>
 
 <script>
-window.handleAdminData = function(data) {
-  if (data.status === 'success') {
-    adminData = data;
-    document.getElementById('status').innerText = "Live";
-    
-    // Output debug trace directly to screen
-    if (data.debug) {
-      document.getElementById('debug-output').innerText = data.debug.join("\n");
-    }
-
-    if (data.range === 'custom') {
-      renderLookupResults();
-    } else {
-      renderDashboard();
-      renderPerformance();
-      renderAnalytics();
-    }
-  }
-};
-
 const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
 
 let adminData = { performance: [], foodHourly: [], bevHourly: [] };
@@ -167,7 +137,7 @@ function switchTab(tabName) {
   document.getElementById(`btn-tab-${tabName}`).classList.add('active');
 }
 
-// Initial Fetch
+// Initial Fetch on load
 fetchAdminData('today');
 
 function fetchAdminData(range, targetDate = '') {
@@ -181,7 +151,7 @@ window.handleAdminData = function(data) {
   if (data.status === 'success') {
     adminData = data;
     document.getElementById('status').innerText = "Live";
-    
+
     if (data.range === 'custom') {
       renderLookupResults();
     } else {
@@ -284,7 +254,6 @@ function fetchCustomDateData() {
     alert("Please choose a date first.");
     return;
   }
-  // Format YYYY-MM-DD -> DD/MM/YYYY
   const parts = dateInput.split('-');
   const formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
   

@@ -1,8 +1,12 @@
 import socket
 import time
+from datetime import datetime
 
 ESP32_IP = "192.168.1.113"
 ESP32_PORT = 9100
+
+# Dynamically generate current timestamp (e.g. "01/10/2026 11:15 am")
+now_timestamp = datetime.now().strftime("%d/%m/%Y %I:%M %p").lower()
 
 ESC_INIT = b'\x1b\x40'
 ESC_ALIGN_CENTER = b'\x1b\x61\x01'
@@ -40,7 +44,7 @@ CHARGE_STREAM = (
     b"Password: i8coconuts\n"
     b"********** THANK YOU ! **********\n\n" +
     ESC_ALIGN_LEFT +
-    b"30/09/2026 10:22 am                     #6-9014\n" +
+    f"{now_timestamp}                     #6-9014\n".encode('utf-8') +
     ESC_CUT
 )
 
@@ -69,7 +73,7 @@ BILL_STREAM = (
     b"Password: i8coconuts\n"
     b"********** THANK YOU ! **********\n\n" +
     ESC_ALIGN_LEFT +
-    b"30/09/2026 9:48 am\n" +
+    f"{now_timestamp}\n".encode('utf-8') +
     ESC_CUT
 )
 
