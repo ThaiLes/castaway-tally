@@ -52,6 +52,15 @@
   .btn-action { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
 </style>
 </head>
+
+<!-- DEBUG PANEL -->
+<div style="margin-top:30px; background:#020617; border:1px solid #334155; padding:12px; border-radius:8px;">
+  <h4 style="color:#f59e0b; font-size:12px; margin-bottom:6px;">System Diagnostics</h4>
+  <pre id="debug-output" style="color:#94a3b8; font-size:10px; white-space:pre-wrap; max-height:150px; overflow-y:auto;"></pre>
+</div>
+
+
+
 <body>
 
 <div class="header">
@@ -127,6 +136,26 @@
 </div>
 
 <script>
+window.handleAdminData = function(data) {
+  if (data.status === 'success') {
+    adminData = data;
+    document.getElementById('status').innerText = "Live";
+    
+    // Output debug trace directly to screen
+    if (data.debug) {
+      document.getElementById('debug-output').innerText = data.debug.join("\n");
+    }
+
+    if (data.range === 'custom') {
+      renderLookupResults();
+    } else {
+      renderDashboard();
+      renderPerformance();
+      renderAnalytics();
+    }
+  }
+};
+
 const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
 
 let adminData = { performance: [], foodHourly: [], bevHourly: [] };

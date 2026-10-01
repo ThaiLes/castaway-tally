@@ -9,12 +9,7 @@ ESC_ALIGN_CENTER = b'\x1b\x61\x01'
 ESC_ALIGN_LEFT = b'\x1b\x61\x00'
 ESC_CUT = b'\x1d\x56\x42\x00'
 
-# -------------------------------------------------------------------------
-# 1. CHARGE RECEIPT STREAM (Left Hand Side)
-# Items: Cappucino (hot) [2x90=180], Water [1x40=40], 
-#        Pancake,Scrambled eggs and bacon [2x250=500], Orange Espresso [1x120=120]
-# Total: B840.00 | Receipt: #6-9014
-# -------------------------------------------------------------------------
+# CHARGE Receipt (Paid)
 CHARGE_STREAM = (
     ESC_INIT + ESC_ALIGN_CENTER +
     b"RECEIPT\n\n"
@@ -49,11 +44,7 @@ CHARGE_STREAM = (
     ESC_CUT
 )
 
-# -------------------------------------------------------------------------
-# 2. BILL RECEIPT STREAM (Right Hand Side)
-# Items: Espresso (Hot) [2x70=140]
-# Total / Amount due: B140.00 | Header includes "BILL"
-# -------------------------------------------------------------------------
+# BILL Receipt (Pre-Bill)
 BILL_STREAM = (
     ESC_INIT + ESC_ALIGN_CENTER +
     b"RECEIPT\n\n"
@@ -83,33 +74,32 @@ BILL_STREAM = (
 )
 
 def send_pos_burst(job_name, data_buffer):
-    print(f"\n[Loyverse POS] Connecting to ESP32 at {ESP32_IP}:{ESP32_PORT}...")
+    print(f"\n[Simulator] Connecting to ESP32 at {ESP32_IP}:{ESP32_PORT}...")
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(5)
         sock.connect((ESP32_IP, ESP32_PORT))
         
-        print(f"[Loyverse POS] Transmitting '{job_name}' stream ({len(data_buffer)} bytes)...")
+        print(f"[Simulator] Sending '{job_name}' stream ({len(data_buffer)} bytes)...")
         sock.sendall(data_buffer)
         
-        # Pause 200ms before closing socket (matches Android/iOS TCP FIN behavior)
         time.sleep(0.2)
         sock.close()
-        print(f"[Loyverse POS] SUCCESS: Sent '{job_name}' and closed connection cleanly.\n")
+        print(f"[Simulator] SUCCESS: Sent '{job_name}' burst.\n")
         
     except Exception as e:
-        print(f"[Loyverse POS ERROR] Connection failed: {e}\n")
+        print(f"[Simulator Error] {e}\n")
 
 if __name__ == "__main__":
-    print("=== LOYVERSE POS RECEIPT SIMULATOR ===")
-    print("1. Send CHARGE Receipt (LHS - 4 items, B840.00)")
-    print("2. Send BILL Receipt   (RHS - Espresso, B140.00)")
+    print("=== LOYVERSE TEST SIMULATOR ===")
+    print("1. Send CHARGE Receipt (Paid - B840.00)")
+    print("2. Send BILL Receipt   (Pre-bill - B140.00)")
     
-    choice = input("\nSelect receipt type (1 or 2): ").strip()
+    choice = input("\nSelect (1 or 2): ").strip()
     
     if choice == '1':
-        send_pos_burst("CHARGE (Paid)", CHARGE_STREAM)
+        send_pos_burst("CHARGE", CHARGE_STREAM)
     elif choice == '2':
-        send_pos_burst("BILL (Pre-bill)", BILL_STREAM)
+        send_pos_burst("BILL", BILL_STREAM)
     else:
-        print("Invalid selection. Aborted.")
+        print("Invalid selection.")
