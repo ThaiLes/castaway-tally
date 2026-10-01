@@ -1,0 +1,115 @@
+import socket
+import time
+
+ESP32_IP = "192.168.1.113"
+ESP32_PORT = 9100
+
+ESC_INIT = b'\x1b\x40'
+ESC_ALIGN_CENTER = b'\x1b\x61\x01'
+ESC_ALIGN_LEFT = b'\x1b\x61\x00'
+ESC_CUT = b'\x1d\x56\x42\x00'
+
+# -------------------------------------------------------------------------
+# 1. CHARGE RECEIPT STREAM (Left Hand Side)
+# Items: Cappucino (hot) [2x90=180], Water [1x40=40], 
+#        Pancake,Scrambled eggs and bacon [2x250=500], Orange Espresso [1x120=120]
+# Total: B840.00 | Receipt: #6-9014
+# -------------------------------------------------------------------------
+CHARGE_STREAM = (
+    ESC_INIT + ESC_ALIGN_CENTER +
+    b"RECEIPT\n\n"
+    b"Castaway beach bar\n"
+    b"18 Moo 6 Hinkong Koh Phangan Thailand 84280\n"
+    b"Tel.092-420-8353\n\n" +
+    ESC_ALIGN_LEFT +
+    b"Order: 01\n"
+    b"Employee: Fa\n"
+    b"POS: POS 1\n"
+    b"------------------------------------------\n"
+    b"Dine in\n"
+    b"------------------------------------------\n"
+    b"Cappucino (hot)                          B180.00\n"
+    b"2 x B90.00\n"
+    b"Water                                     B40.00\n"
+    b"1 x B40.00\n"
+    b"Pancake,Scrambled eggs and bacon          B500.00\n"
+    b"2 x B250.00\n"
+    b"Orange Espresso                           B120.00\n"
+    b"1 x B120.00\n"
+    b"------------------------------------------\n"
+    b"Total                                    B840.00\n"
+    b"Cash                                     B840.00\n"
+    b"------------------------------------------\n" +
+    ESC_ALIGN_CENTER +
+    b"WiFi Name : AIS CASTAWAY BEACH BAR\n"
+    b"Password: i8coconuts\n"
+    b"********** THANK YOU ! **********\n\n" +
+    ESC_ALIGN_LEFT +
+    b"30/09/2026 10:22 am                     #6-9014\n" +
+    ESC_CUT
+)
+
+# -------------------------------------------------------------------------
+# 2. BILL RECEIPT STREAM (Right Hand Side)
+# Items: Espresso (Hot) [2x70=140]
+# Total / Amount due: B140.00 | Header includes "BILL"
+# -------------------------------------------------------------------------
+BILL_STREAM = (
+    ESC_INIT + ESC_ALIGN_CENTER +
+    b"RECEIPT\n\n"
+    b"Castaway beach bar\n"
+    b"18 Moo 6 Hinkong Koh Phangan Thailand 84280\n"
+    b"Tel.092-420-8353\n\n"
+    b"BILL\n\n" +
+    ESC_ALIGN_LEFT +
+    b"Order: Ticket - 9:48 am\n"
+    b"Employee: Fa\n"
+    b"POS: POS 1\n"
+    b"------------------------------------------\n"
+    b"Dine in\n"
+    b"------------------------------------------\n"
+    b"Espresso (Hot)                           B140.00\n"
+    b"2 x B70.00\n"
+    b"------------------------------------------\n"
+    b"Amount due                               B140.00\n"
+    b"------------------------------------------\n" +
+    ESC_ALIGN_CENTER +
+    b"WiFi Name : AIS CASTAWAY BEACH BAR\n"
+    b"Password: i8coconuts\n"
+    b"********** THANK YOU ! **********\n\n" +
+    ESC_ALIGN_LEFT +
+    b"30/09/2026 9:48 am\n" +
+    ESC_CUT
+)
+
+def send_pos_burst(job_name, data_buffer):
+    print(f"\n[Loyverse POS] Connecting to ESP32 at {ESP32_IP}:{ESP32_PORT}...")
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(5)
+        sock.connect((ESP32_IP, ESP32_PORT))
+        
+        print(f"[Loyverse POS] Transmitting '{job_name}' stream ({len(data_buffer)} bytes)...")
+        sock.sendall(data_buffer)
+        
+        # Pause 200ms before closing socket (matches Android/iOS TCP FIN behavior)
+        time.sleep(0.2)
+        sock.close()
+        print(f"[Loyverse POS] SUCCESS: Sent '{job_name}' and closed connection cleanly.\n")
+        
+    except Exception as e:
+        print(f"[Loyverse POS ERROR] Connection failed: {e}\n")
+
+if __name__ == "__main__":
+    print("=== LOYVERSE POS RECEIPT SIMULATOR ===")
+    print("1. Send CHARGE Receipt (LHS - 4 items, B840.00)")
+    print("2. Send BILL Receipt   (RHS - Espresso, B140.00)")
+    
+    choice = input("\nSelect receipt type (1 or 2): ").strip()
+    
+    if choice == '1':
+        send_pos_burst("CHARGE (Paid)", CHARGE_STREAM)
+    elif choice == '2':
+        send_pos_burst("BILL (Pre-bill)", BILL_STREAM)
+    else:
+        print("Invalid selection. Aborted.")

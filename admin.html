@@ -1,655 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Castaway Admin Portal</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #0f172a; color: #fff; padding: 16px; max-width: 600px; margin: 0 auto; }
-    .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
-    
-    /* Navigation Grid */
-    .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-bottom: 16px; }
-    .nav-btn { padding: 10px 4px; border-radius: 8px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
-    .nav-btn.active { background: #06b6d4; color: #0f172a; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Castaway Admin Portal</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: #0f172a; color: #fff; padding: 16px; max-width: 600px; margin: 0 auto; }
+  .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
+  
+  /* Navigation Grid */
+  .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-bottom: 16px; }
+  .nav-btn { padding: 10px 4px; border-radius: 8px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
+  .nav-btn.active { background: #06b6d4; color: #0f172a; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+  /* KPI Cards Grid */
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .kpi-card { background: #1e293b; padding: 12px 8px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
+  .kpi-val { font-size: 16px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
+  .kpi-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
 
-    /* Performance Filter Grid */
-    .filter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
-    .filter-btn { padding: 8px 4px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
-    .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+  /* List Items */
+  .item-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
+  
+  /* Charts & Titles */
+  .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; }
+  .chart-card-title { font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .chart-card-title.food { color: #f59e0b; }
+  .chart-card-title.bev { color: #38bdf8; }
+  .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 11px; }
+  .bar-label { width: 75px; color: #94a3b8; font-weight: bold; }
+  .bar-track { flex-grow: 1; background: #0f172a; height: 18px; border-radius: 4px; overflow: hidden; margin: 0 8px; border: 1px solid #334155; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+  .bar-fill.food { background: #f59e0b; }
+  .bar-fill.bev { background: #38bdf8; }
+  .bar-val { width: 35px; text-align: right; font-weight: bold; color: #fff; }
 
-    /* KPI Cards Grid */
-    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-    .kpi-card { background: #1e293b; padding: 12px 8px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
-    .kpi-val { font-size: 16px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
-    .kpi-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
+  .section-title { font-size: 12px; font-weight: bold; margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; }
+  .title-food { color: #f59e0b; border-left: 4px solid #f59e0b; }
+  .title-bev { color: #38bdf8; border-left: 4px solid #38bdf8; }
+  .section-total { font-size: 13px; font-weight: bold; color: #fff; }
 
-    /* List Items */
-    .item-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
-    .price-input { width: 65px; background: #0f172a; border: 1px solid #06b6d4; color: #fff; padding: 6px; border-radius: 6px; text-align: right; font-weight: bold; }
-    
-    /* Buttons */
-    .btn-save { background: #06b6d4; color: #0f172a; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 4px; }
-    .btn-delete { background: #991b1b; color: #f87171; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 4px; }
-
-    /* Form UI Cards */
-    .form-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; margin-top: 16px; }
-    .form-group { margin-bottom: 10px; }
-    .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
-    .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
-    .btn-add { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-    .btn-email { width: 100%; padding: 12px; background: #38bdf8; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
-    .btn-menu-pdf { width: 100%; padding: 12px; background: #f59e0b; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
-
-    /* STACKED ANALYTICS CHART CARDS */
-    .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; }
-    .chart-card-title { font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .chart-card-title.food { color: #f59e0b; }
-    .chart-card-title.bev { color: #38bdf8; }
-
-    .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 11px; }
-    .bar-label { width: 75px; color: #94a3b8; font-weight: bold; }
-    .bar-track { flex-grow: 1; background: #0f172a; height: 18px; border-radius: 4px; overflow: hidden; margin: 0 8px; border: 1px solid #334155; }
-    .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
-    .bar-fill.food { background: #f59e0b; }
-    .bar-fill.bev { background: #38bdf8; }
-    .bar-val { width: 35px; text-align: right; font-weight: bold; color: #fff; }
-
-    /* PERFORMANCE SECTION TITLES WITH TOTALS */
-    .section-title { font-size: 12px; font-weight: bold; margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; }
-    .title-food { color: #f59e0b; border-left: 4px solid #f59e0b; }
-    .title-bev { color: #38bdf8; border-left: 4px solid #38bdf8; }
-    .section-total { font-size: 13px; font-weight: bold; color: #fff; }
-
-    /* MASTER ADD TYPE TOGGLE */
-    .add-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-    .type-btn { padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 12px; cursor: pointer; text-align: center; }
-    .type-btn.active-food { background: #f59e0b; color: #0f172a; border-color: #f59e0b; }
-    .type-btn.active-bev { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-  </style>
+  /* Form & Date Selector */
+  .form-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; margin-top: 16px; }
+  .form-group { margin-bottom: 10px; }
+  .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+  .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
+  .btn-action { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+</style>
 </head>
 <body>
-  <div class="header">
-    <div>
-      <h2 style="margin:0; font-size:18px;">Castaway Admin</h2>
-      <span style="font-size:11px; color:#94a3b8;">Management Portal</span>
+
+<div class="header">
+  <div>
+    <h2 style="margin:0; font-size:18px;">Castaway Admin</h2>
+    <span style="font-size:11px; color:#94a3b8;">Loyverse Analytics Portal</span>
+  </div>
+  <span id="status" class="status">Syncing...</span>
+</div>
+
+<div class="nav-grid">
+  <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="nav-btn active">Dashboard</button>
+  <button onclick="switchTab('performance')" id="btn-tab-performance" class="nav-btn">Performance</button>
+  <button onclick="switchTab('analytics')" id="btn-tab-analytics" class="nav-btn">Analytics</button>
+  <button onclick="switchTab('lookup')" id="btn-tab-lookup" class="nav-btn">Date Lookup</button>
+</div>
+
+<!-- TAB 1: TODAY DASHBOARD -->
+<div id="tab-dashboard" class="tab-content active">
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-lbl">Total Sales</div>
+      <div id="kpi-rev" class="kpi-val">฿0</div>
     </div>
-    <span id="status" class="status">Loading...</span>
-  </div>
-
-  <div class="nav-grid">
-    <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="nav-btn active">Dashboard</button>
-    <button onclick="switchTab('performance')" id="btn-tab-performance" class="nav-btn">Performance</button>
-    <button onclick="switchTab('analytics')" id="btn-tab-analytics" class="nav-btn">Analytics</button>
-    <button onclick="switchTab('items')" id="btn-tab-items" class="nav-btn">Menu Items</button>
-  </div>
-
-  <!-- TAB 1: TODAY DASHBOARD -->
-  <div id="tab-dashboard" class="tab-content active">
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-lbl">Total Sales</div>
-        <div id="kpi-rev" class="kpi-val">฿0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-lbl">Food Sales</div>
-        <div id="kpi-food" class="kpi-val" style="color:#f59e0b;">฿0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-lbl">Drink Sales</div>
-        <div id="kpi-bev" class="kpi-val" style="color:#38bdf8;">฿0</div>
-      </div>
+    <div class="kpi-card">
+      <div class="kpi-lbl">Food Sales</div>
+      <div id="kpi-food" class="kpi-val" style="color:#f59e0b;">฿0</div>
     </div>
-    <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Today's Sales Breakdown</h3>
-    <div id="today-breakdown-list"></div>
-  </div>
-
-  <!-- TAB 2: MENU PERFORMANCE -->
-  <div id="tab-performance" class="tab-content">
-    <div class="filter-grid">
-      <button onclick="setPerfFilter('today')" id="flt-today" class="filter-btn active">Today</button>
-      <button onclick="setPerfFilter('week')" id="flt-week" class="filter-btn">This Week</button>
-      <button onclick="setPerfFilter('month')" id="flt-month" class="filter-btn">30 Days</button>
-      <button onclick="setPerfFilter('all')" id="flt-all" class="filter-btn">All-Time</button>
+    <div class="kpi-card">
+      <div class="kpi-lbl">Drink Sales</div>
+      <div id="kpi-bev" class="kpi-val" style="color:#38bdf8;">฿0</div>
     </div>
+  </div>
+  <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Today's Live Sales Breakdown</h3>
+  <div id="today-breakdown-list"></div>
+</div>
 
-    <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;" id="perf-title">Performance Summary (Today)</h3>
-    <div id="performance-list"></div>
+<!-- TAB 2: MENU PERFORMANCE -->
+<div id="tab-performance" class="tab-content">
+  <h3 style="font-size:14px; margin-bottom: 10px; color:#94a3b8;">Overall Performance Summary</h3>
+  <div id="performance-list"></div>
+</div>
+
+<!-- TAB 3: ANALYTICS -->
+<div id="tab-analytics" class="tab-content">
+  <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Sales Hours</h3>
+  <p style="font-size:11px; color:#94a3b8; margin-bottom:14px;">Hourly sales volume to optimize kitchen prep & bar shifts.</p>
+  
+  <div class="chart-card">
+    <div class="chart-card-title food">Food Peak Hourly Sales</div>
+    <div id="food-analytics-chart"></div>
   </div>
 
-  <!-- TAB 3: STACKED ANALYTICS CHART CARDS -->
-  <div id="tab-analytics" class="tab-content">
-    <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Sales Hours</h3>
-    <p style="font-size:11px; color:#94a3b8; margin-bottom:14px;">Hourly sales volume to optimize kitchen prep & bar shifts separately.</p>
+  <div class="chart-card">
+    <div class="chart-card-title bev">Beverage Peak Hourly Sales</div>
+    <div id="bev-analytics-chart"></div>
+  </div>
+</div>
+
+<!-- TAB 4: HISTORICAL DATE LOOKUP -->
+<div id="tab-lookup" class="tab-content">
+  <div class="form-card">
+    <h3 style="font-size:14px; margin-bottom:6px; color:#06b6d4;">Select Historical Date</h3>
+    <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Select any date to inspect historical sales totals and item breakdowns.</p>
+    <div class="form-group">
+      <label>Target Date</label>
+      <input type="date" id="lookup-date-input" class="form-control">
+    </div>
+    <button onclick="fetchCustomDateData()" class="btn-action">Inspect Date Metrics</button>
+  </div>
+
+  <div id="lookup-results" style="margin-top:16px;"></div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
+
+let adminData = { performance: [], foodHourly: [], bevHourly: [] };
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(`tab-${tabName}`).classList.add('active');
+  document.getElementById(`btn-tab-${tabName}`).classList.add('active');
+}
+
+// Initial Fetch
+fetchAdminData('today');
+
+function fetchAdminData(range, targetDate = '') {
+  document.getElementById('status').innerText = "Syncing...";
+  const script = document.createElement('script');
+  script.src = `${API_URL}?action=getAdminData&range=${range}&targetDate=${targetDate}&callback=handleAdminData&t=${Date.now()}`;
+  document.body.appendChild(script);
+}
+
+window.handleAdminData = function(data) {
+  if (data.status === 'success') {
+    adminData = data;
+    document.getElementById('status').innerText = "Live";
     
-    <!-- CARD 1: FOOD PEAK HOURLY SALES (AMBER) -->
-    <div class="chart-card">
-      <div class="chart-card-title food">Food Peak Hourly Sales 🍔</div>
-      <div id="food-analytics-chart"></div>
-    </div>
-
-    <!-- CARD 2: BEVERAGE PEAK HOURLY SALES (SKY BLUE) -->
-    <div class="chart-card">
-      <div class="chart-card-title bev">Beverage Peak Hourly Sales 🍹</div>
-      <div id="bev-analytics-chart"></div>
-    </div>
-
-    <!-- ON-DEMAND EMAIL REPORT FORM -->
-    <div class="form-card">
-      <h3 style="font-size:14px; margin-bottom:6px; color:#38bdf8;">Email PDF Sales Report</h3>
-      <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Dispatch an official PDF report with Food & Beverage split on demand.</p>
-
-      <div class="form-group">
-        <label>Report Timeframe</label>
-        <select id="report-range" class="form-control">
-          <option value="today">Daily (Today)</option>
-          <option value="week">Weekly (Rolling 7 Days)</option>
-          <option value="month">30 Days</option>
-          <option value="all">All-Time</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Recipient Email Address(es)</label>
-        <input id="report-recipients" class="form-control" value="turvey.les@gmail.com" placeholder="email1@domain.com, email2@domain.com">
-      </div>
-
-      <button onclick="triggerEmailReport()" id="btn-send-email" class="btn-email">Email PDF Report Now</button>
-    </div>
-  </div>
-
-  <!-- TAB 4: MENU ITEMS -->
-  <div id="tab-items" class="tab-content">
-    <h3 style="font-size:14px; margin-bottom:10px; color:#94a3b8;">Active Menu Items & Prices</h3>
-    
-    <!-- FOOD MENU ITEMS LIST -->
-    <div class="section-title title-food">Food Menu Items 🍔</div>
-    <div id="food-items-list"></div>
-
-    <!-- BEVERAGE MENU ITEMS LIST -->
-    <div class="section-title title-bev">Beverage Menu Items 🍹</div>
-    <div id="bev-items-list"></div>
-
-    <!-- FORM 1: ADD NEW ITEM -->
-    <div class="form-card">
-      <h3 style="font-size:14px; margin-bottom:10px; color:#06b6d4;">+ Add New Menu Item</h3>
-      
-      <label style="font-size: 11px; color: #94a3b8; margin-bottom: 4px; display: block;">Select Master Type</label>
-      <div class="add-type-grid">
-        <button onclick="setAddItemType('FOOD')" id="type-btn-food" class="type-btn active-food">FOOD 🍔</button>
-        <button onclick="setAddItemType('BEVERAGE')" id="type-btn-bev" class="type-btn">BEVERAGE 🍹</button>
-      </div>
-
-      <div class="form-group">
-        <label>Category</label>
-        <select id="new-cat-select" class="form-control" onchange="handleCategoryChange()"></select>
-      </div>
-      <div class="form-group" id="other-cat-group" style="display:none;">
-        <label>Type Custom Category Name</label>
-        <input id="new-cat-custom" class="form-control" placeholder="e.g. Desserts">
-      </div>
-
-      <div class="form-group">
-        <label>Code / ID (Auto-suggested)</label>
-        <input id="new-id" class="form-control" placeholder="BK-20">
-      </div>
-
-      <div class="form-group"><label>Item Name</label><input id="new-name" class="form-control" placeholder="Pancake Stack"></div>
-      <div class="form-group"><label>Price (฿)</label><input id="new-price" type="number" class="form-control" placeholder="180"></div>
-      <button onclick="addNewMenuItem()" class="btn-add">+ Add Item to Sheet</button>
-    </div>
-
-    <!-- FORM 2: EMAIL PRINTABLE MENU PDF -->
-    <div class="form-card">
-      <h3 style="font-size:14px; margin-bottom:6px; color:#f59e0b;">Email Printable Menu PDF</h3>
-      <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Generate and dispatch a formatted PDF menu for manual printing.</p>
-
-      <div class="form-group">
-        <label>Recipient Email Address(es)</label>
-        <input id="menu-pdf-recipients" class="form-control" value="turvey.les@gmail.com" placeholder="email1@domain.com, email2@domain.com">
-      </div>
-
-      <button onclick="triggerMenuPDFEmail()" id="btn-send-menu-pdf" class="btn-menu-pdf">Email Updated Menu PDF</button>
-    </div>
-  </div>
-
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwEOvMwt5iebuNuTs0iJNT57OK0Lp9mzDMRT3nREF_PsvSLrYM-1tDUPl8vV2nmsNRF/exec";
-
-    // Master List of Beverage Categories
-    const BEVERAGE_CATEGORIES = [
-      'Cocktails', 'Coffee', 'Teas & Chocolate', 'Smoothies', 
-      'Fruit & Soda', 'Lassi', 'Milkshakes', 'Chilled Soda', 
-      'Beers & Cider', 'Spirits & Mixers', 'Coconut'
-    ];
-
-    let adminData = { items: [], categories: [], counts: {}, performance: [], foodHourly: [], bevHourly: [] };
-    let currentPerfFilter = 'today';
-    let currentAddItemType = 'FOOD';
-
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-      
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-      document.getElementById(`btn-tab-${tabName}`).classList.add('active');
+    if (data.range === 'custom') {
+      renderLookupResults();
+    } else {
+      renderDashboard();
+      renderPerformance();
+      renderAnalytics();
     }
+  }
+};
 
-    function setPerfFilter(filterType) {
-      currentPerfFilter = filterType;
-      document.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById(`flt-${filterType}`).classList.add('active');
+function renderDashboard() {
+  let totalRev = 0, foodRev = 0, bevRev = 0;
+  let breakdownHtml = '';
 
-      const labels = {
-        'today': 'Performance Summary (Today)',
-        'week': 'Performance Summary (Rolling 7 Days)',
-        'month': 'Performance Summary (30 Days)',
-        'all': 'Performance Summary (All-Time)'
-      };
-      document.getElementById('perf-title').innerText = labels[filterType];
+  adminData.performance.forEach(p => {
+    totalRev += p.totalRevenue;
+    if (p.category === 'Beverages') bevRev += p.totalRevenue;
+    else foodRev += p.totalRevenue;
 
-      fetchAdminData();
-    }
-
-    function fetchAdminData() {
-      document.getElementById('status').innerText = "Syncing...";
-      const script = document.createElement('script');
-      script.src = API_URL + "?action=getAdminData&range=" + currentPerfFilter + "&callback=handleAdminData&t=" + Date.now();
-      document.body.appendChild(script);
-    }
-
-    window.handleAdminData = function(data) {
-      if (data.status === 'success') {
-        adminData = data;
-        document.getElementById('status').innerText = "Live";
-        renderDashboard();
-        renderPerformance();
-        renderAnalytics();
-        renderMenuItems();
-        populateCategoryDropdown();
-      }
-    };
-
-    function renderDashboard() {
-      let totalRev = 0;
-      let foodRev = 0;
-      let bevRev = 0;
-      let breakdownHtml = '';
-
-      adminData.items.forEach(item => {
-        const count = adminData.counts[item.id] || 0;
-        if (count > 0) {
-          const rev = count * item.price;
-          totalRev += rev;
-          
-          if (BEVERAGE_CATEGORIES.includes(item.category)) {
-            bevRev += rev;
-          } else {
-            foodRev += rev;
-          }
-
-          breakdownHtml += `
-            <div class="item-row">
-              <div>
-                <div style="font-weight:bold; font-size:13px;">${item.name}</div>
-                <div style="font-size:11px; color:#94a3b8;">${count} sold @ ฿${item.price} (${item.category})</div>
-              </div>
-              <div style="font-weight:bold; color:#06b6d4;">฿${rev.toLocaleString()}</div>
-            </div>
-          `;
-        }
-      });
-
-      document.getElementById('kpi-rev').innerText = `฿${totalRev.toLocaleString()}`;
-      document.getElementById('kpi-food').innerText = `฿${foodRev.toLocaleString()}`;
-      document.getElementById('kpi-bev').innerText = `฿${bevRev.toLocaleString()}`;
-      document.getElementById('today-breakdown-list').innerHTML = breakdownHtml || '<div style="color:#64748b; text-align:center; padding:10px;">No sales logged today yet.</div>';
-    }
-
-    function renderPerformance() {
-      const container = document.getElementById('performance-list');
-      if (!adminData.performance || adminData.performance.length === 0) {
-        container.innerHTML = '<div style="color:#64748b; text-align:center; padding:10px;">No performance summary found for this timeframe.</div>';
-        return;
-      }
-
-      const foodItems = adminData.performance.filter(p => !BEVERAGE_CATEGORIES.includes(p.category)).sort((a,b) => b.totalUnits - a.totalUnits);
-      const bevItems = adminData.performance.filter(p => BEVERAGE_CATEGORIES.includes(p.category)).sort((a,b) => b.totalUnits - a.totalUnits);
-
-      let foodRevTotal = 0, foodUnitsTotal = 0;
-      foodItems.forEach(p => { foodRevTotal += p.totalRevenue; foodUnitsTotal += p.totalUnits; });
-
-      let bevRevTotal = 0, bevUnitsTotal = 0;
-      bevItems.forEach(p => { bevRevTotal += p.totalRevenue; bevUnitsTotal += p.totalUnits; });
-
-      let html = '';
-
-      // FOOD PERFORMANCE HEADER WITH DYNAMIC TOTAL SALES
-      html += `
-        <div class="section-title title-food">
-          <span>Food Performance 🍔</span>
-          <span class="section-total">฿${foodRevTotal.toLocaleString()} <span style="font-size:10px; color:#94a3b8;">(${foodUnitsTotal} units)</span></span>
+    breakdownHtml += `
+      <div class="item-row">
+        <div>
+          <div style="font-weight:bold; font-size:13px;">${p.name}</div>
+          <div style="font-size:11px; color:#94a3b8;">${p.totalUnits} sold (${p.category})</div>
         </div>
-      `;
+        <div style="font-weight:bold; color:#06b6d4;">฿${p.totalRevenue.toLocaleString()}</div>
+      </div>
+    `;
+  });
 
-      if (foodItems.length === 0) {
-        html += '<div style="color:#64748b; padding:8px 12px; font-size:11px;">No food sales in this timeframe.</div>';
-      } else {
-        html += foodItems.map(p => `
-          <div class="item-row">
-            <div>
-              <div style="font-weight:bold; font-size:13px;">${p.name}</div>
-              <div style="font-size:11px; color:#94a3b8;">${p.category} (${p.id})</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-weight:bold; color:#f59e0b;">${p.totalUnits} Units</div>
-              <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
-            </div>
-          </div>
-        `).join('');
-      }
+  document.getElementById('kpi-rev').innerText = `฿${totalRev.toLocaleString()}`;
+  document.getElementById('kpi-food').innerText = `฿${foodRev.toLocaleString()}`;
+  document.getElementById('kpi-bev').innerText = `฿${bevRev.toLocaleString()}`;
+  document.getElementById('today-breakdown-list').innerHTML = breakdownHtml || '<div style="color:#64748b; text-align:center; padding:10px;">No sales logged for this timeframe.</div>';
+}
 
-      // BEVERAGE PERFORMANCE HEADER WITH DYNAMIC TOTAL SALES
-      html += `
-        <div class="section-title title-bev" style="margin-top:20px;">
-          <span>Beverage Performance 🍹</span>
-          <span class="section-total">฿${bevRevTotal.toLocaleString()} <span style="font-size:10px; color:#94a3b8;">(${bevUnitsTotal} units)</span></span>
+function renderPerformance() {
+  const container = document.getElementById('performance-list');
+  let html = '';
+
+  const foodItems = adminData.performance.filter(p => p.category === 'Food');
+  const bevItems = adminData.performance.filter(p => p.category === 'Beverages');
+
+  html += `<div class="section-title title-food"><span>Food Performance</span></div>`;
+  html += foodItems.map(p => `
+    <div class="item-row">
+      <div><div style="font-weight:bold; font-size:13px;">${p.name}</div></div>
+      <div style="text-align:right;">
+        <div style="font-weight:bold; color:#f59e0b;">${p.totalUnits} Units</div>
+        <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
+      </div>
+    </div>
+  `).join('') || '<div style="color:#64748b; padding:8px;">No food sales.</div>';
+
+  html += `<div class="section-title title-bev" style="margin-top:16px;"><span>Beverage Performance</span></div>`;
+  html += bevItems.map(p => `
+    <div class="item-row">
+      <div><div style="font-weight:bold; font-size:13px;">${p.name}</div></div>
+      <div style="text-align:right;">
+        <div style="font-weight:bold; color:#38bdf8;">${p.totalUnits} Units</div>
+        <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
+      </div>
+    </div>
+  `).join('') || '<div style="color:#64748b; padding:8px;">No beverage sales.</div>';
+
+  container.innerHTML = html;
+}
+
+function renderAnalytics() {
+  renderHourlyChart('food-analytics-chart', adminData.foodHourly || Array(24).fill(0), 'food');
+  renderHourlyChart('bev-analytics-chart', adminData.bevHourly || Array(24).fill(0), 'bev');
+}
+
+function renderHourlyChart(elementId, hourlyArray, typeClass) {
+  const container = document.getElementById(elementId);
+  const maxSales = Math.max(...hourlyArray, 1);
+  let chartHtml = '';
+
+  for (let h = 7; h <= 23; h++) {
+    const val = hourlyArray[h] || 0;
+    const pct = Math.round((val / maxSales) * 100);
+    const timeLabel = `${h < 10 ? '0' + h : h}:00`;
+
+    chartHtml += `
+      <div class="bar-row">
+        <div class="bar-label">${timeLabel}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${typeClass}" style="width: ${pct}%;"></div>
         </div>
-      `;
+        <div class="bar-val">${val}</div>
+      </div>
+    `;
+  }
+  container.innerHTML = chartHtml;
+}
 
-      if (bevItems.length === 0) {
-        html += '<div style="color:#64748b; padding:8px 12px; font-size:11px;">No beverage sales in this timeframe.</div>';
-      } else {
-        html += bevItems.map(p => `
-          <div class="item-row">
-            <div>
-              <div style="font-weight:bold; font-size:13px;">${p.name}</div>
-              <div style="font-size:11px; color:#94a3b8;">${p.category} (${p.id})</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-weight:bold; color:#38bdf8;">${p.totalUnits} Units</div>
-              <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
-            </div>
-          </div>
-        `).join('');
-      }
+function fetchCustomDateData() {
+  const dateInput = document.getElementById('lookup-date-input').value;
+  if (!dateInput) {
+    alert("Please choose a date first.");
+    return;
+  }
+  // Format YYYY-MM-DD -> DD/MM/YYYY
+  const parts = dateInput.split('-');
+  const formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+  
+  fetchAdminData('custom', formattedDate);
+}
 
-      container.innerHTML = html;
-    }
+function renderLookupResults() {
+  const container = document.getElementById('lookup-results');
+  let total = 0;
+  let html = `<h4 style="color:#06b6d4; margin-bottom:10px;">Sales Summary for ${adminData.targetDate}</h4>`;
 
-    function renderAnalytics() {
-      renderSingleHourlyChart('food-analytics-chart', adminData.foodHourly || Array(24).fill(0), 'food');
-      renderSingleHourlyChart('bev-analytics-chart', adminData.bevHourly || Array(24).fill(0), 'bev');
-    }
-
-    function renderSingleHourlyChart(elementId, hourlyArray, typeClass) {
-      const container = document.getElementById(elementId);
-      const maxSales = Math.max(...hourlyArray, 1);
-      let chartHtml = '';
-
-      for (let h = 7; h <= 23; h++) {
-        const val = hourlyArray[h] || 0;
-        const pct = Math.round((val / maxSales) * 100);
-        const timeLabel = `${h < 10 ? '0' + h : h}:00 - ${(h+1) < 10 ? '0' + (h+1) : (h+1)}:00`;
-
-        chartHtml += `
-          <div class="bar-row">
-            <div class="bar-label">${timeLabel}</div>
-            <div class="bar-track">
-              <div class="bar-fill ${typeClass}" style="width: ${pct}%;"></div>
-            </div>
-            <div class="bar-val">${val}</div>
-          </div>
-        `;
-      }
-
-      container.innerHTML = chartHtml;
-    }
-
-    function renderMenuItems() {
-      const foodContainer = document.getElementById('food-items-list');
-      const bevContainer = document.getElementById('bev-items-list');
-
-      const foodItems = adminData.items.filter(i => !BEVERAGE_CATEGORIES.includes(i.category));
-      const bevItems = adminData.items.filter(i => BEVERAGE_CATEGORIES.includes(i.category));
-
-      foodContainer.innerHTML = foodItems.map(item => renderMenuItemRow(item)).join('');
-      bevContainer.innerHTML = bevItems.map(item => renderMenuItemRow(item)).join('');
-    }
-
-    function renderMenuItemRow(item) {
-      return `
-        <div class="item-row">
-          <div>
-            <div style="font-weight:bold; font-size:13px;">${item.name}</div>
-            <div style="font-size:11px; color:#94a3b8;">${item.category} (${item.id})</div>
-          </div>
-          <div style="display:flex; align-items:center;">
-            ฿<input id="price-${item.id}" type="number" value="${item.price}" class="price-input">
-            <button onclick="updatePrice('${item.id}')" class="btn-save">Save</button>
-            <button onclick="deleteMenuItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="btn-delete">✕</button>
-          </div>
+  adminData.performance.forEach(p => {
+    total += p.totalRevenue;
+    html += `
+      <div class="item-row">
+        <div>
+          <div style="font-weight:bold; font-size:13px;">${p.name}</div>
+          <div style="font-size:11px; color:#94a3b8;">${p.totalUnits} sold</div>
         </div>
-      `;
-    }
+        <div style="font-weight:bold; color:#06b6d4;">฿${p.totalRevenue.toLocaleString()}</div>
+      </div>
+    `;
+  });
 
-    function setAddItemType(type) {
-      currentAddItemType = type;
-      document.getElementById('type-btn-food').className = type === 'FOOD' ? 'type-btn active-food' : 'type-btn';
-      document.getElementById('type-btn-bev').className = type === 'BEVERAGE' ? 'type-btn active-bev' : 'type-btn';
-      populateCategoryDropdown();
-    }
+  html = `<div style="font-size:16px; font-weight:bold; margin-bottom:12px; color:#f59e0b;">Total Revenue: ฿${total.toLocaleString()}</div>` + html;
+  container.innerHTML = html;
+}
 
-    function populateCategoryDropdown() {
-      const select = document.getElementById('new-cat-select');
-      const allCats = adminData.categories || [];
-
-      let filteredCats = [];
-      if (currentAddItemType === 'FOOD') {
-        filteredCats = allCats.filter(c => !BEVERAGE_CATEGORIES.includes(c));
-      } else {
-        filteredCats = allCats.filter(c => BEVERAGE_CATEGORIES.includes(c));
-      }
-
-      let optionsHtml = filteredCats.map(c => `<option value="${c}">${c}</option>`).join('');
-      optionsHtml += `<option value="OTHER">-- OTHER (Type Custom) --</option>`;
-
-      select.innerHTML = optionsHtml;
-      handleCategoryChange();
-    }
-
-    function handleCategoryChange() {
-      const selectVal = document.getElementById('new-cat-select').value;
-      const otherGroup = document.getElementById('other-cat-group');
-      const idInput = document.getElementById('new-id');
-
-      if (selectVal === 'OTHER') {
-        otherGroup.style.display = 'block';
-        idInput.value = '';
-        idInput.placeholder = currentAddItemType === 'FOOD' ? 'e.g. DS-01' : 'e.g. CK-01';
-      } else {
-        otherGroup.style.display = 'none';
-        idInput.value = getNextAvailableCode(selectVal);
-      }
-    }
-
-    function getNextAvailableCode(category) {
-      const categoryItems = adminData.items.filter(i => i.category === category);
-      
-      const prefixMap = {
-        'Cocktails': 'CK',
-        'Coffee': 'CF',
-        'Teas & Chocolate': 'TE',
-        'Smoothies': 'SM',
-        'Fruit & Soda': 'FS',
-        'Lassi': 'LS',
-        'Milkshakes': 'MS',
-        'Chilled Soda': 'SD',
-        'Beers & Cider': 'BR',
-        'Spirits & Mixers': 'SP',
-        'Coconut': 'CO'
-      };
-
-      let maxNum = 0;
-      let prefix = prefixMap[category] || '';
-
-      categoryItems.forEach(item => {
-        const parts = item.id.split('-');
-        if (parts.length === 2) {
-          if (!prefix) prefix = parts[0];
-          const num = parseInt(parts[1], 10);
-          if (!isNaN(num) && num > maxNum) {
-            maxNum = num;
-          }
-        }
-      });
-
-      if (!prefix) {
-        prefix = category.substring(0, 2).toUpperCase();
-      }
-
-      const nextNum = maxNum + 1;
-      const paddedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
-      return `${prefix}-${paddedNum}`;
-    }
-
-    function triggerEmailReport() {
-      const range = document.getElementById('report-range').value;
-      const recipients = document.getElementById('report-recipients').value.trim();
-      const sendBtn = document.getElementById('btn-send-email');
-
-      if (!recipients) {
-        alert("Please enter at least one recipient email address.");
-        return;
-      }
-
-      sendBtn.innerText = "Generating & Sending PDF...";
-      sendBtn.disabled = true;
-
-      fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'sendReportEmail',
-          range: range,
-          recipients: recipients
-        })
-      }).then(() => {
-        alert(`Sales Report PDF dispatched successfully to: ${recipients}`);
-        sendBtn.innerText = "Email PDF Report Now";
-        sendBtn.disabled = false;
-      }).catch(err => {
-        alert("Failed to send report email. Check network connection.");
-        sendBtn.innerText = "Email PDF Report Now";
-        sendBtn.disabled = false;
-      });
-    }
-
-    function triggerMenuPDFEmail() {
-      const recipients = document.getElementById('menu-pdf-recipients').value.trim();
-      const sendBtn = document.getElementById('btn-send-menu-pdf');
-
-      if (!recipients) {
-        alert("Please enter at least one recipient email address.");
-        return;
-      }
-
-      sendBtn.innerText = "Generating & Sending Printable Menu...";
-      sendBtn.disabled = true;
-
-      fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'sendMenuPDFEmail',
-          recipients: recipients
-        })
-      }).then(() => {
-        alert(`Printable Menu PDF dispatched to: ${recipients}`);
-        sendBtn.innerText = "Email Updated Menu PDF";
-        sendBtn.disabled = false;
-      }).catch(err => {
-        alert("Failed to send menu email. Check connection.");
-        sendBtn.innerText = "Email Updated Menu PDF";
-        sendBtn.disabled = false;
-      });
-    }
-
-    function updatePrice(id) {
-      const newPrice = document.getElementById(`price-${id}`).value;
-      fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'updatePrice', id: id, price: newPrice })
-      }).then(() => {
-        alert("Price updated!");
-        fetchAdminData();
-      });
-    }
-
-    function deleteMenuItem(id, name) {
-      if (confirm(`Are you sure you want to remove "${name}" (${id}) from the menu?`)) {
-        adminData.items = adminData.items.filter(i => i.id !== id);
-        renderMenuItems();
-
-        fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'deleteMenuItem', id: id })
-        }).then(() => {
-          setTimeout(fetchAdminData, 3500);
-        });
-      }
-    }
-
-    function addNewMenuItem() {
-      const idInput = document.getElementById('new-id');
-      const nameInput = document.getElementById('new-name');
-      const priceInput = document.getElementById('new-price');
-      const customCatInput = document.getElementById('new-cat-custom');
-
-      const id = idInput.value.trim();
-      const selectVal = document.getElementById('new-cat-select').value;
-      let cat = selectVal === 'OTHER' ? customCatInput.value.trim() : selectVal;
-
-      const name = nameInput.value.trim();
-      const price = priceInput.value.trim();
-
-      if (!id || !cat || !name || !price) {
-        alert("Please fill all fields");
-        return;
-      }
-
-      const newItem = { id: id, category: cat, name: name, price: Number(price) };
-      adminData.items.push(newItem);
-      renderMenuItems();
-
-      idInput.value = '';
-      nameInput.value = '';
-      priceInput.value = '';
-      customCatInput.value = '';
-
-      fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'addMenuItem', id: id, category: cat, name: name, price: price })
-      }).then(() => {
-        setTimeout(fetchAdminData, 3500);
-      });
-    }
-
-    fetchAdminData();
-    setInterval(fetchAdminData, 15000);
-  </script>
+// Auto-refresh live dashboard every 30 seconds
+setInterval(() => fetchAdminData('today'), 30000);
+</script>
 </body>
 </html>
