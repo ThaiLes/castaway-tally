@@ -1,452 +1,234 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Castaway Admin Portal</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: #0f172a; color: #fff; padding: 16px; max-width: 650px; margin: 0 auto; }
-  .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-  .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
-  
-  /* Navigation Grid */
-  .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-bottom: 16px; }
-  .nav-btn { padding: 10px 4px; border-radius: 8px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
-  .nav-btn.active { background: #06b6d4; color: #0f172a; }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  /* Performance Filters Grid */
-  .filter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
-  .filter-btn { padding: 8px 4px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
-  .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-
-  /* KPI Cards Grid */
-  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-  .kpi-card { background: #1e293b; padding: 12px 8px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
-  .kpi-val { font-size: 16px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
-  .kpi-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
-
-  /* Table / Spreadsheet View */
-  .table-container { background: #1e293b; border-radius: 10px; border: 1px solid #334155; overflow: hidden; margin-top: 10px; }
-  .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
-  .data-table th { background: #0f172a; color: #94a3b8; padding: 10px 12px; text-transform: uppercase; font-size: 10px; font-weight: bold; border-bottom: 1px solid #334155; }
-  .data-table td { padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #f8fafc; }
-  .data-table tr:last-child td { border-bottom: none; }
-  .tag-cat { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-  .tag-food { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b55; }
-  .tag-bev { background: #38bdf822; color: #38bdf8; border: 1px solid #38bdf855; }
-
-  /* List Items */
-  .item-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
-  
-  /* Charts & Titles */
-  .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; }
-  .chart-card-title { font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .chart-card-title.food { color: #f59e0b; }
-  .chart-card-title.bev { color: #38bdf8; }
-  .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 11px; }
-  .bar-label { width: 75px; color: #94a3b8; font-weight: bold; }
-  .bar-track { flex-grow: 1; background: #0f172a; height: 18px; border-radius: 4px; overflow: hidden; margin: 0 8px; border: 1px solid #334155; }
-  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
-  .bar-fill.food { background: #f59e0b; }
-  .bar-fill.bev { background: #38bdf8; }
-  .bar-val { width: 35px; text-align: right; font-weight: bold; color: #fff; }
-
-  .section-title { font-size: 12px; font-weight: bold; margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; }
-  .title-food { color: #f59e0b; border-left: 4px solid #f59e0b; }
-  .title-bev { color: #38bdf8; border-left: 4px solid #38bdf8; }
-
-  /* CUSTOM CALENDAR STYLING */
-  .calendar-card { background: #1e293b; padding: 16px; border-radius: 12px; border: 1px solid #334155; }
-  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .cal-btn { background: #0f172a; border: 1px solid #334155; color: #38bdf8; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-  .cal-title { font-size: 14px; font-weight: bold; color: #f8fafc; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-  .cal-day-hdr { font-size: 10px; font-weight: bold; color: #64748b; padding: 4px 0; }
-  .cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; color: #cbd5e1; cursor: pointer; user-select: none; border: 1px solid transparent; }
-  .cal-day:hover { border-color: #38bdf8; }
-  .cal-day.empty { background: transparent; cursor: default; border: none; }
-  .cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
-  .cal-day.in-range { background: #06b6d444; color: #38bdf8; border-color: #06b6d4; }
-  .btn-action { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 14px; }
-</style>
-</head>
-<body>
-
-<div class="header">
-  <div>
-    <h2 style="margin:0; font-size:18px;">Castaway Admin</h2>
-    <span style="font-size:11px; color:#94a3b8;">Loyverse Analytics Portal</span>
-  </div>
-  <span id="status" class="status">Syncing...</span>
-</div>
-
-<div class="nav-grid">
-  <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="nav-btn active">Dashboard</button>
-  <button onclick="switchTab('performance')" id="btn-tab-performance" class="nav-btn">Performance</button>
-  <button onclick="switchTab('analytics')" id="btn-tab-analytics" class="nav-btn">Analytics</button>
-  <button onclick="switchTab('lookup')" id="btn-tab-lookup" class="nav-btn">Date Lookup</button>
-</div>
-
-<!-- TAB 1: TODAY DASHBOARD -->
-<div id="tab-dashboard" class="tab-content active">
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-lbl">Total Sales</div>
-      <div id="kpi-rev" class="kpi-val">฿0</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-lbl">Food Sales</div>
-      <div id="kpi-food" class="kpi-val" style="color:#f59e0b;">฿0</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-lbl">Drink Sales</div>
-      <div id="kpi-bev" class="kpi-val" style="color:#38bdf8;">฿0</div>
-    </div>
-  </div>
-
-  <h3 style="font-size:14px; margin-bottom:6px; color:#94a3b8;">Today's Live Sales Ledger</h3>
-  
-  <div class="table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Item Description</th>
-          <th style="text-align:center;">Qty</th>
-          <th>Type</th>
-          <th style="text-align:right;">Revenue</th>
-        </tr>
-      </thead>
-      <tbody id="today-table-body">
-        <tr><td colspan="4" style="text-align:center; color:#64748b; padding:16px;">Loading spreadsheet ledger...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- TAB 2: MENU PERFORMANCE -->
-<div id="tab-performance" class="tab-content">
-  <div class="filter-grid">
-    <button onclick="setPerfFilter('today')" id="flt-today" class="filter-btn active">Today</button>
-    <button onclick="setPerfFilter('week')" id="flt-week" class="filter-btn">This Week</button>
-    <button onclick="setPerfFilter('month')" id="flt-month" class="filter-btn">30 Days</button>
-    <button onclick="setPerfFilter('all')" id="flt-all" class="filter-btn">All-Time</button>
-  </div>
-
-  <h3 style="font-size:14px; margin-bottom: 10px; color:#94a3b8;" id="perf-title">Performance Summary (Today)</h3>
-  <div id="performance-list"></div>
-</div>
-
-<!-- TAB 3: ANALYTICS -->
-<div id="tab-analytics" class="tab-content">
-  <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Sales Hours</h3>
-  <p style="font-size:11px; color:#94a3b8; margin-bottom:14px;">Hourly sales volume to optimize kitchen prep & bar shifts.</p>
-  
-  <div class="chart-card">
-    <div class="chart-card-title food">Food Peak Hourly Sales</div>
-    <div id="food-analytics-chart"></div>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-card-title bev">Beverage Peak Hourly Sales</div>
-    <div id="bev-analytics-chart"></div>
-  </div>
-</div>
-
-<!-- TAB 4: INTERACTIVE CALENDAR LOOKUP -->
-<div id="tab-lookup" class="tab-content">
-  <div class="calendar-card">
-    <div class="cal-header">
-      <button class="cal-btn" onclick="changeMonth(-1)">&lt;</button>
-      <div id="cal-month-title" class="cal-title">October 2026</div>
-      <button class="cal-btn" onclick="changeMonth(1)">&gt;</button>
-    </div>
-
-    <div class="cal-grid">
-      <div class="cal-day-hdr">S</div><div class="cal-day-hdr">M</div><div class="cal-day-hdr">T</div>
-      <div class="cal-day-hdr">W</div><div class="cal-day-hdr">T</div><div class="cal-day-hdr">F</div>
-      <div class="cal-day-hdr">S</div>
-    </div>
+function doGet(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    <div id="cal-days-grid" class="cal-grid" style="margin-top:4px;"></div>
+    if (e && e.parameter && e.parameter.action === "getAdminData") {
+      const range = e.parameter.range || "today";
+      const startDate = e.parameter.startDate || e.parameter.targetDate || "";
+      const endDate = e.parameter.endDate || startDate;
+      const callback = e.parameter.callback || "handleAdminData";
+      
+      const adminData = generateAdminAnalytics(ss, range, startDate, endDate);
+      const jsonOutput = JSON.stringify(adminData);
+      
+      return ContentService.createTextOutput(callback + "(" + jsonOutput + ")")
+                           .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+
+    if (e && e.parameter && e.parameter.rawHex) {
+      parseAndLogHexReceipt(ss, e.parameter.rawHex);
+      return createJsonResponse({ status: "success", mode: "rawHex_logged" });
+    }
+
+  } catch (err) {
+    console.error("doGet error:", err.toString());
+  }
+  return createJsonResponse({ status: "success", message: "Castaway Backend Active" });
+}
+
+function doPost(e) {
+  return doGet(e);
+}
+
+function parseAndLogHexReceipt(ss, hexString) {
+  let logSheet = ss.getSheetByName('Tally_Log') || ss.getSheets()[0];
+
+  const timeZone = ss.getSpreadsheetTimeZone() || "Asia/Bangkok";
+  const now = new Date();
+
+  let asciiText = "";
+  for (let i = 0; i < hexString.length; i += 2) {
+    const code = parseInt(hexString.substr(i, 2), 16);
+    if ((code >= 32 && code <= 126) || code === 10 || code === 13) {
+      asciiText += String.fromCharCode(code);
+    }
+  }
+
+  let billType = "CHARGE";
+  const isPreBill = asciiText.includes("BILL") || asciiText.includes("Amount due");
+  if (isPreBill && !asciiText.includes("Cash") && !asciiText.includes("Total Paid")) {
+    billType = "BILL";
+  }
+
+  let dateStr = Utilities.formatDate(now, timeZone, "dd/MM/yyyy");
+  let timeStr = Utilities.formatDate(now, timeZone, "HH:mm:ss");
+
+  const dateTimeMatch = asciiText.match(/(\d{2}\/\d{2}\/\d{4})\s+(\d{1,2}:\d{2}\s*(?:am|pm)?)/i);
+  if (dateTimeMatch) {
+    dateStr = dateTimeMatch[1];
+    timeStr = dateTimeMatch[2];
+  }
+
+  const lines = asciiText.split(/[\r\n]+/);
+  let itemsLogged = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    if (line.includes(' x ')) {
+      const parts = line.split(' x ');
+      const qty = parseInt(parts[0].trim(), 10);
+
+      if (!isNaN(qty) && i > 0) {
+        let rawItemLine = lines[i - 1].trim();
+
+        let itemCost = 0;
+        const totalMatch = rawItemLine.match(/B\s*([\d\.]+)\s*$/i);
+        if (totalMatch) {
+          itemCost = parseFloat(totalMatch[1]);
+          rawItemLine = rawItemLine.substring(0, rawItemLine.lastIndexOf('B')).trim();
+        } else {
+          const fallbackMatch = line.match(/B\s*([\d\.]+)/i);
+          if (fallbackMatch) itemCost = parseFloat(fallbackMatch[1]);
+        }
+
+        let itemName = rawItemLine;
+
+        let modifierStr = "";
+        for (let j = i + 1; j < Math.min(i + 3, lines.length); j++) {
+          const checkLine = lines[j].trim();
+          if (checkLine.startsWith('+')) {
+            modifierStr += " (" + checkLine + ")";
+          } else if (checkLine.length > 0 && !checkLine.includes(' x ')) {
+            break;
+          }
+        }
+
+        const fullItemDescription = itemName + modifierStr;
+
+        if (itemName.length > 0) {
+          logSheet.appendRow([dateStr, timeStr, billType, fullItemDescription, qty, itemCost]);
+          itemsLogged++;
+        }
+      }
+    }
+  }
+
+  if (itemsLogged === 0) {
+    logSheet.appendRow([dateStr, timeStr, billType, "Loyverse Sale", 1, 0]);
+  }
+}
+
+function isBeverageItem(itemName) {
+  const bevKeywords = [
+    'COFFEE', 'TEA', 'LATTE', 'ESPRESSO', 'CAPPUCINO', 'MATCHA', 
+    'SODA', 'JUICE', 'WATER', 'SMOOTHIE', 'BEER', 'COCKTAIL', 
+    'SPIRIT', 'LASSI', 'MILKSHAKE', 'COCONUT', 'DRINK', 'WINE', 'CIDER'
+  ];
+  const upper = itemName.toUpperCase();
+  return bevKeywords.some(kw => upper.includes(kw));
+}
+
+function generateAdminAnalytics(ss, range, startDateStr, endDateStr) {
+  const logSheet = ss.getSheetByName('Tally_Log') || ss.getSheets()[0];
+  const data = logSheet.getDataRange().getValues();
+
+  const timeZone = ss.getSpreadsheetTimeZone() || "Asia/Bangkok";
+  const now = new Date();
+  const todayStr = Utilities.formatDate(now, timeZone, "dd/MM/yyyy");
+
+  let performanceMap = {};
+  let countsMap = {};
+  let foodHourly = Array(24).fill(0);
+  let bevHourly = Array(24).fill(0);
+
+  // Converts DD/MM/YYYY text string or Date object directly to Epoch timestamp (Midnight)
+  function ddmmyyyyToTimestamp(val) {
+    if (!val) return null;
+    let s = "";
+    if (val instanceof Date) {
+      s = Utilities.formatDate(val, timeZone, "dd/MM/yyyy");
+    } else {
+      s = String(val).trim();
+    }
     
-    <p style="font-size:11px; color:#94a3b8; margin-top:12px; text-align:center;" id="cal-selection-label">
-      Click a day to select, or click two days to select a range.
-    </p>
-
-    <button onclick="fetchCalendarRangeData()" class="btn-action">Inspect Selected Days</button>
-  </div>
-
-  <div id="lookup-results" style="margin-top:16px;"></div>
-</div>
-
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
-
-let adminData = { performance: [], foodHourly: [], bevHourly: [] };
-let currentPerfFilter = 'today';
-
-// Calendar Variables
-let calDate = new Date(2026, 9, 1); // Defaults to October 2026
-let rangeStart = null;
-let rangeEnd = null;
-
-function switchTab(tabName) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(`tab-${tabName}`).classList.add('active');
-  document.getElementById(`btn-tab-${tabName}`).classList.add('active');
-  if (tabName === 'lookup') renderCalendar();
-}
-
-function setPerfFilter(filterType) {
-  currentPerfFilter = filterType;
-  document.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(`flt-${filterType}`).classList.add('active');
-  fetchAdminData(filterType);
-}
-
-// Initial Fetch
-fetchAdminData('today');
-
-function fetchAdminData(range, startDate = '', endDate = '') {
-  document.getElementById('status').innerText = "Syncing...";
-  const script = document.createElement('script');
-  script.src = `${API_URL}?action=getAdminData&range=${range}&startDate=${startDate}&endDate=${endDate}&callback=handleAdminData&t=${Date.now()}`;
-  document.body.appendChild(script);
-}
-
-window.handleAdminData = function(data) {
-  if (data.status === 'success') {
-    adminData = data;
-    document.getElementById('status').innerText = "Live";
-
-    if (data.range === 'custom') {
-      renderLookupResults();
-    } else {
-      renderDashboardTable();
-      renderPerformance();
-      renderAnalytics();
+    let parts = s.split('/');
+    if (parts.length === 3) {
+      let d = parseInt(parts[0], 10);
+      let m = parseInt(parts[1], 10) - 1;
+      let y = parseInt(parts[2], 10);
+      return new Date(y, m, d, 0, 0, 0).getTime();
     }
-  }
-};
-
-function renderDashboardTable() {
-  let totalRev = 0, foodRev = 0, bevRev = 0;
-  let rowsHtml = '';
-
-  if (!adminData.performance || adminData.performance.length === 0) {
-    document.getElementById('today-table-body').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#64748b; padding:16px;">No sales logged for this timeframe.</td></tr>`;
-    document.getElementById('kpi-rev').innerText = '฿0';
-    document.getElementById('kpi-food').innerText = '฿0';
-    document.getElementById('kpi-bev').innerText = '฿0';
-    return;
+    return null;
   }
 
-  adminData.performance.forEach(p => {
-    totalRev += p.totalRevenue;
-    const isBev = p.category === 'Beverages';
-    if (isBev) bevRev += p.totalRevenue;
-    else foodRev += p.totalRevenue;
+  const reqStartStr = startDateStr || todayStr;
+  const reqEndStr = endDateStr || reqStartStr;
 
-    const tagClass = isBev ? 'tag-bev' : 'tag-food';
+  const startTs = ddmmyyyyToTimestamp(reqStartStr);
+  const endTs = ddmmyyyyToTimestamp(reqEndStr);
+  const todayTs = ddmmyyyyToTimestamp(todayStr);
 
-    rowsHtml += `
-      <tr>
-        <td style="font-weight:bold; color:#f8fafc;">${p.name}</td>
-        <td style="text-align:center; font-weight:bold; color:#38bdf8;">${p.totalUnits}</td>
-        <td><span class="tag-cat ${tagClass}">${p.category}</span></td>
-        <td style="text-align:right; font-weight:bold; color:#06b6d4;">฿${p.totalRevenue.toLocaleString()}</td>
-      </tr>
-    `;
-  });
+  const weekAgoTs = todayTs - (7 * 24 * 60 * 60 * 1000);
+  const monthAgoTs = todayTs - (30 * 24 * 60 * 60 * 1000);
 
-  document.getElementById('kpi-rev').innerText = `฿${totalRev.toLocaleString()}`;
-  document.getElementById('kpi-food').innerText = `฿${foodRev.toLocaleString()}`;
-  document.getElementById('kpi-bev').innerText = `฿${bevRev.toLocaleString()}`;
-  document.getElementById('today-table-body').innerHTML = rowsHtml;
-}
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row[0] && !row[3]) continue;
 
-function renderPerformance() {
-  const container = document.getElementById('performance-list');
-  let html = '';
+    let rowTs = ddmmyyyyToTimestamp(row[0]);
+    let timeStr = String(row[1] || "").trim();
+    let itemName = String(row[3] || "").trim();
+    let tally = Number(row[4]) || 0;
+    let cost = Number(row[5]) || 0;
 
-  const foodItems = adminData.performance.filter(p => p.category === 'Food');
-  const bevItems = adminData.performance.filter(p => p.category === 'Beverages');
+    if (!itemName || !rowTs) continue;
 
-  html += `<div class="section-title title-food"><span>Food Performance</span></div>`;
-  html += foodItems.map(p => `
-    <div class="item-row">
-      <div><div style="font-weight:bold; font-size:13px;">${p.name}</div></div>
-      <div style="text-align:right;">
-        <div style="font-weight:bold; color:#f59e0b;">${p.totalUnits} Units</div>
-        <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
-      </div>
-    </div>
-  `).join('') || '<div style="color:#64748b; padding:8px;">No food sales.</div>';
+    let include = false;
 
-  html += `<div class="section-title title-bev" style="margin-top:16px;"><span>Beverage Performance</span></div>`;
-  html += bevItems.map(p => `
-    <div class="item-row">
-      <div><div style="font-weight:bold; font-size:13px;">${p.name}</div></div>
-      <div style="text-align:right;">
-        <div style="font-weight:bold; color:#38bdf8;">${p.totalUnits} Units</div>
-        <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
-      </div>
-    </div>
-  `).join('') || '<div style="color:#64748b; padding:8px;">No beverage sales.</div>';
-
-  container.innerHTML = html;
-}
-
-function renderAnalytics() {
-  renderHourlyChart('food-analytics-chart', adminData.foodHourly || Array(24).fill(0), 'food');
-  renderHourlyChart('bev-analytics-chart', adminData.bevHourly || Array(24).fill(0), 'bev');
-}
-
-function renderHourlyChart(elementId, hourlyArray, typeClass) {
-  const container = document.getElementById(elementId);
-  const maxSales = Math.max(...hourlyArray, 1);
-  let chartHtml = '';
-
-  for (let h = 7; h <= 23; h++) {
-    const val = hourlyArray[h] || 0;
-    const pct = Math.round((val / maxSales) * 100);
-    const timeLabel = `${h < 10 ? '0' + h : h}:00`;
-
-    chartHtml += `
-      <div class="bar-row">
-        <div class="bar-label">${timeLabel}</div>
-        <div class="bar-track">
-          <div class="bar-fill ${typeClass}" style="width: ${pct}%;"></div>
-        </div>
-        <div class="bar-val">${val}</div>
-      </div>
-    `;
-  }
-  container.innerHTML = chartHtml;
-}
-
-/* CALENDAR BUILDER LOGIC */
-function changeMonth(delta) {
-  calDate.setMonth(calDate.getMonth() + delta);
-  renderCalendar();
-}
-
-function renderCalendar() {
-  const year = calDate.getFullYear();
-  const month = calDate.getMonth();
-  
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  document.getElementById('cal-month-title').innerText = `${monthNames[month]} ${year}`;
-
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const grid = document.getElementById('cal-days-grid');
-  let html = '';
-
-  for (let i = 0; i < firstDay; i++) {
-    html += `<div class="cal-day empty"></div>`;
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const curr = new Date(year, month, d);
-    let cls = 'cal-day';
-
-    if (rangeStart && rangeEnd) {
-      if (curr >= rangeStart && curr <= rangeEnd) cls += ' in-range';
-    } else if (rangeStart && curr.getTime() === rangeStart.getTime()) {
-      cls += ' selected';
+    if (range === "today" && rowTs === todayTs) {
+      include = true;
+    } else if (range === "week" && rowTs >= weekAgoTs && rowTs <= todayTs) {
+      include = true;
+    } else if (range === "month" && rowTs >= monthAgoTs && rowTs <= todayTs) {
+      include = true;
+    } else if (range === "custom" && startTs && endTs && rowTs >= startTs && rowTs <= endTs) {
+      include = true;
+    } else if (range === "all") {
+      include = true;
     }
 
-    html += `<div class="${cls}" onclick="selectCalDay(${year}, ${month}, ${d})">${d}</div>`;
-  }
+    if (include) {
+      const category = isBeverageItem(itemName) ? "Beverages" : "Food";
 
-  grid.innerHTML = html;
-  
-  const lbl = document.getElementById('cal-selection-label');
-  if (rangeStart && rangeEnd) {
-    lbl.innerText = `Selected Range: ${formatD(rangeStart)} to ${formatD(rangeEnd)}`;
-  } else if (rangeStart) {
-    lbl.innerText = `Selected Day: ${formatD(rangeStart)} (Click another day for a range)`;
-  } else {
-    lbl.innerText = `Click a day to select, or click two days to highlight a range.`;
-  }
-}
+      countsMap[itemName] = (countsMap[itemName] || 0) + tally;
 
-function selectCalDay(y, m, d) {
-  const clicked = new Date(y, m, d);
+      if (!performanceMap[itemName]) {
+        performanceMap[itemName] = { name: itemName, category: category, totalUnits: 0, totalRevenue: 0 };
+      }
+      performanceMap[itemName].totalUnits += tally;
+      performanceMap[itemName].totalRevenue += cost;
 
-  if (!rangeStart || (rangeStart && rangeEnd)) {
-    rangeStart = clicked;
-    rangeEnd = null;
-  } else if (rangeStart && !rangeEnd) {
-    if (clicked < rangeStart) {
-      rangeEnd = rangeStart;
-      rangeStart = clicked;
-    } else {
-      rangeEnd = clicked;
+      let hour = -1;
+      if (timeStr) {
+        let match = timeStr.match(/(\d{1,2}):(\d{2})/);
+        if (match) {
+          hour = parseInt(match[1], 10);
+          if (/pm/i.test(timeStr) && hour < 12) hour += 12;
+          if (/am/i.test(timeStr) && hour === 12) hour = 0;
+        }
+      }
+
+      if (hour >= 0 && hour < 24) {
+        if (category === "Beverages") bevHourly[hour] += tally;
+        else foodHourly[hour] += tally;
+      }
     }
   }
-  renderCalendar();
+
+  return {
+    status: "success",
+    range: range,
+    startDate: reqStartStr,
+    endDate: reqEndStr,
+    counts: countsMap,
+    performance: Object.keys(performanceMap).map(k => performanceMap[k]),
+    foodHourly: foodHourly,
+    bevHourly: bevHourly
+  };
 }
 
-function formatD(d) {
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  return `${day}/${month}/${d.getFullYear()}`;
+function createJsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+                       .setMimeType(ContentService.MimeType.JSON);
 }
-
-function fetchCalendarRangeData() {
-  if (!rangeStart) {
-    alert("Please click a day on the calendar first.");
-    return;
-  }
-
-  const startStr = formatD(rangeStart);
-  const endStr = rangeEnd ? formatD(rangeEnd) : startStr;
-
-  fetchAdminData('custom', startStr, endStr);
-}
-
-function renderLookupResults() {
-  const container = document.getElementById('lookup-results');
-  let total = 0;
-  
-  let rangeLabel = adminData.startDate;
-  if (adminData.endDate && adminData.endDate !== adminData.startDate) {
-    rangeLabel += ` to ${adminData.endDate}`;
-  }
-
-  let html = `<h4 style="color:#06b6d4; margin-bottom:10px;">Sales Summary (${rangeLabel})</h4>`;
-
-  if (!adminData.performance || adminData.performance.length === 0) {
-    container.innerHTML = html + `<div style="color:#64748b; padding:12px;">No sales found for selected date range.</div>`;
-    return;
-  }
-
-  adminData.performance.forEach(p => {
-    total += p.totalRevenue;
-    html += `
-      <div class="item-row">
-        <div>
-          <div style="font-weight:bold; font-size:13px;">${p.name}</div>
-          <div style="font-size:11px; color:#94a3b8;">${p.totalUnits} sold (${p.category})</div>
-        </div>
-        <div style="font-weight:bold; color:#06b6d4;">฿${p.totalRevenue.toLocaleString()}</div>
-      </div>
-    `;
-  });
-
-  html = `<div style="font-size:16px; font-weight:bold; margin-bottom:12px; color:#f59e0b;">Total Revenue: ฿${total.toLocaleString()}</div>` + html;
-  container.innerHTML = html;
-}
-
-// Auto-refresh live dashboard every 30 seconds
-setInterval(() => fetchAdminData(currentPerfFilter), 30000);
-</script>
-</body>
-</html>
