@@ -34,7 +34,6 @@
   .data-table th { background: #0f172a; color: #94a3b8; padding: 10px 12px; text-transform: uppercase; font-size: 10px; font-weight: bold; border-bottom: 1px solid #334155; }
   .data-table td { padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #f8fafc; }
   .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover { background: #334155/30; }
   .tag-cat { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
   .tag-food { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b55; }
   .tag-bev { background: #38bdf822; color: #38bdf8; border: 1px solid #38bdf855; }
@@ -59,12 +58,19 @@
   .title-food { color: #f59e0b; border-left: 4px solid #f59e0b; }
   .title-bev { color: #38bdf8; border-left: 4px solid #38bdf8; }
 
-  /* Form & Date Selector */
-  .form-card { background: #1e293b; padding: 14px; border-radius: 10px; border: 1px solid #334155; margin-top: 16px; }
-  .form-group { margin-bottom: 10px; }
-  .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
-  .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
-  .btn-action { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+  /* CUSTOM CALENDAR STYLING */
+  .calendar-card { background: #1e293b; padding: 16px; border-radius: 12px; border: 1px solid #334155; }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cal-btn { background: #0f172a; border: 1px solid #334155; color: #38bdf8; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+  .cal-title { font-size: 14px; font-weight: bold; color: #f8fafc; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+  .cal-day-hdr { font-size: 10px; font-weight: bold; color: #64748b; padding: 4px 0; }
+  .cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; color: #cbd5e1; cursor: pointer; user-select: none; border: 1px solid transparent; }
+  .cal-day:hover { border-color: #38bdf8; }
+  .cal-day.empty { background: transparent; cursor: default; border: none; }
+  .cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
+  .cal-day.in-range { background: #06b6d444; color: #38bdf8; border-color: #06b6d4; }
+  .btn-action { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 14px; }
 </style>
 </head>
 <body>
@@ -84,7 +90,7 @@
   <button onclick="switchTab('lookup')" id="btn-tab-lookup" class="nav-btn">Date Lookup</button>
 </div>
 
-<!-- TAB 1: TODAY DASHBOARD (SPREADSHEET LOOK) -->
+<!-- TAB 1: TODAY DASHBOARD -->
 <div id="tab-dashboard" class="tab-content active">
   <div class="kpi-grid">
     <div class="kpi-card">
@@ -120,7 +126,7 @@
   </div>
 </div>
 
-<!-- TAB 2: MENU PERFORMANCE WITH SUB-TAB FILTERS -->
+<!-- TAB 2: MENU PERFORMANCE -->
 <div id="tab-performance" class="tab-content">
   <div class="filter-grid">
     <button onclick="setPerfFilter('today')" id="flt-today" class="filter-btn active">Today</button>
@@ -149,23 +155,28 @@
   </div>
 </div>
 
-<!-- TAB 4: CALENDAR-BASED DATE LOOKUP -->
+<!-- TAB 4: INTERACTIVE CALENDAR LOOKUP -->
 <div id="tab-lookup" class="tab-content">
-  <div class="form-card">
-    <h3 style="font-size:14px; margin-bottom:6px; color:#06b6d4;">Calendar Date Lookup</h3>
-    <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Select a single day or a custom date range to inspect historical sales.</p>
+  <div class="calendar-card">
+    <div class="cal-header">
+      <button class="cal-btn" onclick="changeMonth(-1)">&lt;</button>
+      <div id="cal-month-title" class="cal-title">October 2026</div>
+      <button class="cal-btn" onclick="changeMonth(1)">&gt;</button>
+    </div>
+
+    <div class="cal-grid">
+      <div class="cal-day-hdr">S</div><div class="cal-day-hdr">M</div><div class="cal-day-hdr">T</div>
+      <div class="cal-day-hdr">W</div><div class="cal-day-hdr">T</div><div class="cal-day-hdr">F</div>
+      <div class="cal-day-hdr">S</div>
+    </div>
     
-    <div class="form-group">
-      <label>Start / Target Date</label>
-      <input type="date" id="lookup-start-date" class="form-control">
-    </div>
+    <div id="cal-days-grid" class="cal-grid" style="margin-top:4px;"></div>
+    
+    <p style="font-size:11px; color:#94a3b8; margin-top:12px; text-align:center;" id="cal-selection-label">
+      Click a day to select, or click two days to select a range.
+    </p>
 
-    <div class="form-group">
-      <label>End Date (Optional for multi-day range)</label>
-      <input type="date" id="lookup-end-date" class="form-control">
-    </div>
-
-    <button onclick="fetchCalendarRangeData()" class="btn-action">Inspect Range Metrics</button>
+    <button onclick="fetchCalendarRangeData()" class="btn-action">Inspect Selected Days</button>
   </div>
 
   <div id="lookup-results" style="margin-top:16px;"></div>
@@ -177,30 +188,27 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_
 let adminData = { performance: [], foodHourly: [], bevHourly: [] };
 let currentPerfFilter = 'today';
 
+// Calendar Variables
+let calDate = new Date(2026, 9, 1); // Defaults to October 2026
+let rangeStart = null;
+let rangeEnd = null;
+
 function switchTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
   document.getElementById(`tab-${tabName}`).classList.add('active');
   document.getElementById(`btn-tab-${tabName}`).classList.add('active');
+  if (tabName === 'lookup') renderCalendar();
 }
 
-// Sub-Tab Filter Handler for Performance Tab
 function setPerfFilter(filterType) {
   currentPerfFilter = filterType;
   document.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
   document.getElementById(`flt-${filterType}`).classList.add('active');
-  
-  const labels = {
-    'today': 'Performance Summary (Today)',
-    'week': 'Performance Summary (Rolling 7 Days)',
-    'month': 'Performance Summary (30 Days)',
-    'all': 'Performance Summary (All-Time)'
-  };
-  document.getElementById('perf-title').innerText = labels[filterType];
   fetchAdminData(filterType);
 }
 
-// Initial Fetch on load
+// Initial Fetch
 fetchAdminData('today');
 
 function fetchAdminData(range, startDate = '', endDate = '') {
@@ -225,7 +233,6 @@ window.handleAdminData = function(data) {
   }
 };
 
-// Render Spreadsheet / Ledger Table for Dashboard
 function renderDashboardTable() {
   let totalRev = 0, foodRev = 0, bevRev = 0;
   let rowsHtml = '';
@@ -322,25 +329,87 @@ function renderHourlyChart(elementId, hourlyArray, typeClass) {
   container.innerHTML = chartHtml;
 }
 
-function fetchCalendarRangeData() {
-  const startRaw = document.getElementById('lookup-start-date').value;
-  const endRaw = document.getElementById('lookup-end-date').value;
+/* CALENDAR BUILDER LOGIC */
+function changeMonth(delta) {
+  calDate.setMonth(calDate.getMonth() + delta);
+  renderCalendar();
+}
 
-  if (!startRaw) {
-    alert("Please select at least a Start Date.");
+function renderCalendar() {
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  document.getElementById('cal-month-title').innerText = `${monthNames[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const grid = document.getElementById('cal-days-grid');
+  let html = '';
+
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div class="cal-day empty"></div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const curr = new Date(year, month, d);
+    let cls = 'cal-day';
+
+    if (rangeStart && rangeEnd) {
+      if (curr >= rangeStart && curr <= rangeEnd) cls += ' in-range';
+    } else if (rangeStart && curr.getTime() === rangeStart.getTime()) {
+      cls += ' selected';
+    }
+
+    html += `<div class="${cls}" onclick="selectCalDay(${year}, ${month}, ${d})">${d}</div>`;
+  }
+
+  grid.innerHTML = html;
+  
+  const lbl = document.getElementById('cal-selection-label');
+  if (rangeStart && rangeEnd) {
+    lbl.innerText = `Selected Range: ${formatD(rangeStart)} to ${formatD(rangeEnd)}`;
+  } else if (rangeStart) {
+    lbl.innerText = `Selected Day: ${formatD(rangeStart)} (Click another day for a range)`;
+  } else {
+    lbl.innerText = `Click a day to select, or click two days to highlight a range.`;
+  }
+}
+
+function selectCalDay(y, m, d) {
+  const clicked = new Date(y, m, d);
+
+  if (!rangeStart || (rangeStart && rangeEnd)) {
+    rangeStart = clicked;
+    rangeEnd = null;
+  } else if (rangeStart && !rangeEnd) {
+    if (clicked < rangeStart) {
+      rangeEnd = rangeStart;
+      rangeStart = clicked;
+    } else {
+      rangeEnd = clicked;
+    }
+  }
+  renderCalendar();
+}
+
+function formatD(d) {
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${day}/${month}/${d.getFullYear()}`;
+}
+
+function fetchCalendarRangeData() {
+  if (!rangeStart) {
+    alert("Please click a day on the calendar first.");
     return;
   }
 
-  const formatD = (val) => {
-    if (!val) return '';
-    const parts = val.split('-');
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-  };
+  const startStr = formatD(rangeStart);
+  const endStr = rangeEnd ? formatD(rangeEnd) : startStr;
 
-  const startDate = formatD(startRaw);
-  const endDate = formatD(endRaw);
-
-  fetchAdminData('custom', startDate, endDate);
+  fetchAdminData('custom', startStr, endStr);
 }
 
 function renderLookupResults() {
@@ -355,7 +424,7 @@ function renderLookupResults() {
   let html = `<h4 style="color:#06b6d4; margin-bottom:10px;">Sales Summary (${rangeLabel})</h4>`;
 
   if (!adminData.performance || adminData.performance.length === 0) {
-    container.innerHTML = html + `<div style="color:#64748b; padding:12px;">No sales found for selected range.</div>`;
+    container.innerHTML = html + `<div style="color:#64748b; padding:12px;">No sales found for selected date range.</div>`;
     return;
   }
 
