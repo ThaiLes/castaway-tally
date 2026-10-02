@@ -222,6 +222,7 @@ fetchAdminData('today');
 function fetchAdminData(range, startDate = '', endDate = '') {
   document.getElementById('status').innerText = "Syncing...";
   const script = document.createElement('script');
+  // CHANGE THIS:
   script.src = `${API_URL}?action=getAdminData&range=${range}&startDate=${startDate}&endDate=${endDate}&callback=handleAdminData&t=${Date.now()}`;
   document.body.appendChild(script);
 }
