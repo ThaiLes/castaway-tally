@@ -71,12 +71,6 @@
   .cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
   .cal-day.in-range { background: #06b6d444; color: #38bdf8; border-color: #06b6d4; }
   .btn-action { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 14px; }
-
-  /* DIAGNOSTICS PANEL */
-  .debug-panel { margin-top: 24px; background: #020617; border: 1px solid #334155; border-radius: 10px; padding: 12px; }
-  .debug-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
-  .debug-title { color: #f59e0b; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-  .debug-log { font-family: monospace; font-size: 10px; color: #94a3b8; white-space: pre-wrap; max-height: 180px; overflow-y: auto; word-break: break-all; }
 </style>
 </head>
 <body>
@@ -188,32 +182,11 @@
   <div id="lookup-results" style="margin-top:16px;"></div>
 </div>
 
-<!-- SYSTEM DIAGNOSTICS PANEL -->
-<div class="debug-panel">
-  <div class="debug-header">
-    <span class="debug-title">System Diagnostics Log</span>
-    <button onclick="clearDebugLog()" style="background:#1e293b; border:1px solid #334155; color:#94a3b8; font-size:9px; padding:2px 6px; border-radius:4px; cursor:pointer;">Clear</button>
-  </div>
-  <pre id="debug-output" class="debug-log">Initializing diagnostics...</pre>
-</div>
-
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
 
 let adminData = { performance: [], foodHourly: [], bevHourly: [] };
 let currentPerfFilter = 'today';
-let debugLogs = [];
-
-function logDebug(msg) {
-  const timestamp = new Date().toLocaleTimeString();
-  debugLogs.unshift(`[${timestamp}] ${msg}`);
-  document.getElementById('debug-output').innerText = debugLogs.join("\n");
-}
-
-function clearDebugLog() {
-  debugLogs = [];
-  document.getElementById('debug-output').innerText = "Log cleared.";
-}
 
 // Calendar State
 let calDate = new Date(2026, 9, 1); // October 2026
@@ -244,7 +217,6 @@ function setPerfFilter(filterType) {
 }
 
 // Initial Fetch
-logDebug("Portal initialized. Triggering fetch for 'today'...");
 fetchAdminData('today');
 
 function fetchAdminData(range, startDate = '', endDate = '') {
@@ -256,25 +228,16 @@ function fetchAdminData(range, startDate = '', endDate = '') {
   const script = document.createElement('script');
   script.id = scriptId;
   const requestUrl = `${API_URL}?action=getAdminData&range=${range}&startDate=${startDate}&endDate=${endDate}&callback=handleAdminData&t=${Date.now()}`;
-  
-  logDebug(`Requesting: range="${range}" start="${startDate}" end="${endDate}"`);
   script.src = requestUrl;
 
   script.onerror = function() {
     document.getElementById('status').innerText = "Error";
-    logDebug("ERROR: JSONP script failed to load. Check script URL or Apps Script permissions.");
   };
 
   document.body.appendChild(script);
 }
 
 window.handleAdminData = function(data) {
-  logDebug(`Response Received: status="${data.status}" range="${data.range}" itemsFound=${data.performance ? data.performance.length : 0}`);
-  
-  if (data.debug) {
-    data.debug.forEach(d => logDebug(`[Backend] ${d}`));
-  }
-
   if (data.status === 'success') {
     adminData = data;
     document.getElementById('status').innerText = "Live";
@@ -286,8 +249,6 @@ window.handleAdminData = function(data) {
       renderPerformance();
       renderAnalytics();
     }
-  } else {
-    logDebug(`WARNING: Backend returned status "${data.status}"`);
   }
 };
 
