@@ -10,6 +10,18 @@
   .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
   .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
   
+  /* Heartbeat Pulse Indicator */
+  .heart-icon { display: inline-block; margin-left: 6px; font-size: 16px; vertical-align: middle; }
+  .heart-icon.pulse { animation: heartPulse 1.2s infinite ease-in-out; }
+  @keyframes heartPulse {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.25); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    60% { transform: scale(1); }
+    100% { transform: scale(1); }
+  }
+
   /* Navigation Grid */
   .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-bottom: 16px; }
   .nav-btn { padding: 10px 4px; border-radius: 8px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
@@ -77,7 +89,9 @@
 
 <div class="header">
   <div>
-    <h2 style="margin:0; font-size:18px;">Castaway Admin</h2>
+    <h2 style="margin:0; font-size:18px; display:flex; align-items:center;">
+      Castaway Admin <span id="heart-status" class="heart-icon">💔</span>
+    </h2>
     <span style="font-size:11px; color:#94a3b8;">Loyverse Analytics Portal</span>
   </div>
   <span id="status" class="status">Syncing...</span>
@@ -232,6 +246,7 @@ function fetchAdminData(range, startDate = '', endDate = '') {
 
   script.onerror = function() {
     document.getElementById('status').innerText = "Error";
+    updateHeartStatus(false);
   };
 
   document.body.appendChild(script);
@@ -242,6 +257,9 @@ window.handleAdminData = function(data) {
     adminData = data;
     document.getElementById('status').innerText = "Live";
 
+    // Update Heartbeat Indicator
+    updateHeartStatus(data.isOnline);
+
     if (data.range === 'custom') {
       renderLookupResults();
     } else {
@@ -251,6 +269,17 @@ window.handleAdminData = function(data) {
     }
   }
 };
+
+function updateHeartStatus(online) {
+  const heartEl = document.getElementById('heart-status');
+  if (online) {
+    heartEl.innerText = "❤️";
+    heartEl.classList.add("pulse");
+  } else {
+    heartEl.innerText = "💔";
+    heartEl.classList.remove("pulse");
+  }
+}
 
 function renderDashboardTable() {
   let totalRev = 0, foodRev = 0, bevRev = 0;
