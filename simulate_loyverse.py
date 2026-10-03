@@ -2,7 +2,7 @@ import socket
 import time
 from datetime import datetime
 
-ESP32_IP = "192.168.1.113"
+ESP32_IP = "192.168.1.100"
 ESP32_PORT = 9100
 
 # Dynamically generate current timestamp (e.g. "01/10/2026 11:15 am")
