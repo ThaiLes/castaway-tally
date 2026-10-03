@@ -6,494 +6,305 @@
 <title>Castaway Admin Portal</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: #0f172a; color: #fff; padding: 16px; max-width: 650px; margin: 0 auto; }
+  body { background: #0f172a; color: #fff; padding: 16px; max-width: 680px; margin: 0 auto; }
   .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
   .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
-  
-  /* Heartbeat Pulse Indicator */
-  .heart-icon { display: inline-block; margin-left: 6px; font-size: 16px; vertical-align: middle; }
+  .status.bad { background: #7f1d1d; color: #fca5a5; }
+  .heart-icon { display: inline-block; margin-left: 6px; font-size: 16px; }
   .heart-icon.pulse { animation: heartPulse 1.2s infinite ease-in-out; }
-  @keyframes heartPulse {
-    0% { transform: scale(1); }
-    15% { transform: scale(1.25); }
-    30% { transform: scale(1); }
-    45% { transform: scale(1.15); }
-    60% { transform: scale(1); }
-    100% { transform: scale(1); }
-  }
-
-  /* Navigation Grid */
-  .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-bottom: 16px; }
-  .nav-btn { padding: 10px 4px; border-radius: 8px; border: none; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
-  .nav-btn.active { background: #06b6d4; color: #0f172a; }
+  @keyframes heartPulse { 0%{transform:scale(1)} 15%{transform:scale(1.25)} 30%{transform:scale(1)} 45%{transform:scale(1.15)} 60%{transform:scale(1)} 100%{transform:scale(1)} }
+  .nav-grid, .filter-grid, .pay-grid { display: grid; gap: 6px; margin-bottom: 14px; }
+  .nav-grid { grid-template-columns: repeat(4, 1fr); }
+  .filter-grid { grid-template-columns: repeat(4, 1fr); }
+  .pay-grid { grid-template-columns: repeat(3, 1fr); }
+  .nav-btn, .filter-btn, .pay-btn { padding: 8px 4px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; }
+  .nav-btn.active, .pay-btn.active { background: #06b6d4; color: #0f172a; border-color: #06b6d4; }
+  .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
-
-  /* Performance Filters Grid */
-  .filter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
-  .filter-btn { padding: 8px 4px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; text-align: center; }
-  .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-
-  /* KPI Cards Grid */
-  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
   .kpi-card { background: #1e293b; padding: 12px 8px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
   .kpi-val { font-size: 16px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
   .kpi-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
-
-  /* Table / Spreadsheet View */
-  .table-container { background: #1e293b; border-radius: 10px; border: 1px solid #334155; overflow: hidden; margin-top: 10px; }
-  .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
-  .data-table th { background: #0f172a; color: #94a3b8; padding: 10px 12px; text-transform: uppercase; font-size: 10px; font-weight: bold; border-bottom: 1px solid #334155; }
-  .data-table td { padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #f8fafc; }
-  .data-table tr:last-child td { border-bottom: none; }
-  .tag-cat { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-  .tag-food { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b55; }
-  .tag-bev { background: #38bdf822; color: #38bdf8; border: 1px solid #38bdf855; }
-
-  /* List Items */
-  .item-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
-  
-  /* Charts & Titles */
-  .chart-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; }
-  .chart-card-title { font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .chart-card-title.food { color: #f59e0b; }
-  .chart-card-title.bev { color: #38bdf8; }
-  .bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 11px; }
-  .bar-label { width: 75px; color: #94a3b8; font-weight: bold; }
-  .bar-track { flex-grow: 1; background: #0f172a; height: 18px; border-radius: 4px; overflow: hidden; margin: 0 8px; border: 1px solid #334155; }
-  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
-  .bar-fill.food { background: #f59e0b; }
-  .bar-fill.bev { background: #38bdf8; }
-  .bar-val { width: 35px; text-align: right; font-weight: bold; color: #fff; }
-
-  .section-title { font-size: 12px; font-weight: bold; margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; }
-  .title-food { color: #f59e0b; border-left: 4px solid #f59e0b; }
-  .title-bev { color: #38bdf8; border-left: 4px solid #38bdf8; }
-
-  /* CUSTOM CALENDAR STYLING */
-  .calendar-card { background: #1e293b; padding: 16px; border-radius: 12px; border: 1px solid #334155; }
+  .note { font-size: 11px; color: #94a3b8; margin: 6px 0 12px; }
+  .table-container, .chart-card, .item-row, .calendar-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; }
+  .table-container { overflow: hidden; margin-top: 10px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th { background: #0f172a; color: #94a3b8; padding: 10px 8px; text-transform: uppercase; font-size: 10px; text-align: left; }
+  .data-table td { padding: 10px 8px; border-bottom: 1px solid #0f172a; }
+  .tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+  .tag-food { color: #f59e0b; background: #f59e0b22; }
+  .tag-soft { color: #38bdf8; background: #38bdf822; }
+  .tag-alc { color: #f472b6; background: #f472b622; }
+  .tag-uns { color: #fca5a5; background: #7f1d1d; }
+  .item-row { display: flex; justify-content: space-between; gap: 8px; padding: 12px; margin-bottom: 8px; }
+  .chart-card { padding: 16px; margin-bottom: 16px; }
+  .chart-card h3 { font-size: 13px; margin-bottom: 10px; text-transform: uppercase; }
+  .bar-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 11px; }
+  .bar-label { width: 52px; color: #94a3b8; }
+  .bar-track { flex: 1; background: #0f172a; height: 16px; border-radius: 4px; overflow: hidden; margin: 0 8px; }
+  .bar-fill { height: 100%; }
+  .food { background: #f59e0b; } .soft { background: #38bdf8; } .alc { background: #f472b6; }
+  .section-title { font-size: 12px; font-weight: bold; margin: 14px 0 8px; text-transform: uppercase; }
   .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .cal-btn { background: #0f172a; border: 1px solid #334155; color: #38bdf8; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-  .cal-title { font-size: 14px; font-weight: bold; color: #f8fafc; }
+  .cal-btn, .btn-action { background: #0f172a; border: 1px solid #334155; color: #38bdf8; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+  .btn-action { width: 100%; background: #06b6d4; color: #0f172a; border: none; margin-top: 14px; }
   .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-  .cal-day-hdr { font-size: 10px; font-weight: bold; color: #64748b; padding: 4px 0; }
-  .cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; color: #cbd5e1; cursor: pointer; user-select: none; border: 1px solid transparent; }
-  .cal-day:hover { border-color: #38bdf8; }
-  .cal-day.empty { background: transparent; cursor: default; border: none; }
+  .cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; cursor: pointer; }
+  .cal-day.empty { background: transparent; }
   .cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
-  .cal-day.in-range { background: #06b6d444; color: #38bdf8; border-color: #06b6d4; }
-  .btn-action { width: 100%; padding: 12px; background: #06b6d4; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 14px; }
+  .cal-day.in-range { background: #06b6d444; color: #38bdf8; }
 </style>
 </head>
 <body>
-
 <div class="header">
   <div>
-    <h2 style="margin:0; font-size:18px; display:flex; align-items:center;">
-      Castaway Admin <span id="heart-status" class="heart-icon">💔</span>
-    </h2>
-    <span style="font-size:11px; color:#94a3b8;">Loyverse Analytics Portal</span>
+    <h2 style="margin:0; font-size:18px;">Castaway Admin <span id="heart-status" class="heart-icon"></span></h2>
+    <span style="font-size:11px; color:#94a3b8;">Cash bills and QR charges, both counted</span>
   </div>
   <span id="status" class="status">Syncing...</span>
 </div>
-
 <div class="nav-grid">
-  <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="nav-btn active">Dashboard</button>
-  <button onclick="switchTab('performance')" id="btn-tab-performance" class="nav-btn">Performance</button>
-  <button onclick="switchTab('analytics')" id="btn-tab-analytics" class="nav-btn">Analytics</button>
-  <button onclick="switchTab('lookup')" id="btn-tab-lookup" class="nav-btn">Date Lookup</button>
+  <button class="nav-btn active" id="btn-tab-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="nav-btn" id="btn-tab-performance" onclick="switchTab('performance')">Performance</button>
+  <button class="nav-btn" id="btn-tab-analytics" onclick="switchTab('analytics')">Analytics</button>
+  <button class="nav-btn" id="btn-tab-lookup" onclick="switchTab('lookup')">Date Lookup</button>
 </div>
 
-<!-- TAB 1: TODAY DASHBOARD -->
 <div id="tab-dashboard" class="tab-content active">
+  <div class="pay-grid">
+    <button class="pay-btn active" id="pay-all" onclick="setPay('all')">All</button>
+    <button class="pay-btn" id="pay-cash" onclick="setPay('cash')">Cash</button>
+    <button class="pay-btn" id="pay-pos" onclick="setPay('pos')">POS / QR</button>
+  </div>
   <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-lbl">Total Sales</div>
-      <div id="kpi-rev" class="kpi-val">฿0</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-lbl">Food Sales</div>
-      <div id="kpi-food" class="kpi-val" style="color:#f59e0b;">฿0</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-lbl">Drink Sales</div>
-      <div id="kpi-bev" class="kpi-val" style="color:#38bdf8;">฿0</div>
-    </div>
+    <div class="kpi-card"><div class="kpi-lbl">Sales</div><div id="kpi-rev" class="kpi-val">฿0</div></div>
+    <div class="kpi-card"><div class="kpi-lbl">Cash</div><div id="kpi-cash" class="kpi-val">฿0</div></div>
+    <div class="kpi-card"><div class="kpi-lbl">POS / QR</div><div id="kpi-pos" class="kpi-val">฿0</div></div>
   </div>
-
-  <h3 style="font-size:14px; margin-bottom:6px; color:#94a3b8;">Today's Live Sales Ledger</h3>
-  
-  <div class="table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Item Description</th>
-          <th style="text-align:center;">Qty</th>
-          <th>Type</th>
-          <th style="text-align:right;">Revenue</th>
-        </tr>
-      </thead>
-      <tbody id="today-table-body">
-        <tr><td colspan="4" style="text-align:center; color:#64748b; padding:16px;">Loading spreadsheet ledger...</td></tr>
-      </tbody>
-    </table>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-lbl">Food</div><div id="kpi-food" class="kpi-val" style="color:#f59e0b;">฿0</div></div>
+    <div class="kpi-card"><div class="kpi-lbl">Soft drinks</div><div id="kpi-soft" class="kpi-val" style="color:#38bdf8;">฿0</div></div>
+    <div class="kpi-card"><div class="kpi-lbl">Alcohol</div><div id="kpi-alc" class="kpi-val" style="color:#f472b6;">฿0</div></div>
   </div>
+  <p class="note" id="dash-note"></p>
+  <h3 style="font-size:14px; color:#94a3b8;">Item count</h3>
+  <div class="table-container"><table class="data-table"><thead><tr><th>Item</th><th>Qty</th><th>Group</th><th style="text-align:right;">Baht</th></tr></thead><tbody id="today-table-body"></tbody></table></div>
 </div>
 
-<!-- TAB 2: MENU PERFORMANCE -->
 <div id="tab-performance" class="tab-content">
   <div class="filter-grid">
-    <button onclick="setPerfFilter('today')" id="flt-today" class="filter-btn active">Today</button>
-    <button onclick="setPerfFilter('week')" id="flt-week" class="filter-btn">This Week</button>
-    <button onclick="setPerfFilter('month')" id="flt-month" class="filter-btn">30 Days</button>
-    <button onclick="setPerfFilter('all')" id="flt-all" class="filter-btn">All-Time</button>
+    <button class="filter-btn active" id="flt-today" onclick="setRange('today')">Today</button>
+    <button class="filter-btn" id="flt-week" onclick="setRange('week')">7 days</button>
+    <button class="filter-btn" id="flt-month" onclick="setRange('month')">30 days</button>
+    <button class="filter-btn" id="flt-all" onclick="setRange('all')">All</button>
   </div>
-
-  <h3 style="font-size:14px; margin-bottom: 10px; color:#94a3b8;" id="perf-title">Performance Summary (Today)</h3>
   <div id="performance-list"></div>
 </div>
 
-<!-- TAB 3: ANALYTICS -->
 <div id="tab-analytics" class="tab-content">
-  <h3 style="font-size:14px; margin-bottom:4px; color:#06b6d4;">Peak Sales Hours</h3>
-  <p style="font-size:11px; color:#94a3b8; margin-bottom:14px;">Hourly sales volume to optimize kitchen prep & bar shifts.</p>
-  
-  <div class="chart-card">
-    <div class="chart-card-title food">Food Peak Hourly Sales</div>
-    <div id="food-analytics-chart"></div>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-card-title bev">Beverage Peak Hourly Sales</div>
-    <div id="bev-analytics-chart"></div>
-  </div>
+  <p class="note" id="peak-line">Peak hours load with the selected range.</p>
+  <div class="chart-card"><h3 style="color:#f59e0b;">Food units</h3><div id="chart-food"></div></div>
+  <div class="chart-card"><h3 style="color:#38bdf8;">Soft drink units</h3><div id="chart-soft"></div></div>
+  <div class="chart-card"><h3 style="color:#f472b6;">Alcohol units</h3><div id="chart-alc"></div></div>
+  <div id="best-lists"></div>
 </div>
 
-<!-- TAB 4: INTERACTIVE CALENDAR LOOKUP -->
 <div id="tab-lookup" class="tab-content">
-  <div class="calendar-card">
+  <div class="calendar-card" style="padding:16px;">
     <div class="cal-header">
-      <button class="cal-btn" onclick="changeMonth(-1)">&lt;</button>
-      <div id="cal-month-title" class="cal-title">October 2026</div>
-      <button class="cal-btn" onclick="changeMonth(1)">&gt;</button>
+      <button class="cal-btn" onclick="changeMonth(-1)"><</button>
+      <div id="cal-month-title"></div>
+      <button class="cal-btn" onclick="changeMonth(1)">></button>
     </div>
-
-    <div class="cal-grid">
-      <div class="cal-day-hdr">S</div><div class="cal-day-hdr">M</div><div class="cal-day-hdr">T</div>
-      <div class="cal-day-hdr">W</div><div class="cal-day-hdr">T</div><div class="cal-day-hdr">F</div>
-      <div class="cal-day-hdr">S</div>
-    </div>
-    
+    <div class="cal-grid"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div>
     <div id="cal-days-grid" class="cal-grid" style="margin-top:4px;"></div>
-    
-    <p style="font-size:11px; color:#94a3b8; margin-top:12px; text-align:center;" id="cal-selection-label">
-      Click a day to select, or click two days to select a range.
-    </p>
-
-    <button onclick="fetchCalendarRangeData()" class="btn-action">Inspect Selected Days</button>
+    <p class="note" id="cal-selection-label" style="text-align:center;">Click a day, or two days for a range.</p>
+    <button class="btn-action" onclick="fetchCalendar()">Inspect selected days</button>
   </div>
-
   <div id="lookup-results" style="margin-top:16px;"></div>
 </div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
+let adminData = { items: [], hourly: {} };
+let lookupData = null;
+let currentRange = "today";
+let payMode = "all";
+let activeTab = "dashboard";
+let calDate = new Date();
+let rangeStart = null, rangeEnd = null;
 
-let adminData = { performance: [], foodHourly: [], bevHourly: [] };
-let currentPerfFilter = 'today';
+function baht(n) { return "฿" + (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&","<":"<",">":">","\"":""","'":"&#39;" }[c])); }
+function unitsOf(p) { return payMode === "cash" ? p.cashUnits : payMode === "pos" ? p.posUnits : p.cashUnits + p.posUnits; }
+function moneyOf(p) { return payMode === "cash" ? p.cashRevenue : payMode === "pos" ? p.posRevenue : p.cashRevenue + p.posRevenue; }
+function tag(cat) { return cat === "Food" ? "tag-food" : cat === "Soft drinks" ? "tag-soft" : cat === "Alcohol" ? "tag-alc" : "tag-uns"; }
 
-// Calendar State
-let calDate = new Date(2026, 9, 1); // October 2026
-let rangeStart = null;
-let rangeEnd = null;
-
-function switchTab(tabName) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(`tab-${tabName}`).classList.add('active');
-  document.getElementById(`btn-tab-${tabName}`).classList.add('active');
-  if (tabName === 'lookup') renderCalendar();
+function switchTab(name) {
+  activeTab = name;
+  document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  document.getElementById("btn-tab-" + name).classList.add("active");
+  if (name === "lookup") renderCalendar();
 }
-
-function setPerfFilter(filterType) {
-  currentPerfFilter = filterType;
-  document.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(`flt-${filterType}`).classList.add('active');
-  
-  const labels = {
-    'today': 'Performance Summary (Today)',
-    'week': 'Performance Summary (Rolling 7 Days)',
-    'month': 'Performance Summary (30 Days)',
-    'all': 'Performance Summary (All-Time)'
-  };
-  document.getElementById('perf-title').innerText = labels[filterType];
-  fetchAdminData(filterType);
+function setPay(mode) {
+  payMode = mode;
+  document.querySelectorAll(".pay-btn").forEach(el => el.classList.remove("active"));
+  document.getElementById("pay-" + mode).classList.add("active");
+  renderAll();
 }
-
-// Initial Fetch
-fetchAdminData('today');
-
-function fetchAdminData(range, startDate = '', endDate = '') {
-  document.getElementById('status').innerText = "Syncing...";
-  const scriptId = 'jsonp-fetch-script';
-  const existingScript = document.getElementById(scriptId);
-  if (existingScript) existingScript.remove();
-
-  const script = document.createElement('script');
-  script.id = scriptId;
-  const requestUrl = `${API_URL}?action=getAdminData&range=${range}&startDate=${startDate}&endDate=${endDate}&callback=handleAdminData&t=${Date.now()}`;
-  script.src = requestUrl;
-
-  script.onerror = function() {
-    document.getElementById('status').innerText = "Error";
-    updateHeartStatus(false);
+function setRange(range) {
+  currentRange = range;
+  document.querySelectorAll(".filter-btn").forEach(el => el.classList.remove("active"));
+  document.getElementById("flt-" + range).classList.add("active");
+  fetchAdminData(range);
+}
+function fetchAdminData(range, startDate, endDate) {
+  document.getElementById("status").textContent = "Syncing...";
+  document.getElementById("status").classList.remove("bad");
+  var old = document.getElementById("jsonp-fetch-script");
+  if (old) old.remove();
+  var script = document.createElement("script");
+  script.id = "jsonp-fetch-script";
+  script.src = API_URL + "?action=getAdminData&range=" + encodeURIComponent(range)
+    + "&startDate=" + encodeURIComponent(startDate || "") + "&endDate=" + encodeURIComponent(endDate || "")
+    + "&callback=handleAdminData&t=" + Date.now();
+  script.onerror = function () {
+    document.getElementById("status").textContent = "Error";
+    document.getElementById("status").classList.add("bad");
   };
-
   document.body.appendChild(script);
 }
-
-window.handleAdminData = function(data) {
-  if (data.status === 'success') {
-    adminData = data;
-    document.getElementById('status').innerText = "Live";
-
-    // Update Heartbeat Indicator
-    updateHeartStatus(data.isOnline);
-
-    if (data.range === 'custom') {
-      renderLookupResults();
-    } else {
-      renderDashboardTable();
-      renderPerformance();
-      renderAnalytics();
-    }
-  }
+window.handleAdminData = function (data) {
+  if (!data || data.status !== "success") return;
+  document.getElementById("status").textContent = "Live";
+  var heart = document.getElementById("heart-status");
+  heart.textContent = data.isOnline ? "♥" : "♡";
+  heart.classList.toggle("pulse", !!data.isOnline);
+  if (data.range === "custom") { lookupData = data; renderLookup(); return; }
+  adminData = data;
+  renderAll();
 };
+function renderAll() { renderDashboard(); renderPerformance(); renderAnalytics(); }
 
-function updateHeartStatus(online) {
-  const heartEl = document.getElementById('heart-status');
-  if (online) {
-    heartEl.innerText = "❤️";
-    heartEl.classList.add("pulse");
-  } else {
-    heartEl.innerText = "💔";
-    heartEl.classList.remove("pulse");
-  }
-}
-
-function renderDashboardTable() {
-  let totalRev = 0, foodRev = 0, bevRev = 0;
-  let rowsHtml = '';
-
-  if (!adminData.performance || adminData.performance.length === 0) {
-    document.getElementById('today-table-body').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#64748b; padding:16px;">No sales logged for today yet.</td></tr>`;
-    document.getElementById('kpi-rev').innerText = '฿0';
-    document.getElementById('kpi-food').innerText = '฿0';
-    document.getElementById('kpi-bev').innerText = '฿0';
-    return;
-  }
-
-  adminData.performance.forEach(p => {
-    totalRev += p.totalRevenue;
-    const isBev = p.category === 'Beverages';
-    if (isBev) bevRev += p.totalRevenue;
-    else foodRev += p.totalRevenue;
-
-    const tagClass = isBev ? 'tag-bev' : 'tag-food';
-
-    rowsHtml += `
-      <tr>
-        <td style="font-weight:bold; color:#f8fafc;">${p.name}</td>
-        <td style="text-align:center; font-weight:bold; color:#38bdf8;">${p.totalUnits}</td>
-        <td><span class="tag-cat ${tagClass}">${p.category}</span></td>
-        <td style="text-align:right; font-weight:bold; color:#06b6d4;">฿${p.totalRevenue.toLocaleString()}</td>
-      </tr>
-    `;
+function renderDashboard() {
+  var items = adminData.items || [];
+  var food = 0, soft = 0, alc = 0, cash = 0, pos = 0;
+  items.forEach(function (p) {
+    cash += p.cashRevenue; pos += p.posRevenue;
+    var m = moneyOf(p);
+    if (p.category === "Food") food += m;
+    else if (p.category === "Soft drinks") soft += m;
+    else if (p.category === "Alcohol") alc += m;
   });
-
-  document.getElementById('kpi-rev').innerText = `฿${totalRev.toLocaleString()}`;
-  document.getElementById('kpi-food').innerText = `฿${foodRev.toLocaleString()}`;
-  document.getElementById('kpi-bev').innerText = `฿${bevRev.toLocaleString()}`;
-  document.getElementById('today-table-body').innerHTML = rowsHtml;
+  document.getElementById("kpi-rev").textContent = baht(payMode === "cash" ? cash : payMode === "pos" ? pos : cash + pos);
+  document.getElementById("kpi-cash").textContent = baht(cash);
+  document.getElementById("kpi-pos").textContent = baht(pos);
+  document.getElementById("kpi-food").textContent = baht(food);
+  document.getElementById("kpi-soft").textContent = baht(soft);
+  document.getElementById("kpi-alc").textContent = baht(alc);
+  var uns = (adminData.unsorted || []).length;
+  document.getElementById("dash-note").textContent = uns ? uns + " item names did not match the menu and are marked Unsorted." : "Cash is a bill. POS is a QR charge. Both are included.";
+  var rows = items.filter(p => unitsOf(p) || moneyOf(p)).sort((a, b) => moneyOf(b) - moneyOf(a));
+  document.getElementById("today-table-body").innerHTML = rows.length ? rows.map(function (p) {
+    return "<tr><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
+  }).join("") : "<tr><td colspan='4' style='text-align:center; color:#64748b; padding:16px;'>No sales in this view yet.</td></tr>";
 }
 
 function renderPerformance() {
-  const container = document.getElementById('performance-list');
-  let html = '';
-
-  const foodItems = adminData.performance.filter(p => p.category === 'Food');
-  const bevItems = adminData.performance.filter(p => p.category === 'Beverages');
-
-  html += `<div class="section-title title-food"><span>Food Performance</span></div>`;
-  html += foodItems.map(p => `
-    <div class="item-row">
-      <div><div style="font-weight:bold; font-size:13px;">${p.name}</div></div>
-      <div style="text-align:right;">
-        <div style="font-weight:bold; color:#f59e0b;">${p.totalUnits} Units</div>
-        <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
-      </div>
-    </div>
-  `).join('') || '<div style="color:#64748b; padding:8px;">No food sales in this timeframe.</div>';
-
-  html += `<div class="section-title title-bev" style="margin-top:16px;"><span>Beverage Performance</span></div>`;
-  html += bevItems.map(p => `
-    <div class="item-row">
-      <div><div style="font-weight:bold; font-size:13px;">${p.name}</div></div>
-      <div style="text-align:right;">
-        <div style="font-weight:bold; color:#38bdf8;">${p.totalUnits} Units</div>
-        <div style="font-size:11px; color:#94a3b8;">฿${p.totalRevenue.toLocaleString()}</div>
-      </div>
-    </div>
-  `).join('') || '<div style="color:#64748b; padding:8px;">No beverage sales in this timeframe.</div>';
-
-  container.innerHTML = html;
+  var groups = ["Food", "Soft drinks", "Alcohol", "Unsorted"];
+  document.getElementById("performance-list").innerHTML = groups.map(function (g) {
+    var rows = (adminData.items || []).filter(p => p.category === g && (unitsOf(p) || moneyOf(p))).sort((a, b) => unitsOf(b) - unitsOf(a));
+    return "<div class='section-title'>" + g + "</div>" + (rows.map(function (p) {
+      return "<div class='item-row'><div><b>" + esc(p.name) + "</b><div class='note'>" + p.cashUnits + " cash · " + p.posUnits + " POS</div></div><div style='text-align:right;'><b>" + unitsOf(p) + " units</b><div class='note'>" + baht(moneyOf(p)) + "</div></div></div>";
+    }).join("") || "<div class='note'>None in this range.</div>");
+  }).join("");
 }
 
 function renderAnalytics() {
-  renderHourlyChart('food-analytics-chart', adminData.foodHourly || Array(24).fill(0), 'food');
-  renderHourlyChart('bev-analytics-chart', adminData.bevHourly || Array(24).fill(0), 'bev');
-}
-
-function renderHourlyChart(elementId, hourlyArray, typeClass) {
-  const container = document.getElementById(elementId);
-  const maxSales = Math.max(...hourlyArray, 1);
-  let chartHtml = '';
-
-  for (let h = 7; h <= 23; h++) {
-    const val = hourlyArray[h] || 0;
-    const pct = Math.round((val / maxSales) * 100);
-    const timeLabel = `${h < 10 ? '0' + h : h}:00`;
-
-    chartHtml += `
-      <div class="bar-row">
-        <div class="bar-label">${timeLabel}</div>
-        <div class="bar-track">
-          <div class="bar-fill ${typeClass}" style="width: ${pct}%;"></div>
-        </div>
-        <div class="bar-val">${val}</div>
-      </div>
-    `;
-  }
-  container.innerHTML = chartHtml;
-}
-
-/* CALENDAR BUILDER LOGIC */
-function changeMonth(delta) {
-  calDate.setMonth(calDate.getMonth() + delta);
-  renderCalendar();
-}
-
-function renderCalendar() {
-  const year = calDate.getFullYear();
-  const month = calDate.getMonth();
-  
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  document.getElementById('cal-month-title').innerText = `${monthNames[month]} ${year}`;
-
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const grid = document.getElementById('cal-days-grid');
-  let html = '';
-
-  for (let i = 0; i < firstDay; i++) {
-    html += `<div class="cal-day empty"></div>`;
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const curr = new Date(year, month, d);
-    let cls = 'cal-day';
-
-    if (rangeStart && rangeEnd) {
-      if (curr >= rangeStart && curr <= rangeEnd) cls += ' in-range';
-    } else if (rangeStart && curr.getTime() === rangeStart.getTime()) {
-      cls += ' selected';
-    }
-
-    html += `<div class="${cls}" onclick="selectCalDay(${year}, ${month}, ${d})">${d}</div>`;
-  }
-
-  grid.innerHTML = html;
-  
-  const lbl = document.getElementById('cal-selection-label');
-  if (rangeStart && rangeEnd) {
-    lbl.innerText = `Selected Range: ${formatDDMMYYYY(rangeStart)} to ${formatDDMMYYYY(rangeEnd)}`;
-  } else if (rangeStart) {
-    lbl.innerText = `Selected Day: ${formatDDMMYYYY(rangeStart)} (Click another day for a range)`;
-  } else {
-    lbl.innerText = `Click a day to select, or click two days to highlight a range.`;
-  }
-}
-
-function selectCalDay(y, m, d) {
-  const clicked = new Date(y, m, d);
-
-  if (!rangeStart || (rangeStart && rangeEnd)) {
-    rangeStart = clicked;
-    rangeEnd = null;
-  } else if (rangeStart && !rangeEnd) {
-    if (clicked < rangeStart) {
-      rangeEnd = rangeStart;
-      rangeStart = clicked;
-    } else {
-      rangeEnd = clicked;
-    }
-  }
-  renderCalendar();
-}
-
-function formatDDMMYYYY(d) {
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  return `${day}/${month}/${d.getFullYear()}`;
-}
-
-function fetchCalendarRangeData() {
-  if (!rangeStart) {
-    alert("Please select a day on the calendar first.");
-    return;
-  }
-
-  const startStr = formatDDMMYYYY(rangeStart);
-  const endStr = rangeEnd ? formatDDMMYYYY(rangeEnd) : startStr;
-
-  fetchAdminData('custom', startStr, endStr);
-}
-
-function renderLookupResults() {
-  const container = document.getElementById('lookup-results');
-  let total = 0;
-  
-  let rangeLabel = adminData.startDate;
-  if (adminData.endDate && adminData.endDate !== adminData.startDate) {
-    rangeLabel += ` to ${adminData.endDate}`;
-  }
-
-  let html = `<h4 style="color:#06b6d4; margin-bottom:10px;">Sales Summary (${rangeLabel})</h4>`;
-
-  if (!adminData.performance || adminData.performance.length === 0) {
-    container.innerHTML = html + `<div style="color:#64748b; padding:12px;">No sales found for selected date range.</div>`;
-    return;
-  }
-
-  adminData.performance.forEach(p => {
-    total += p.totalRevenue;
-    html += `
-      <div class="item-row">
-        <div>
-          <div style="font-weight:bold; font-size:13px;">${p.name}</div>
-          <div style="font-size:11px; color:#94a3b8;">${p.totalUnits} sold (${p.category})</div>
-        </div>
-        <div style="font-weight:bold; color:#06b6d4;">฿${p.totalRevenue.toLocaleString()}</div>
-      </div>
-    `;
+  var hourly = adminData.hourly || {};
+  drawChart("chart-food", hourly.food, "food");
+  drawChart("chart-soft", hourly.soft, "soft");
+  drawChart("chart-alc", hourly.alcohol, "alc");
+  document.getElementById("peak-line").textContent = peakSentence();
+  var ranked = (adminData.items || []).filter(p => unitsOf(p) > 0).map(function (p) {
+    return { name: p.name, category: p.category, units: unitsOf(p), money: moneyOf(p) };
   });
-
-  html = `<div style="font-size:16px; font-weight:bold; margin-bottom:12px; color:#f59e0b;">Total Revenue: ฿${total.toLocaleString()}</div>` + html;
-  container.innerHTML = html;
+  var byMoney = ranked.slice().sort((a, b) => b.money - a.money).slice(0, 5);
+  var byUnits = ranked.slice().sort((a, b) => b.units - a.units).slice(0, 5);
+  var quiet = ranked.slice().sort((a, b) => a.units - b.units)[0];
+  document.getElementById("best-lists").innerHTML =
+    listBlock("Top 5 by baht", byMoney, function (p) { return baht(p.money) + " · " + p.units + " units"; })
+    + listBlock("Top 5 by quantity", byUnits, function (p) { return p.units + " units · " + baht(p.money); })
+    + (quiet ? "<div class='note'>Quietest seller in this view: " + esc(quiet.name) + " (" + quiet.units + ").</div>" : "");
+}
+function listBlock(title, rows, detail) {
+  return "<div class='section-title'>" + title + "</div>" + (rows.map(function (p) {
+    return "<div class='item-row'><div><b>" + esc(p.name) + "</b><div class='note'>" + esc(p.category) + "</div></div><div>" + detail(p) + "</div></div>";
+  }).join("") || "<div class='note'>No sales yet.</div>");
+}
+function drawChart(id, bucket, cls) {
+  var arr = bucket ? (bucket[payMode] || bucket.all || []) : [];
+  var max = Math.max.apply(null, arr.concat([1]));
+  var html = "";
+  for (var h = 7; h <= 23; h++) {
+    var val = arr[h] || 0;
+    html += "<div class='bar-row'><div class='bar-label'>" + (h < 10 ? "0" : "") + h + ":00</div><div class='bar-track'><div class='bar-fill " + cls + "' style='width:" + Math.round(val / max * 100) + "%'></div></div><div>" + val + "</div></div>";
+  }
+  document.getElementById(id).innerHTML = html;
+}
+function peakSentence() {
+  function peak(bucket, label) {
+    var arr = bucket ? (bucket[payMode] || bucket.all || []) : [];
+    var best = 0, hour = -1;
+    arr.forEach(function (v, h) { if (v > best) { best = v; hour = h; } });
+    return best ? label + " peaks at " + (hour < 10 ? "0" : "") + hour + ":00 (" + best + " units)" : "";
+  }
+  var h = adminData.hourly || {};
+  return [peak(h.food, "Food"), peak(h.soft, "Soft drinks"), peak(h.alcohol, "Alcohol")].filter(Boolean).join(". ") || "No hourly sales in this view yet.";
 }
 
-setInterval(() => fetchAdminData(currentPerfFilter), 30000);
+function changeMonth(d) { calDate.setMonth(calDate.getMonth() + d); renderCalendar(); }
+function fmt(d) { return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear(); }
+function renderCalendar() {
+  var y = calDate.getFullYear(), m = calDate.getMonth();
+  document.getElementById("cal-month-title").textContent = ["January","February","March","April","May","June","July","August","September","October","November","December"][m] + " " + y;
+  var first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate(), html = "";
+  for (var i = 0; i < first; i++) html += "<div class='cal-day empty'></div>";
+  for (var d = 1; d <= days; d++) {
+    var curr = new Date(y, m, d), cls = "cal-day";
+    if (rangeStart && rangeEnd && curr >= rangeStart && curr <= rangeEnd) cls += " in-range";
+    else if (rangeStart && !rangeEnd && curr.getTime() === rangeStart.getTime()) cls += " selected";
+    html += "<div class='" + cls + "' onclick='selectDay(" + y + "," + m + "," + d + ")'>" + d + "</div>";
+  }
+  document.getElementById("cal-days-grid").innerHTML = html;
+  document.getElementById("cal-selection-label").textContent = rangeStart && rangeEnd ? fmt(rangeStart) + " to " + fmt(rangeEnd) : rangeStart ? fmt(rangeStart) : "Click a day, or two days for a range.";
+}
+function selectDay(y, m, d) {
+  var clicked = new Date(y, m, d);
+  if (!rangeStart || rangeEnd) { rangeStart = clicked; rangeEnd = null; }
+  else if (clicked < rangeStart) { rangeEnd = rangeStart; rangeStart = clicked; }
+  else rangeEnd = clicked;
+  renderCalendar();
+}
+function fetchCalendar() {
+  if (!rangeStart) return;
+  fetchAdminData("custom", fmt(rangeStart), fmt(rangeEnd || rangeStart));
+}
+function renderLookup() {
+  var items = (lookupData && lookupData.items) || [];
+  var total = items.reduce((s, p) => s + p.cashRevenue + p.posRevenue, 0);
+  var label = lookupData.startDate + (lookupData.endDate && lookupData.endDate !== lookupData.startDate ? " to " + lookupData.endDate : "");
+  document.getElementById("lookup-results").innerHTML = "<div class='section-title'>All sales " + esc(label) + ": " + baht(total) + "</div>" + (items.sort((a, b) => (b.cashUnits + b.posUnits) - (a.cashUnits + a.posUnits)).map(function (p) {
+    return "<div class='item-row'><div><b>" + esc(p.name) + "</b><div class='note'>" + esc(p.category) + " · " + p.cashUnits + " cash · " + p.posUnits + " POS</div></div><div>" + (p.cashUnits + p.posUnits) + " · " + baht(p.cashRevenue + p.posRevenue) + "</div></div>";
+  }).join("") || "<div class='note'>No sales in that range.</div>");
+}
+
+fetchAdminData("today");
+renderCalendar();
+setInterval(function () { if (activeTab !== "lookup") fetchAdminData(currentRange); }, 30000);
 </script>
 </body>
 </html>
