@@ -137,12 +137,18 @@ let rangeStart = null, rangeEnd = null;
 
 function baht(n) { return "฿" + (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 function esc(s) {
-  return String(s == null ? "" : s)
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
-    .replace(/"/g, """)
-    .replace(/'/g, "&#39;");
+  var out = "";
+  var text = String(s == null ? "" : s);
+  for (var i = 0; i < text.length; i++) {
+    var c = text.charAt(i);
+    if (c === "&") out += "&" + "amp;";
+    else if (c === "<") out += "&" + "lt;";
+    else if (c === ">") out += "&" + "gt;";
+    else if (c === '"') out += "&" + "quot;";
+    else if (c === "'") out += "&" + "#39;";
+    else out += c;
+  }
+  return out;
 }
 function unitsOf(p) { return payMode === "cash" ? p.cashUnits : payMode === "pos" ? p.posUnits : p.cashUnits + p.posUnits; }
 function moneyOf(p) { return payMode === "cash" ? p.cashRevenue : payMode === "pos" ? p.posRevenue : p.cashRevenue + p.posRevenue; }
