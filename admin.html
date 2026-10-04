@@ -11,6 +11,7 @@
   .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
   .status.bad { background: #7f1d1d; color: #fca5a5; }
   .heart-icon { display: inline-block; margin-left: 6px; font-size: 16px; }
+  .heart-icon { color: #f43f5e; }
   .heart-icon.pulse { animation: heartPulse 1.2s infinite ease-in-out; }
   @keyframes heartPulse { 0%{transform:scale(1)} 15%{transform:scale(1.25)} 30%{transform:scale(1)} 45%{transform:scale(1.15)} 60%{transform:scale(1)} 100%{transform:scale(1)} }
   .nav-grid, .filter-grid, .pay-grid { display: grid; gap: 6px; margin-bottom: 14px; }
@@ -317,7 +318,7 @@ function renderLookup() {
 
 fetchAdminData("today");
 renderCalendar();
-setInterval(function () { if (activeTab !== "lookup") fetchAdminData(currentRange); }, 30000);
+setInterval(function () { if (activeTab !== "lookup") fetchAdminData(currentRange); }, 10000);
 </script>
 </body>
 </html>
