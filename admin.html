@@ -60,7 +60,7 @@
 <div class="header">
   <div>
     <h2 style="margin:0; font-size:18px;">Castaway Admin <span id="heart-status" class="heart-icon"></span></h2>
-    <span style="font-size:11px; color:#94a3b8;">Cash bills and QR charges, both counted</span>
+    <span style="font-size:11px; color:#94a3b8;">Bills and charges, both counted</span>
   </div>
   <span id="status" class="status">Syncing...</span>
 </div>
@@ -71,17 +71,16 @@
   <button class="nav-btn" id="btn-tab-lookup" onclick="switchTab('lookup')">Date Lookup</button>
 </div>
 
-
 <div id="tab-dashboard" class="tab-content active">
   <div class="pay-grid">
-    <button class="pay-btn active" id="pay-all" onclick="setPay('all')">All</button>
-    <button class="pay-btn" id="pay-cash" onclick="setPay('cash')">Cash</button>
-    <button class="pay-btn" id="pay-pos" onclick="setPay('pos')">POS / QR</button>
+    <button class="pay-btn active" id="pay-all" onclick="setPay('all')">ALL</button>
+    <button class="pay-btn" id="pay-cash" onclick="setPay('cash')">BILL</button>
+    <button class="pay-btn" id="pay-pos" onclick="setPay('pos')">CHARGE</button>
   </div>
   <div class="kpi-grid">
     <div class="kpi-card"><div class="kpi-lbl">Sales</div><div id="kpi-rev" class="kpi-val">฿0</div></div>
-    <div class="kpi-card"><div class="kpi-lbl">Cash</div><div id="kpi-cash" class="kpi-val">฿0</div></div>
-    <div class="kpi-card"><div class="kpi-lbl">POS / QR</div><div id="kpi-pos" class="kpi-val">฿0</div></div>
+    <div class="kpi-card"><div class="kpi-lbl">BILL</div><div id="kpi-cash" class="kpi-val">฿0</div></div>
+    <div class="kpi-card"><div class="kpi-lbl">CHARGE</div><div id="kpi-pos" class="kpi-val">฿0</div></div>
   </div>
   <div class="kpi-grid">
     <div class="kpi-card"><div class="kpi-lbl">Food</div><div id="kpi-food" class="kpi-val" style="color:#f59e0b;">฿0</div></div>
@@ -139,10 +138,10 @@ let rangeStart = null, rangeEnd = null;
 function baht(n) { return "฿" + (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 function esc(s) {
   return String(s == null ? "" : s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
+    .replace(/&/g, "&")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
+    .replace(/"/g, """)
     .replace(/'/g, "&#39;");
 }
 function unitsOf(p) { return payMode === "cash" ? p.cashUnits : payMode === "pos" ? p.posUnits : p.cashUnits + p.posUnits; }
@@ -214,7 +213,7 @@ function renderDashboard() {
   document.getElementById("kpi-soft").textContent = baht(soft);
   document.getElementById("kpi-alc").textContent = baht(alc);
   var uns = (adminData.unsorted || []).length;
-  document.getElementById("dash-note").textContent = uns ? uns + " item names did not match the menu and are marked Unsorted." : "Cash is a bill. POS is a QR charge. Both are included.";
+  document.getElementById("dash-note").textContent = uns ? uns + " item names did not match the menu and are marked Unsorted." : "BILL is cash. CHARGE is the QR sale. ALL includes both.";
   var rows = items.filter(p => unitsOf(p) || moneyOf(p)).sort((a, b) => moneyOf(b) - moneyOf(a));
   document.getElementById("today-table-body").innerHTML = rows.length ? rows.map(function (p) {
     return "<tr><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
@@ -226,7 +225,7 @@ function renderPerformance() {
   document.getElementById("performance-list").innerHTML = groups.map(function (g) {
     var rows = (adminData.items || []).filter(p => p.category === g && (unitsOf(p) || moneyOf(p))).sort((a, b) => unitsOf(b) - unitsOf(a));
     return "<div class='section-title'>" + g + "</div>" + (rows.map(function (p) {
-      return "<div class='item-row'><div><b>" + esc(p.name) + "</b><div class='note'>" + p.cashUnits + " cash · " + p.posUnits + " POS</div></div><div style='text-align:right;'><b>" + unitsOf(p) + " units</b><div class='note'>" + baht(moneyOf(p)) + "</div></div></div>";
+      return "<div class='item-row'><div><b>" + esc(p.name) + "</b><div class='note'>" + p.cashUnits + " BILL · " + p.posUnits + " CHARGE</div></div><div style='text-align:right;'><b>" + unitsOf(p) + " units</b><div class='note'>" + baht(moneyOf(p)) + "</div></div></div>";
     }).join("") || "<div class='note'>None in this range.</div>");
   }).join("");
 }
@@ -305,8 +304,8 @@ function renderLookup() {
   var items = (lookupData && lookupData.items) || [];
   var total = items.reduce((s, p) => s + p.cashRevenue + p.posRevenue, 0);
   var label = lookupData.startDate + (lookupData.endDate && lookupData.endDate !== lookupData.startDate ? " to " + lookupData.endDate : "");
-  document.getElementById("lookup-results").innerHTML = "<div class='section-title'>All sales " + esc(label) + ": " + baht(total) + "</div>" + (items.sort((a, b) => (b.cashUnits + b.posUnits) - (a.cashUnits + a.posUnits)).map(function (p) {
-    return "<div class='item-row'><div><b>" + esc(p.name) + "</b><div class='note'>" + esc(p.category) + " · " + p.cashUnits + " cash · " + p.posUnits + " POS</div></div><div>" + (p.cashUnits + p.posUnits) + " · " + baht(p.cashRevenue + p.posRevenue) + "</div></div>";
+  document.getElementById("lookup-results").innerHTML = "<div class='section-title'>ALL sales " + esc(label) + ": " + baht(total) + "</div>" + (items.sort((a, b) => (b.cashUnits + b.posUnits) - (a.cashUnits + a.posUnits)).map(function (p) {
+    return "<div class='item-row'><div><b>" + esc(p.name) + "</b><div class='note'>" + esc(p.category) + " · " + p.cashUnits + " BILL · " + p.posUnits + " CHARGE</div></div><div>" + (p.cashUnits + p.posUnits) + " · " + baht(p.cashRevenue + p.posRevenue) + "</div></div>";
   }).join("") || "<div class='note'>No sales in that range.</div>");
 }
 
