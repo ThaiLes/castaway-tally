@@ -137,7 +137,14 @@ let calDate = new Date();
 let rangeStart = null, rangeEnd = null;
 
 function baht(n) { return "฿" + (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
-function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&","<":"<",">":">","\"":""","'":"&#39;" }[c])); }
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 function unitsOf(p) { return payMode === "cash" ? p.cashUnits : payMode === "pos" ? p.posUnits : p.cashUnits + p.posUnits; }
 function moneyOf(p) { return payMode === "cash" ? p.cashRevenue : payMode === "pos" ? p.posRevenue : p.cashRevenue + p.posRevenue; }
 function tag(cat) { return cat === "Food" ? "tag-food" : cat === "Soft drinks" ? "tag-soft" : cat === "Alcohol" ? "tag-alc" : "tag-uns"; }
