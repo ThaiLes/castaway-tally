@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -11,7 +12,6 @@
   .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
   .status.bad { background: #7f1d1d; color: #fca5a5; }
   .heart-icon { display: inline-block; margin-left: 6px; font-size: 16px; }
-  .heart-icon { color: #f43f5e; }
   .heart-icon.pulse { animation: heartPulse 1.2s infinite ease-in-out; }
   @keyframes heartPulse { 0%{transform:scale(1)} 15%{transform:scale(1.25)} 30%{transform:scale(1)} 45%{transform:scale(1.15)} 60%{transform:scale(1)} 100%{transform:scale(1)} }
   .nav-grid, .filter-grid, .pay-grid { display: grid; gap: 6px; margin-bottom: 14px; }
@@ -46,6 +46,12 @@
   .bar-track { flex: 1; background: #0f172a; height: 16px; border-radius: 4px; overflow: hidden; margin: 0 8px; }
   .bar-fill { height: 100%; }
   .food { background: #f59e0b; } .soft { background: #38bdf8; } .alc { background: #f472b6; }
+  .line-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; font-size: 10px; }
+  .line-label { width: 36px; color: #94a3b8; }
+  .line-track { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .thin { height: 4px; border-radius: 2px; background: #334155; }
+  .thin > span { display: block; height: 100%; border-radius: 2px; }
+  .line-count { width: 52px; text-align: right; color: #cbd5e1; }
   .section-title { font-size: 12px; font-weight: bold; margin: 14px 0 8px; text-transform: uppercase; }
   .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .cal-btn, .btn-action { background: #0f172a; border: 1px solid #334155; color: #38bdf8; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
@@ -61,6 +67,7 @@
 <div class="header">
   <div>
     <h2 style="margin:0; font-size:18px;">Castaway Admin <span id="heart-status" class="heart-icon"></span></h2>
+    <span style="font-size:11px; color:#94a3b8;">Bills and charges, both counted</span>
   </div>
   <span id="status" class="status">Syncing...</span>
 </div>
@@ -104,9 +111,11 @@
 
 <div id="tab-analytics" class="tab-content">
   <p class="note" id="peak-line">Peak hours load with the selected range.</p>
-  <div class="chart-card"><h3 style="color:#f59e0b;">Food units</h3><div id="chart-food"></div></div>
-  <div class="chart-card"><h3 style="color:#38bdf8;">Soft drink units</h3><div id="chart-soft"></div></div>
-  <div class="chart-card"><h3 style="color:#f472b6;">Alcohol units</h3><div id="chart-alc"></div></div>
+  <div class="chart-card">
+    <h3>Units by hour</h3>
+    <div class="note">Food amber, soft drinks blue, alcohol pink.</div>
+    <div id="chart-hours"></div>
+  </div>
   <div id="best-lists"></div>
 </div>
 
@@ -194,7 +203,7 @@ window.handleAdminData = function (data) {
   if (!data || data.status !== "success") return;
   document.getElementById("status").textContent = "Live";
   var heart = document.getElementById("heart-status");
-  heart.textContent = data.isOnline ? "♥" : "♡";
+  heart.textContent = data.isOnline ? "❤️" : "💔";
   heart.classList.toggle("pulse", !!data.isOnline);
   if (data.range === "custom") { lookupData = data; renderLookup(); return; }
   adminData = data;
@@ -219,7 +228,6 @@ function renderDashboard() {
   document.getElementById("kpi-soft").textContent = baht(soft);
   document.getElementById("kpi-alc").textContent = baht(alc);
   var uns = (adminData.unsorted || []).length;
-  document.getElementById("dash-note").textContent = uns ? uns + " item names did not match the menu and are marked Unsorted." : "BILL is cash. CHARGE is the QR sale. ALL includes both.";
   var rows = items.filter(p => unitsOf(p) || moneyOf(p)).sort((a, b) => moneyOf(b) - moneyOf(a));
   document.getElementById("today-table-body").innerHTML = rows.length ? rows.map(function (p) {
     return "<tr><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
@@ -238,9 +246,7 @@ function renderPerformance() {
 
 function renderAnalytics() {
   var hourly = adminData.hourly || {};
-  drawChart("chart-food", hourly.food, "food");
-  drawChart("chart-soft", hourly.soft, "soft");
-  drawChart("chart-alc", hourly.alcohol, "alc");
+  drawCombined(hourly);
   document.getElementById("peak-line").textContent = peakSentence();
   var ranked = (adminData.items || []).filter(p => unitsOf(p) > 0).map(function (p) {
     return { name: p.name, category: p.category, units: unitsOf(p), money: moneyOf(p) };
@@ -252,6 +258,27 @@ function renderAnalytics() {
     listBlock("Top 5 by baht", byMoney, function (p) { return baht(p.money) + " · " + p.units + " units"; })
     + listBlock("Top 5 by quantity", byUnits, function (p) { return p.units + " units · " + baht(p.money); })
     + (quiet ? "<div class='note'>Quietest seller in this view: " + esc(quiet.name) + " (" + quiet.units + ").</div>" : "");
+}
+function series(bucket) {
+  return bucket ? (bucket[payMode] || bucket.all || []) : [];
+}
+function drawCombined(hourly) {
+  var food = series(hourly.food);
+  var soft = series(hourly.soft);
+  var alc = series(hourly.alcohol);
+  var max = 1;
+  for (var h = 7; h <= 23; h++) max = Math.max(max, food[h] || 0, soft[h] || 0, alc[h] || 0);
+  var html = "";
+  for (var hour = 7; hour <= 23; hour++) {
+    var f = food[hour] || 0, s = soft[hour] || 0, a = alc[hour] || 0;
+    html += "<div class='line-row'><div class='line-label'>" + (hour < 10 ? "0" : "") + hour + "</div><div class='line-track'>"
+      + thin(f, max, "food") + thin(s, max, "soft") + thin(a, max, "alc")
+      + "</div><div class='line-count'>" + f + " / " + s + " / " + a + "</div></div>";
+  }
+  document.getElementById("chart-hours").innerHTML = html;
+}
+function thin(val, max, cls) {
+  return "<div class='thin'><span class='" + cls + "' style='width:" + Math.round(val / max * 100) + "%'></span></div>";
 }
 function listBlock(title, rows, detail) {
   return "<div class='section-title'>" + title + "</div>" + (rows.map(function (p) {
@@ -317,7 +344,7 @@ function renderLookup() {
 
 fetchAdminData("today");
 renderCalendar();
-setInterval(function () { if (activeTab !== "lookup") fetchAdminData(currentRange); }, 10000);
+setInterval(function () { if (activeTab !== "lookup") fetchAdminData(currentRange); }, 30000);
 </script>
 </body>
 </html>
