@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -65,9 +64,8 @@
 </head>
 <body>
 <div class="header">
-  <div>
-    <h2 style="margin:0; font-size:18px;">Castaway Admin <span id="heart-status" class="heart-icon"></span></h2>
-    <span id="status" class="status">Syncing...</span>
+  <h2 style="margin:0; font-size:18px;">Castaway Admin <span id="heart-status" class="heart-icon"></span></h2>
+  <span id="status" class="status">Syncing...</span>
 </div>
 <div class="nav-grid">
   <button class="nav-btn active" id="btn-tab-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
@@ -226,6 +224,7 @@ function renderDashboard() {
   document.getElementById("kpi-soft").textContent = baht(soft);
   document.getElementById("kpi-alc").textContent = baht(alc);
   var uns = (adminData.unsorted || []).length;
+  document.getElementById("dash-note").textContent = uns ? uns + " item names did not match the menu and are marked Unsorted." : "BILL is cash. CHARGE is the QR sale. ALL includes both.";
   var rows = items.filter(p => unitsOf(p) || moneyOf(p)).sort((a, b) => moneyOf(b) - moneyOf(a));
   document.getElementById("today-table-body").innerHTML = rows.length ? rows.map(function (p) {
     return "<tr><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
