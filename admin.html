@@ -112,16 +112,6 @@
 </div>
 
 <div id="tab-analytics" class="tab-content">
-  <select id="analytics-group" onchange="renderAnalytics()" style="width:100%; padding:10px; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #334155; margin-bottom:10px;">
-    <option value="all">All groups</option>
-    <option value="sandwiches">Sandwiches</option>
-    <option value="breakfast">Breakfast</option>
-    <option value="coffee">Coffee</option>
-    <option value="beer">Beer</option>
-    <option value="Food">Food</option>
-    <option value="Soft drinks">Soft drinks</option>
-    <option value="Alcohol">Alcohol</option>
-  </select>
   <div id="best-lists"></div>
   <p class="note" id="peak-line">Peak hours load with the selected range.</p>
   <div class="chart-card">
@@ -251,9 +241,6 @@ function renderDashboard() {
   }).join("") : "<tr><td colspan='5' style='text-align:center; color:#64748b; padding:16px;'>No sales in this view yet.</td></tr>";
 }
 
-function renderPerformance() {
-  document.getElementById("performance-list").innerHTML = summaryBlock(adminData, "This range");
-}
 function totals(data) {
   var items = (data && data.items) || [];
   var out = { sales: 0, cash: 0, pos: 0, food: 0, soft: 0, alc: 0, uns: 0 };
@@ -279,24 +266,38 @@ function summaryBlock(data, title) {
     + "</tbody></table></div>";
 }
 
-function sectionOf(name) {
-  var n = String(name || "").toLowerCase();
-  if (/sandwich|melt|peri|ham|chicken mayo/.test(n)) return "sandwiches";
-  if (/porridge|porriddge|pancake|muffin|benedict|granola|toast|eggs|omelette/.test(n)) return "breakfast";
-  if (/cappu|latte|espresso|americano|flatwhite|flat white|mocha|macchiato/.test(n)) return "coffee";
-  if (/chang|singha|\bleo\b|beer|stella/.test(n)) return "beer";
-  return "";
+function renderPerformance() {
+  var items = adminData.items || [];
+  var types = [
+    ["Peri Peri Chicken Mayo", /peri/i],
+    ["Ham & Cheese", /ham/i],
+    ["Tuna Melt", /tuna melt/i],
+    ["Basil Pesto", /pesto/i],
+    ["Massaman & Cheddar", /massaman/i]
+  ];
+  var groups = [
+    ["Breakfast", /porridge|porriddge|pancake|muffin|benedict|granola|toast|eggs|omelette/i],
+    ["Coffee", /cappu|latte|espresso|americano|flat\s*white|mocha|macchiato/i],
+    ["Beer", /chang|singha|\bleo\b|beer|stella/i]
+  ];
+  function roll(re) {
+    var units = 0, money = 0;
+    items.forEach(function (p) {
+      if (re.test(p.name)) { units += unitsOf(p); money += moneyOf(p); }
+    });
+    return { units: units, money: money };
+  }
+  function row(label, stat) {
+    return "<div class='item-row'><div><b>" + esc(label) + "</b><div class='note'>" + (stat.units ? stat.units + " sold" : "No sales in this range") + "</div></div><div>" + baht(stat.money) + "</div></div>";
+  }
+  document.getElementById("performance-list").innerHTML =
+    "<div class='section-title'>Sandwiches</div>" + types.map(function (t) { return row(t[0], roll(t[1])); }).join("")
+    + "<div class='section-title'>Also watching</div>" + groups.map(function (g) { return row(g[0], roll(g[1])); }).join("");
 }
 function renderAnalytics() {
-  var pick = document.getElementById("analytics-group").value;
-  var items = (adminData.items || []).filter(function (p) {
-    if (pick === "all") return true;
-    if (pick === "Food" || pick === "Soft drinks" || pick === "Alcohol") return p.category === pick;
-    return sectionOf(p.name) === pick;
-  });
-  var money = 0, units = 0;
-  items.forEach(function (p) { money += moneyOf(p); units += unitsOf(p); });
-  document.getElementById("best-lists").innerHTML = "<div class='grand'><div class='kpi-lbl'>" + esc(document.getElementById("analytics-group").selectedOptions[0].text) + "</div><b>" + baht(money) + "</b><div class='note'>" + units + " units</div></div>";
+  var t = totals(adminData);
+  document.getElementById("best-lists").innerHTML = "<div class='grand'><div class='kpi-lbl'>Sales</div><b>" + baht(t.sales) + "</b></div>"
+    + "<div class='kpi-grid'><div class='kpi-card'><div class='kpi-lbl'>Food</div><div class='kpi-val' style='color:#f59e0b;'>" + baht(t.food) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Soft drinks</div><div class='kpi-val' style='color:#38bdf8;'>" + baht(t.soft) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Alcohol</div><div class='kpi-val' style='color:#f472b6;'>" + baht(t.alc) + "</div></div></div>";
   drawCombined(adminData.hourly || {});
   document.getElementById("peak-line").textContent = peakSentence();
 }
