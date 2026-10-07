@@ -112,6 +112,16 @@
 </div>
 
 <div id="tab-analytics" class="tab-content">
+  <select id="analytics-group" onchange="renderAnalytics()" style="width:100%; padding:10px; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #334155; margin-bottom:10px;">
+    <option value="all">All groups</option>
+    <option value="sandwiches">Sandwiches</option>
+    <option value="breakfast">Breakfast</option>
+    <option value="coffee">Coffee</option>
+    <option value="beer">Beer</option>
+    <option value="Food">Food</option>
+    <option value="Soft drinks">Soft drinks</option>
+    <option value="Alcohol">Alcohol</option>
+  </select>
   <div id="best-lists"></div>
   <p class="note" id="peak-line">Peak hours load with the selected range.</p>
   <div class="chart-card">
@@ -269,10 +279,25 @@ function summaryBlock(data, title) {
     + "</tbody></table></div>";
 }
 
+function sectionOf(name) {
+  var n = String(name || "").toLowerCase();
+  if (/sandwich|melt|peri|ham|chicken mayo/.test(n)) return "sandwiches";
+  if (/porridge|porriddge|pancake|muffin|benedict|granola|toast|eggs|omelette/.test(n)) return "breakfast";
+  if (/cappu|latte|espresso|americano|flatwhite|flat white|mocha|macchiato/.test(n)) return "coffee";
+  if (/chang|singha|\bleo\b|beer|stella/.test(n)) return "beer";
+  return "";
+}
 function renderAnalytics() {
-  document.getElementById("best-lists").innerHTML = summaryBlock(adminData, "Analytics");
-  var hourly = adminData.hourly || {};
-  drawCombined(hourly);
+  var pick = document.getElementById("analytics-group").value;
+  var items = (adminData.items || []).filter(function (p) {
+    if (pick === "all") return true;
+    if (pick === "Food" || pick === "Soft drinks" || pick === "Alcohol") return p.category === pick;
+    return sectionOf(p.name) === pick;
+  });
+  var money = 0, units = 0;
+  items.forEach(function (p) { money += moneyOf(p); units += unitsOf(p); });
+  document.getElementById("best-lists").innerHTML = "<div class='grand'><div class='kpi-lbl'>" + esc(document.getElementById("analytics-group").selectedOptions[0].text) + "</div><b>" + baht(money) + "</b><div class='note'>" + units + " units</div></div>";
+  drawCombined(adminData.hourly || {});
   document.getElementById("peak-line").textContent = peakSentence();
 }
 function series(bucket) {
