@@ -59,7 +59,11 @@
   .cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; cursor: pointer; }
   .cal-day.empty { background: transparent; }
   .cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
-  .cal-day.in-range { background: #06b6d444; color: #38bdf8; }
+  .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 12px 0; }
+  .sub-btn { padding: 8px 4px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; }
+  .sub-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+  .grand { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px; text-align: center; margin-bottom: 8px; }
+  .grand b { display: block; font-size: 28px; color: #06b6d4; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -128,6 +132,11 @@
     <button class="btn-action" onclick="fetchCalendar()">Inspect selected days</button>
   </div>
   <div id="lookup-results" style="margin-top:16px;"></div>
+  <div class="sub-grid">
+    <button class="sub-btn active" id="look-hours" onclick="setLookupView('hours')">Sales by hour</button>
+    <button class="sub-btn" id="look-top" onclick="setLookupView('top')">Top sellers</button>
+  </div>
+  <div id="lookup-detail"></div>
 </div>
 
 <script>
@@ -138,7 +147,7 @@ let currentRange = "today";
 let payMode = "all";
 let activeTab = "dashboard";
 let calDate = new Date();
-let rangeStart = null, rangeEnd = null;
+let lookupView = "hours";
 
 function baht(n) { return "฿" + (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 function esc(s) {
@@ -232,13 +241,31 @@ function renderDashboard() {
 }
 
 function renderPerformance() {
-  var groups = ["Food", "Soft drinks", "Alcohol", "Unsorted"];
-  document.getElementById("performance-list").innerHTML = groups.map(function (g) {
-    var rows = (adminData.items || []).filter(p => p.category === g && (unitsOf(p) || moneyOf(p))).sort((a, b) => unitsOf(b) - unitsOf(a));
-    return "<div class='section-title'>" + g + "</div>" + (rows.map(function (p) {
-      return "<div class='item-row'><div><b>" + esc(p.name) + "</b><div class='note'>" + p.cashUnits + " BILL · " + p.posUnits + " CHARGE</div></div><div style='text-align:right;'><b>" + unitsOf(p) + " units</b><div class='note'>" + baht(moneyOf(p)) + "</div></div></div>";
-    }).join("") || "<div class='note'>None in this range.</div>");
-  }).join("");
+  document.getElementById("performance-list").innerHTML = summaryBlock(adminData, "This range");
+}
+function totals(data) {
+  var items = (data && data.items) || [];
+  var out = { sales: 0, cash: 0, pos: 0, food: 0, soft: 0, alc: 0, uns: 0 };
+  items.forEach(function (p) {
+    out.cash += p.cashRevenue; out.pos += p.posRevenue;
+    var m = moneyOf(p);
+    out.sales += m;
+    if (p.category === "Food") out.food += m;
+    else if (p.category === "Soft drinks") out.soft += m;
+    else if (p.category === "Alcohol") out.alc += m;
+    else out.uns += m;
+  });
+  return out;
+}
+function summaryBlock(data, title) {
+  var t = totals(data);
+  var rows = ((data && data.items) || []).filter(p => unitsOf(p) || moneyOf(p)).sort((a, b) => moneyOf(b) - moneyOf(a));
+  return "<div class='grand'><div class='kpi-lbl'>" + esc(title) + "</div><b>" + baht(t.sales) + "</b></div>"
+    + "<div class='kpi-grid'><div class='kpi-card'><div class='kpi-lbl'>BILL</div><div class='kpi-val'>" + baht(t.cash) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>CHARGE</div><div class='kpi-val'>" + baht(t.pos) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Unsorted</div><div class='kpi-val'>" + baht(t.uns) + "</div></div></div>"
+    + "<div class='kpi-grid'><div class='kpi-card'><div class='kpi-lbl'>Food</div><div class='kpi-val' style='color:#f59e0b;'>" + baht(t.food) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Soft drinks</div><div class='kpi-val' style='color:#38bdf8;'>" + baht(t.soft) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Alcohol</div><div class='kpi-val' style='color:#f472b6;'>" + baht(t.alc) + "</div></div></div>"
+    + "<div class='table-container'><table class='data-table'><thead><tr><th>Item</th><th>Qty</th><th>Group</th><th style='text-align:right;'>Baht</th></tr></thead><tbody>"
+    + (rows.map(function (p) { return "<tr><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>"; }).join("") || "<tr><td colspan='4' style='text-align:center;color:#64748b;padding:16px;'>No sales in this view yet.</td></tr>")
+    + "</tbody></table></div>";
 }
 
 function renderAnalytics() {
@@ -330,13 +357,40 @@ function fetchCalendar() {
   if (!rangeStart) return;
   fetchAdminData("custom", fmt(rangeStart), fmt(rangeEnd || rangeStart));
 }
+function setLookupView(name) {
+  lookupView = name;
+  document.getElementById("look-hours").classList.toggle("active", name === "hours");
+  document.getElementById("look-top").classList.toggle("active", name === "top");
+  renderLookupDetail();
+}
 function renderLookup() {
-  var items = (lookupData && lookupData.items) || [];
-  var total = items.reduce((s, p) => s + p.cashRevenue + p.posRevenue, 0);
   var label = lookupData.startDate + (lookupData.endDate && lookupData.endDate !== lookupData.startDate ? " to " + lookupData.endDate : "");
-  document.getElementById("lookup-results").innerHTML = "<div class='section-title'>ALL sales " + esc(label) + ": " + baht(total) + "</div>" + (items.sort((a, b) => (b.cashUnits + b.posUnits) - (a.cashUnits + a.posUnits)).map(function (p) {
-    return "<div class='item-row'><div><b>" + esc(p.name) + "</b><div class='note'>" + esc(p.category) + " · " + p.cashUnits + " BILL · " + p.posUnits + " CHARGE</div></div><div>" + (p.cashUnits + p.posUnits) + " · " + baht(p.cashRevenue + p.posRevenue) + "</div></div>";
-  }).join("") || "<div class='note'>No sales in that range.</div>");
+  document.getElementById("lookup-results").innerHTML = summaryBlock(lookupData, label || "Selected days");
+  renderLookupDetail();
+}
+function renderLookupDetail() {
+  var box = document.getElementById("lookup-detail");
+  if (!lookupData) { box.innerHTML = "<div class='note'>Pick a day, then inspect it.</div>"; return; }
+  if (lookupView === "top") {
+    var ranked = (lookupData.items || []).filter(p => unitsOf(p) > 0).map(function (p) {
+      return { name: p.name, category: p.category, units: unitsOf(p), money: moneyOf(p) };
+    }).sort((a, b) => b.money - a.money).slice(0, 8);
+    box.innerHTML = listBlock("Top sellers", ranked, function (p) { return baht(p.money) + " · " + p.units + " units"; });
+    return;
+  }
+  var hourly = lookupData.hourly || {};
+  var food = series(hourly.food), soft = series(hourly.soft), alc = series(hourly.alcohol);
+  var max = 1;
+  for (var h = 7; h <= 23; h++) max = Math.max(max, food[h] || 0, soft[h] || 0, alc[h] || 0);
+  var html = "<div class='chart-card'><h3>Sales by hour</h3><div class='note'>Units: food / soft drinks / alcohol. Peak is the busiest hour.</div>";
+  for (var hour = 7; hour <= 23; hour++) {
+    var f = food[hour] || 0, s = soft[hour] || 0, a = alc[hour] || 0;
+    if (!f && !s && !a) continue;
+    html += "<div class='line-row'><div class='line-label'>" + (hour < 10 ? "0" : "") + hour + "</div><div class='line-track'>"
+      + thin(f, max, "food") + thin(s, max, "soft") + thin(a, max, "alc")
+      + "</div><div class='line-count'>" + f + " / " + s + " / " + a + "</div></div>";
+  }
+  box.innerHTML = html + (max === 1 ? "<div class='note'>No hourly sales in this selection.</div>" : "") + "</div>";
 }
 
 fetchAdminData("today");
