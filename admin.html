@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -60,6 +59,7 @@
   .cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; cursor: pointer; }
   .cal-day.empty { background: transparent; }
   .cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
+  .cal-day.in-range { background: #0e7490; color: #fff; }
   .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 12px 0; }
   .sub-btn { padding: 8px 4px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; }
   .sub-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
@@ -133,10 +133,6 @@
     <button class="btn-action" onclick="fetchCalendar()">Inspect selected days</button>
   </div>
   <div id="lookup-results" style="margin-top:16px;"></div>
-  <div class="sub-grid">
-    <button class="sub-btn active" id="look-hours" onclick="setLookupView('hours')">Sales by hour</button>
-    <button class="sub-btn" id="look-top" onclick="setLookupView('top')">Top sellers</button>
-  </div>
   <div id="lookup-detail"></div>
 </div>
 
@@ -352,12 +348,6 @@ function fetchCalendar() {
   if (!rangeStart) return;
   fetchAdminData("custom", fmt(rangeStart), fmt(rangeEnd || rangeStart));
 }
-function setLookupView(name) {
-  lookupView = name;
-  document.getElementById("look-hours").classList.toggle("active", name === "hours");
-  document.getElementById("look-top").classList.toggle("active", name === "top");
-  renderLookupDetail();
-}
 function renderLookup() {
   var label = lookupData.startDate + (lookupData.endDate && lookupData.endDate !== lookupData.startDate ? " to " + lookupData.endDate : "");
   document.getElementById("lookup-results").innerHTML = summaryBlock(lookupData, label || "Selected days");
@@ -365,27 +355,22 @@ function renderLookup() {
 }
 function renderLookupDetail() {
   var box = document.getElementById("lookup-detail");
-  if (!lookupData) { box.innerHTML = "<div class='note'>Pick a day, then inspect it.</div>"; return; }
-  if (lookupView === "top") {
-    var ranked = (lookupData.items || []).filter(p => unitsOf(p) > 0).map(function (p) {
-      return { name: p.name, category: p.category, units: unitsOf(p), money: moneyOf(p) };
-    }).sort((a, b) => b.money - a.money).slice(0, 8);
-    box.innerHTML = listBlock("Top sellers", ranked, function (p) { return baht(p.money) + " · " + p.units + " units"; });
-    return;
-  }
+  if (!lookupData) { box.innerHTML = ""; return; }
   var hourly = lookupData.hourly || {};
   var food = series(hourly.food), soft = series(hourly.soft), alc = series(hourly.alcohol);
   var max = 1;
   for (var h = 7; h <= 23; h++) max = Math.max(max, food[h] || 0, soft[h] || 0, alc[h] || 0);
-  var html = "<div class='chart-card'><h3>Sales by hour</h3><div class='note'>Units: food / soft drinks / alcohol. Peak is the busiest hour.</div>";
+  var html = "<div class='chart-card'><h3>Sales by hour</h3><div class='note'>Units: food / soft drinks / alcohol.</div>";
+  var any = false;
   for (var hour = 7; hour <= 23; hour++) {
     var f = food[hour] || 0, s = soft[hour] || 0, a = alc[hour] || 0;
     if (!f && !s && !a) continue;
+    any = true;
     html += "<div class='line-row'><div class='line-label'>" + (hour < 10 ? "0" : "") + hour + "</div><div class='line-track'>"
       + thin(f, max, "food") + thin(s, max, "soft") + thin(a, max, "alc")
       + "</div><div class='line-count'>" + f + " / " + s + " / " + a + "</div></div>";
   }
-  box.innerHTML = html + (max === 1 ? "<div class='note'>No hourly sales in this selection.</div>" : "") + "</div>";
+  box.innerHTML = html + (any ? "" : "<div class='note'>No hourly sales in this selection.</div>") + "</div>";
 }
 
 fetchAdminData("today");
