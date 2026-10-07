@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -96,8 +95,8 @@
     <div class="kpi-card"><div class="kpi-lbl">Alcohol</div><div id="kpi-alc" class="kpi-val" style="color:#f472b6;">฿0</div></div>
   </div>
   <p class="note" id="dash-note"></p>
-  <h3 style="font-size:14px; color:#94a3b8;">Item count</h3>
-  <div class="table-container"><table class="data-table"><thead><tr><th>Item</th><th>Qty</th><th>Group</th><th style="text-align:right;">Baht</th></tr></thead><tbody id="today-table-body"></tbody></table></div>
+  <h3 style="font-size:14px; color:#94a3b8;">Ranking, high to low</h3>
+  <div class="table-container"><table class="data-table"><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Group</th><th style="text-align:right;">Baht</th></tr></thead><tbody id="today-table-body"></tbody></table></div>
 </div>
 
 <div id="tab-performance" class="tab-content">
@@ -111,13 +110,13 @@
 </div>
 
 <div id="tab-analytics" class="tab-content">
+  <div id="best-lists"></div>
   <p class="note" id="peak-line">Peak hours load with the selected range.</p>
   <div class="chart-card">
     <h3>Units by hour</h3>
     <div class="note">Food amber, soft drinks blue, alcohol pink.</div>
     <div id="chart-hours"></div>
   </div>
-  <div id="best-lists"></div>
 </div>
 
 <div id="tab-lookup" class="tab-content">
@@ -149,6 +148,7 @@ let payMode = "all";
 let activeTab = "dashboard";
 let calDate = new Date();
 let lookupView = "hours";
+let rangeStart = null, rangeEnd = null;
 
 function baht(n) { return "฿" + (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 function esc(s) {
@@ -189,9 +189,11 @@ function setRange(range) {
   document.getElementById("flt-" + range).classList.add("active");
   fetchAdminData(range);
 }
-function fetchAdminData(range, startDate, endDate) {
-  document.getElementById("status").textContent = "Syncing...";
-  document.getElementById("status").classList.remove("bad");
+function fetchAdminData(range, startDate, endDate, quiet) {
+  if (!quiet) {
+    document.getElementById("status").textContent = "Syncing...";
+    document.getElementById("status").classList.remove("bad");
+  }
   var old = document.getElementById("jsonp-fetch-script");
   if (old) old.remove();
   var script = document.createElement("script");
@@ -236,9 +238,9 @@ function renderDashboard() {
   var uns = (adminData.unsorted || []).length;
   document.getElementById("dash-note").textContent = uns ? uns + " item names did not match the menu and are marked Unsorted." : "BILL is cash. CHARGE is the QR sale. ALL includes both.";
   var rows = items.filter(p => unitsOf(p) || moneyOf(p)).sort((a, b) => moneyOf(b) - moneyOf(a));
-  document.getElementById("today-table-body").innerHTML = rows.length ? rows.map(function (p) {
-    return "<tr><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
-  }).join("") : "<tr><td colspan='4' style='text-align:center; color:#64748b; padding:16px;'>No sales in this view yet.</td></tr>";
+  document.getElementById("today-table-body").innerHTML = rows.length ? rows.map(function (p, i) {
+    return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
+  }).join("") : "<tr><td colspan='5' style='text-align:center; color:#64748b; padding:16px;'>No sales in this view yet.</td></tr>";
 }
 
 function renderPerformance() {
@@ -264,25 +266,16 @@ function summaryBlock(data, title) {
   return "<div class='grand'><div class='kpi-lbl'>" + esc(title) + "</div><b>" + baht(t.sales) + "</b></div>"
     + "<div class='kpi-grid'><div class='kpi-card'><div class='kpi-lbl'>BILL</div><div class='kpi-val'>" + baht(t.cash) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>CHARGE</div><div class='kpi-val'>" + baht(t.pos) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Unsorted</div><div class='kpi-val'>" + baht(t.uns) + "</div></div></div>"
     + "<div class='kpi-grid'><div class='kpi-card'><div class='kpi-lbl'>Food</div><div class='kpi-val' style='color:#f59e0b;'>" + baht(t.food) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Soft drinks</div><div class='kpi-val' style='color:#38bdf8;'>" + baht(t.soft) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Alcohol</div><div class='kpi-val' style='color:#f472b6;'>" + baht(t.alc) + "</div></div></div>"
-    + "<div class='table-container'><table class='data-table'><thead><tr><th>Item</th><th>Qty</th><th>Group</th><th style='text-align:right;'>Baht</th></tr></thead><tbody>"
-    + (rows.map(function (p) { return "<tr><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>"; }).join("") || "<tr><td colspan='4' style='text-align:center;color:#64748b;padding:16px;'>No sales in this view yet.</td></tr>")
+    + "<div class='table-container'><table class='data-table'><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Group</th><th style='text-align:right;'>Baht</th></tr></thead><tbody>"
+    + (rows.map(function (p, i) { return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>"; }).join("") || "<tr><td colspan='5' style='text-align:center;color:#64748b;padding:16px;'>No sales in this view yet.</td></tr>")
     + "</tbody></table></div>";
 }
 
 function renderAnalytics() {
+  document.getElementById("best-lists").innerHTML = summaryBlock(adminData, "Analytics");
   var hourly = adminData.hourly || {};
   drawCombined(hourly);
   document.getElementById("peak-line").textContent = peakSentence();
-  var ranked = (adminData.items || []).filter(p => unitsOf(p) > 0).map(function (p) {
-    return { name: p.name, category: p.category, units: unitsOf(p), money: moneyOf(p) };
-  });
-  var byMoney = ranked.slice().sort((a, b) => b.money - a.money).slice(0, 5);
-  var byUnits = ranked.slice().sort((a, b) => b.units - a.units).slice(0, 5);
-  var quiet = ranked.slice().sort((a, b) => a.units - b.units)[0];
-  document.getElementById("best-lists").innerHTML =
-    listBlock("Top 5 by baht", byMoney, function (p) { return baht(p.money) + " · " + p.units + " units"; })
-    + listBlock("Top 5 by quantity", byUnits, function (p) { return p.units + " units · " + baht(p.money); })
-    + (quiet ? "<div class='note'>Quietest seller in this view: " + esc(quiet.name) + " (" + quiet.units + ").</div>" : "");
 }
 function series(bucket) {
   return bucket ? (bucket[payMode] || bucket.all || []) : [];
@@ -396,7 +389,10 @@ function renderLookupDetail() {
 
 fetchAdminData("today");
 renderCalendar();
-setInterval(function () { if (activeTab !== "lookup") fetchAdminData(currentRange); }, 30000);
+setInterval(function () {
+  if (activeTab === "lookup" && rangeStart) fetchAdminData("custom", fmt(rangeStart), fmt(rangeEnd || rangeStart), true);
+  else fetchAdminData(currentRange, "", "", true);
+}, 15000);
 </script>
 </body>
 </html>
