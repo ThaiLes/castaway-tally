@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -90,8 +91,14 @@
   <div class="table-container"><table class="data-table"><thead><tr><th>#</th><th>Item</th><th>Group</th><th style="text-align:right;">Qty</th></tr></thead><tbody id="lookup-body"></tbody></table></div>
 </div>
 <div id="tab-decisions" class="tab-content">
-  <p class="note">Both columns show sales so far. They will differ once tracking passes 7 days.</p>
-  <div class="table-container"><table class="data-table"><thead><tr><th>Menu item</th><th style="text-align:right;">7 days</th><th style="text-align:right;">30 days</th></tr></thead><tbody id="decision-body"></tbody></table></div>
+  <p class="note">This week is Monday to today. This month is the calendar month. History from 6 Oct is included.</p>
+  <select id="month-pick" onchange="pickMonth()" style="width:100%; padding:8px; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #334155; margin-bottom:8px;"></select>
+  <div class="two-grid">
+    <input id="report-email" type="email" placeholder="Email for this report" style="padding:8px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#fff;">
+    <button class="btn-action" style="margin-top:0;" onclick="sendReport()">Send report</button>
+  </div>
+  <p class="note" id="report-note">The address is cleared after sending.</p>
+  <div class="table-container"><table class="data-table"><thead><tr><th>Menu item</th><th style="text-align:right;">This week</th><th id="month-col" style="text-align:right;">This month</th></tr></thead><tbody id="decision-body"></tbody></table></div>
 </div>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
@@ -100,7 +107,42 @@ let picked = [];
 let group = "Food";
 let todayItems = [];
 let weekItems = [];
-let monthItems = [];
+let decisionSlot = "";
+function mondayOf(d) {
+  var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  var day = x.getDay();
+  x.setDate(x.getDate() - (day === 0 ? 6 : day - 1));
+  return x;
+}
+function loadDecisions() {
+  fillMonthPick();
+  decisionSlot = "week";
+  var now = new Date();
+  fetchCounts("custom", fmt(mondayOf(now)), fmt(now));
+}
+function pickMonth() {
+  var parts = document.getElementById("month-pick").value.split("-");
+  var start = new Date(Number(parts[0]), Number(parts[1]) - 1, 1);
+  var end = new Date(Number(parts[0]), Number(parts[1]), 0);
+  var today = new Date();
+  if (end > today) end = today;
+  document.getElementById("month-col").textContent = document.getElementById("month-pick").selectedOptions[0].text;
+  decisionSlot = "month";
+  fetchCounts("custom", fmt(start), fmt(end));
+}
+function fillMonthPick() {
+  var sel = document.getElementById("month-pick");
+  if (sel.options.length) return;
+  var names = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var now = new Date();
+  for (var i = 0; i < 6; i++) {
+    var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    var opt = document.createElement("option");
+    opt.value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+    opt.textContent = names[d.getMonth()] + " " + d.getFullYear();
+    sel.appendChild(opt);
+  }
+}
 const MENU = [
   ["Sandwiches", "Sandwich - Peri Peri Chicken Mayo", /peri/i],
   ["Sandwiches", "Sandwich - Ham & Cheese", /ham/i],
@@ -156,7 +198,7 @@ function switchTab(name) {
   document.getElementById("tab-" + name).classList.add("active");
   document.getElementById("btn-tab-" + name).classList.add("active");
   if (name === "lookup") renderCalendar();
-  if (name === "decisions") fetchCounts("month");
+  if (name === "decisions") loadDecisions();
 }
 function fetchCounts(range, startDate, endDate, quiet) {
   if (!quiet) document.getElementById("status").textContent = "Syncing...";
@@ -180,15 +222,18 @@ window.handleAdminData = function (data) {
   var heart = document.getElementById("heart-status");
   heart.textContent = data.isOnline ? "❤️" : "💔";
   heart.classList.toggle("pulse", !!data.isOnline);
-  if (data.range === "custom") { lookupItems = data.items || []; fillTable("lookup-body", lookupItems); }
-  else if (data.range === "week" || data.range === "month") {
-    if (data.range === "week") weekItems = data.items || [];
-    if (data.range === "month") monthItems = data.items || [];
-    if (!weekItems.length) weekItems = monthItems;
-    if (!monthItems.length) monthItems = weekItems;
+  if (data.range === "custom" && decisionSlot) {
+    if (decisionSlot === "week") weekItems = data.items || [];
+    else monthItems = data.items || [];
+    var next = decisionSlot === "week" ? "month" : "";
+    decisionSlot = next;
     renderDecisions();
+    if (next) pickMonth();
+    return;
   }
-  else { todayItems = data.items || []; fillTable("today-body", todayItems); }
+  if (data.range === "custom") { lookupItems = data.items || []; fillTable("lookup-body", lookupItems); return; }
+  todayItems = data.items || [];
+  fillTable("today-body", todayItems);
 };
 function setGroup(name) {
   group = name;
@@ -280,7 +325,19 @@ function fetchDates() {
   lookupLabel = picked.length + " days";
   fetchCounts("custom", fmt(new Date(dates[0])), fmt(new Date(dates[dates.length - 1])));
 }
-fetchCounts("today");
+function sendReport() {
+  var email = document.getElementById("report-email").value.trim();
+  var note = document.getElementById("report-note");
+  if (!email) { note.textContent = "Enter an email"; return; }
+  note.textContent = "Sending...";
+  var script = document.createElement("script");
+  script.src = API_URL + "?action=sendReport&email=" + encodeURIComponent(email) + "&callback=handleReport&t=" + Date.now();
+  document.body.appendChild(script);
+  document.getElementById("report-email").value = "";
+}
+window.handleReport = function (data) {
+  document.getElementById("report-note").textContent = data && data.status === "success" ? "Sent. Address cleared." : "Not sent";
+};
 renderCalendar();
 setInterval(function () { fetchCounts("today", "", "", true); }, 45000);
 </script>
