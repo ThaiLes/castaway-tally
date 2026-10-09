@@ -107,6 +107,7 @@ let picked = [];
 let group = "Food";
 let todayItems = [];
 let weekItems = [];
+let monthItems = [];
 let decisionSlot = "";
 function mondayOf(d) {
   var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -338,6 +339,7 @@ function sendReport() {
 window.handleReport = function (data) {
   document.getElementById("report-note").textContent = data && data.status === "success" ? "Sent. Address cleared." : "Not sent";
 };
+fetchCounts("today");
 renderCalendar();
 setInterval(function () { fetchCounts("today", "", "", true); }, 45000);
 </script>
