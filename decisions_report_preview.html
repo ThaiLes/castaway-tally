@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Castaway Beach Bar - Complete Decisions & Peak Sales Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+  
+  body {
+    background: #525659;
+    padding: 30px 10px;
+  }
+
+  /* Simulated A4 Page Container */
+  .page {
+    background: #ffffff;
+    color: #1e293b;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm;
+    margin: 0 auto 30px auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    border-radius: 2px;
+  }
+
+  /* Header Section */
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+  }
+
+  .brand h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+
+  .brand p {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  .meta-details {
+    text-align: right;
+    font-size: 11px;
+    color: #475569;
+    line-height: 1.5;
+  }
+
+  .meta-details strong {
+    color: #0f172a;
+  }
+
+  /* Summary KPI Cards */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .kpi-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+
+  .kpi-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.5px;
+  }
+
+  .kpi-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 4px;
+  }
+
+  .kpi-sub {
+    font-size: 10px;
+    color: #06b6d4;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  /* Section Titles */
+  .section-title {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #0f172a;
+    background: #f1f5f9;
+    padding: 6px 10px;
+    border-left: 4px solid #06b6d4;
+    margin-bottom: 10px;
+    margin-top: 20px;
+  }
+
+  /* Data Tables */
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-bottom: 16px;
+  }
+
+  .report-table th {
+    background: #ffffff;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 8px;
+    border-bottom: 2px solid #cbd5e1;
+    text-align: left;
+  }
+
+  .report-table td {
+    padding: 7px 8px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #334155;
+  }
+
+  .report-table tr:nth-child(even) {
+    background: #fafafa;
+  }
+
+  .cat-header td {
+    background: #f8fafc !important;
+    font-weight: 800;
+    color: #0f172a;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-top: 10px;
+    border-bottom: 1px solid #cbd5e1;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+  }
+  .badge-high { background: #d1fae5; color: #047857; }
+  .badge-mid { background: #e0f2fe; color: #0369a1; }
+  .badge-low { background: #f1f5f9; color: #64748b; }
+
+  /* Hourly Bar Graph (Pure CSS Print-Safe) */
+  .chart-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .bar-graph {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 120px;
+    gap: 6px;
+    padding-top: 20px;
+    border-bottom: 2px solid #cbd5e1;
+  }
+
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .bar-fill {
+    width: 100%;
+    background: #06b6d4;
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    min-height: 2px;
+  }
+
+  .bar-fill.peak {
+    background: #0f172a;
+  }
+
+  .bar-val {
+    font-size: 8px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 3px;
+  }
+
+  .bar-label {
+    font-size: 8px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 6px;
+  }
+
+  /* Footer Section */
+  .report-footer {
+    margin-top: 30px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: #94a3b8;
+  }
+
+  /* Print Specific Rules for PDF Generation */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; margin: 0; width: 100%; padding: 0; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Interactive Control Panel (Screen Only) -->
+<div style="text-align: center; margin-bottom: 20px;" class="no-print">
+  <button onclick="window.print()" style="padding: 10px 20px; font-weight: bold; background: #06b6d4; color: #0f172a; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+    📄 Print / Save Full PDF
+  </button>
+</div>
+
+<div class="page">
+  <!-- Header -->
+  <div class="report-header">
+    <div class="brand">
+      <h1>Castaway Beach Bar</h1>
+      <p>All-Item Menu Performance & Trajectory Report</p>
+    </div>
+    <div class="meta-details">
+      <p><strong>Report Date:</strong> 09 Oct 2026</p>
+      <p><strong>Reporting Period:</strong> October 2026</p>
+      <p><strong>Venue Location:</strong> Koh Phangan, Thailand</p>
+    </div>
+  </div>
+
+  <!-- Key Metrics Summary -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">This Week Volume</div>
+      <div class="kpi-value">739 Units</div>
+      <div class="kpi-sub">Monday 05 Oct – Today</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">This Month Volume</div>
+      <div class="kpi-value">739 Units</div>
+      <div class="kpi-sub">October Calendar Month</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Peak Food Service</div>
+      <div class="kpi-value">12:00 – 14:00</div>
+      <div class="kpi-sub">Lunch Service Spike</div>
+    </div>
+  </div>
+
+  <!-- Complete Menu Performance Breakdown -->
+  <div class="section-title">Complete Menu Performance Breakdown</div>
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th>Menu Item</th>
+        <th class="num">This Week</th>
+        <th class="num">This Month</th>
+        <th class="num">Performance Status</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- Sandwiches -->
+      <tr class="cat-header"><td colspan="4">Sandwiches</td></tr>
+      <tr><td>Sandwich - Peri Peri Chicken Mayo</td><td class="num">42</td><td class="num">42</td><td class="num"><span class="badge badge-high">Top Seller</span></td></tr>
+      <tr><td>Sandwich - Ham & Cheese</td><td class="num">28</td><td class="num">28</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Sandwich - Tuna Melt</td><td class="num">19</td><td class="num">19</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Sandwich - Basil Pesto V</td><td class="num">14</td><td class="num">14</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Sandwich - Massaman & Chedder</td><td class="num">11</td><td class="num">11</td><td class="num"><span class="badge badge-low">Low</span></td></tr>
+
+      <!-- Breakfast -->
+      <tr class="cat-header"><td colspan="4">Breakfast</td></tr>
+      <tr><td>Porridge</td><td class="num">12</td><td class="num">12</td><td class="num"><span class="badge badge-low">Low</span></td></tr>
+      <tr><td>Eggs on toast</td><td class="num">24</td><td class="num">24</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Eggs Benedict</td><td class="num">56</td><td class="num">56</td><td class="num"><span class="badge badge-high">Top Seller</span></td></tr>
+      <tr><td>Pancakes</td><td class="num">18</td><td class="num">18</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Breakfast muffins</td><td class="num">15</td><td class="num">15</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>French toast</td><td class="num">31</td><td class="num">31</td><td class="num"><span class="badge badge-mid">High Demand</span></td></tr>
+      <tr><td>Muesli</td><td class="num">9</td><td class="num">9</td><td class="num"><span class="badge badge-low">Low</span></td></tr>
+      <tr><td>Fruit platter</td><td class="num">22</td><td class="num">22</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Omelette</td><td class="num">27</td><td class="num">27</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+
+      <!-- Thai Curries -->
+      <tr class="cat-header"><td colspan="4">Thai Curries</td></tr>
+      <tr><td>Panang curry</td><td class="num">33</td><td class="num">33</td><td class="num"><span class="badge badge-mid">High Demand</span></td></tr>
+      <tr><td>Green curry</td><td class="num">29</td><td class="num">29</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Massaman curry</td><td class="num">38</td><td class="num">38</td><td class="num"><span class="badge badge-mid">High Demand</span></td></tr>
+
+      <!-- Thai Specialities -->
+      <tr class="cat-header"><td colspan="4">Thai Specialities</td></tr>
+      <tr><td>Special fried rice</td><td class="num">45</td><td class="num">45</td><td class="num"><span class="badge badge-high">Top Seller</span></td></tr>
+      <tr><td>Curried fried rice</td><td class="num">16</td><td class="num">16</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Pad Thai</td><td class="num">84</td><td class="num">84</td><td class="num"><span class="badge badge-high">Top Seller</span></td></tr>
+      <tr><td>Beef with Thai basil</td><td class="num">62</td><td class="num">62</td><td class="num"><span class="badge badge-high">Top Seller</span></td></tr>
+      <tr><td>Sweet and sour</td><td class="num">21</td><td class="num">21</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Beef in oyster sauce</td><td class="num">17</td><td class="num">17</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Chicken with cashew nut</td><td class="num">35</td><td class="num">35</td><td class="num"><span class="badge badge-mid">High Demand</span></td></tr>
+
+      <!-- Salads -->
+      <tr class="cat-header"><td colspan="4">Salads</td></tr>
+      <tr><td>Thai spicy salad</td><td class="num">18</td><td class="num">18</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Burmese salad</td><td class="num">8</td><td class="num">8</td><td class="num"><span class="badge badge-low">Low</span></td></tr>
+      <tr><td>Fresh garden salad</td><td class="num">13</td><td class="num">13</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+
+      <!-- Snacks & Sides -->
+      <tr class="cat-header"><td colspan="4">Snacks & Sides</td></tr>
+      <tr><td>Tempura prawns</td><td class="num">26</td><td class="num">26</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>Crispy spring rolls</td><td class="num">32</td><td class="num">32</td><td class="num"><span class="badge badge-mid">High Demand</span></td></tr>
+      <tr><td>Crispy chicken wings</td><td class="num">48</td><td class="num">48</td><td class="num"><span class="badge badge-high">Top Seller</span></td></tr>
+      <tr><td>Thai pork ribs</td><td class="num">23</td><td class="num">23</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+      <tr><td>French fries</td><td class="num">95</td><td class="num">95</td><td class="num"><span class="badge badge-high">Top Seller</span></td></tr>
+
+      <!-- Something Sweet -->
+      <tr class="cat-header"><td colspan="4">Something Sweet</td></tr>
+      <tr><td>Mango sticky rice</td><td class="num">41</td><td class="num">41</td><td class="num"><span class="badge badge-high">Top Seller</span></td></tr>
+      <tr><td>Ice cream</td><td class="num">19</td><td class="num">19</td><td class="num"><span class="badge badge-mid">Steady</span></td></tr>
+
+    </tbody>
+  </table>
+
+  <!-- Sales Trajectory & Peak Hours Section -->
+  <div class="section-title">Sales Trajectory & Hourly Food Peak Hours</div>
+  <div class="chart-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <span style="font-size: 11px; font-weight: 700; color: #0f172a;">Food Items Sold by Operating Hour (08:00 – 21:00)</span>
+      <span style="font-size: 9px; color: #64748b; font-weight: 600;">■ Peak Hours Highlighted</span>
+    </div>
+
+    <!-- HTML/CSS Pure Print Bar Graph -->
+    <div class="bar-graph">
+      <div class="bar-col"><span class="bar-val">12</span><div class="bar-fill" style="height: 15%;"></div><span class="bar-label">08:00</span></div>
+      <div class="bar-col"><span class="bar-val">28</span><div class="bar-fill" style="height: 35%;"></div><span class="bar-label">09:00</span></div>
+      <div class="bar-col"><span class="bar-val">45</span><div class="bar-fill" style="height: 55%;"></div><span class="bar-label">10:00</span></div>
+      <div class="bar-col"><span class="bar-val">52</span><div class="bar-fill" style="height: 65%;"></div><span class="bar-label">11:00</span></div>
+      <div class="bar-col"><span class="bar-val">78</span><div class="bar-fill peak" style="height: 95%;"></div><span class="bar-label">12:00</span></div>
+      <div class="bar-col"><span class="bar-val">84</span><div class="bar-fill peak" style="height: 100%;"></div><span class="bar-label">13:00</span></div>
+      <div class="bar-col"><span class="bar-val">62</span><div class="bar-fill" style="height: 75%;"></div><span class="bar-label">14:00</span></div>
+      <div class="bar-col"><span class="bar-val">38</span><div class="bar-fill" style="height: 48%;"></div><span class="bar-label">15:00</span></div>
+      <div class="bar-col"><span class="bar-val">31</span><div class="bar-fill" style="height: 40%;"></div><span class="bar-label">16:00</span></div>
+      <div class="bar-col"><span class="bar-val">48</span><div class="bar-fill" style="height: 60%;"></div><span class="bar-label">17:00</span></div>
+      <div class="bar-col"><span class="bar-val">65</span><div class="bar-fill peak" style="height: 82%;"></div><span class="bar-label">18:00</span></div>
+      <div class="bar-col"><span class="bar-val">58</span><div class="bar-fill" style="height: 72%;"></div><span class="bar-label">19:00</span></div>
+      <div class="bar-col"><span class="bar-val">34</span><div class="bar-fill" style="height: 42%;"></div><span class="bar-label">20:00</span></div>
+      <div class="bar-col"><span class="bar-val">15</span><div class="bar-fill" style="height: 20%;"></div><span class="bar-label">21:00</span></div>
+    </div>
+  </div>
+
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th>Service Window</th>
+        <th>Primary Volume Drivers</th>
+        <th class="num">Trajectory Trend</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Morning Service (08:00 – 11:00)</td>
+        <td>Eggs Benedict, French Toast, Coffee & Breakfast Shakes</td>
+        <td class="num"><span class="badge badge-mid">+18% Steady Rise</span></td>
+      </tr>
+      <tr>
+        <td>Lunch Peak (12:00 – 14:00)</td>
+        <td>Pad Thai, Beef with Thai Basil, Sandwiches & French Fries</td>
+        <td class="num"><span class="badge badge-high">Primary Daily Spike</span></td>
+      </tr>
+      <tr>
+        <td>Sunset & Dinner (17:00 – 20:00)</td>
+        <td>Special Fried Rice, Chicken Wings, Curries & Sweet Items</td>
+        <td class="num"><span class="badge badge-mid">+35% Evening Spike</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Footer -->
+  <div class="report-footer">
+    <div>Generated automatically by Castaway Admin Portal</div>
+    <div>Page 1 of 1</div>
+  </div>
+</div>
+
+</body>
+</html>
