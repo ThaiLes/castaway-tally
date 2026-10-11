@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -69,11 +68,6 @@
   <button class="nav-btn" id="btn-tab-lookup" onclick="switchTab('lookup')">Date Lookup</button>
 </div>
 <div id="tab-dashboard" class="tab-content active">
-  <div class="pay-grid">
-    <button class="pay-btn active" id="pay-all" onclick="setPay('all')">ALL</button>
-    <button class="pay-btn" id="pay-cash" onclick="setPay('cash')">BILL</button>
-    <button class="pay-btn" id="pay-pos" onclick="setPay('pos')">CHARGE</button>
-  </div>
   <div class="kpi-grid">
     <div class="kpi-card"><div class="kpi-lbl">Sales</div><div id="kpi-rev" class="kpi-val">฿0</div></div>
     <div class="kpi-card"><div class="kpi-lbl">BILL</div><div id="kpi-cash" class="kpi-val">฿0</div></div>
@@ -187,10 +181,10 @@ function splitMoney(items) {
   (items || []).forEach(function (p) {
     cash += p.cashRevenue || 0; pos += p.posRevenue || 0;
     var m = moneyOf(p);
-    if (p.category === "Food") food += m;
+    if (p.category === "Food" && !isBbq(p)) food += m;
     else if (p.category === "Soft drinks") soft += m;
     else if (p.category === "Alcohol") alc += m;
-    else if (p.category === "BBQ") bbq += m;
+    else if (isBbq(p)) bbq += m;
     else uns += m;
   });
   return { food: food, soft: soft, alc: alc, bbq: bbq, uns: uns, cash: cash, pos: pos };
@@ -209,7 +203,7 @@ function renderDashboard() {
   document.getElementById("dash-note").textContent = "BILL is cash. CHARGE is the QR sale. ALL includes both.";
   var rows = items.filter(p => unitsOf(p) || moneyOf(p)).sort((a, b) => moneyOf(b) - moneyOf(a));
   document.getElementById("today-table-body").innerHTML = rows.length ? rows.map(function (p, i) {
-    return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
+    return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(isBbq(p) ? "BBQ" : p.category) + "'>" + esc(isBbq(p) ? "BBQ" : p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
   }).join("") : "<tr><td colspan='5' style='text-align:center; color:#64748b; padding:16px;'>No sales in this view yet.</td></tr>";
 }
 function summaryBlock(data, title) {
@@ -218,7 +212,7 @@ function summaryBlock(data, title) {
   return "<div class='grand'><div class='kpi-lbl'>" + esc(title) + "</div><b>" + baht(payMode === "cash" ? t.cash : payMode === "pos" ? t.pos : t.cash + t.pos) + "</b></div>"
     + "<div class='kpi-grid'><div class='kpi-card'><div class='kpi-lbl'>Food</div><div class='kpi-val' style='color:#f59e0b;'>" + baht(t.food) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>BBQ</div><div class='kpi-val' style='color:#ef4444;'>" + baht(t.bbq) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Soft drinks</div><div class='kpi-val' style='color:#38bdf8;'>" + baht(t.soft) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Alcohol</div><div class='kpi-val' style='color:#f472b6;'>" + baht(t.alc) + "</div></div></div>"
     + "<div class='table-container'><table class='data-table'><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Group</th><th style='text-align:right;'>Baht</th></tr></thead><tbody>"
-    + (rows.map(function (p, i) { return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>"; }).join("") || "<tr><td colspan='5' style='text-align:center;color:#64748b;padding:16px;'>No sales in this view yet.</td></tr>")
+    + (rows.map(function (p, i) { return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(isBbq(p) ? "BBQ" : p.category) + "'>" + esc(isBbq(p) ? "BBQ" : p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>"; }).join("") || "<tr><td colspan='5' style='text-align:center;color:#64748b;padding:16px;'>No sales in this view yet.</td></tr>")
     + "</tbody></table></div>";
 }
 function renderAnalytics() {
@@ -289,7 +283,7 @@ function fetchCalendar() {
 }
 function renderLookup() {
   var label = lookupData.startDate + (lookupData.endDate && lookupData.endDate !== lookupData.startDate ? " to " + lookupData.endDate : "");
-  document.getElementById("lookup-results").innerHTML = summaryBlock(lookupData, label || "Selected days");
+  document.getElementById("lookup-results").innerHTML = "<h3 style='font-size:14px; color:#94a3b8; margin-top:12px;'>Ranking, high to low</h3>" + summaryBlock(lookupData, label || "Selected days");
   var hourly = lookupData.hourly || {};
   document.getElementById("lookup-detail").innerHTML = "<div class='chart-card'><h3>Sales by hour</h3><div class='note'>Food / soft drinks / alcohol / BBQ.</div><div id='lookup-hours'></div></div>";
   drawCombined("lookup-hours", hourly);
