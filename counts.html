@@ -104,12 +104,7 @@ body { background: #0f172a; color: #fff; padding: 16px; max-width: 680px; margin
 
 <div id="tab-decisions" class="tab-content">
   <p class="note">This week is Monday to today. This month is the calendar month. History from 6 Oct is included.</p>
-  <select id="month-pick" onchange="pickMonth()" style="width:100%; padding:8px; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #334155; margin-bottom:8px;"></select>
-  <div class="two-grid">
-    <input id="report-email" type="email" placeholder="Email for this report" style="padding:8px; border-radius: 6px; border:1px solid #334155; background:#0f172a; color:#fff;">
-    <button class="btn-action" style="margin-top:0;" onclick="sendReport()">Send report</button>
-  </div>
-  <p class="note" id="report-note">The address is cleared after sending.</p>
+  <select id="month-pick" onchange="pickMonth()" style="width:100%; padding:8px; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #334155; margin-bottom:12px;"></select>
   <div class="table-container">
     <table class="data-table">
       <thead><tr><th>Menu item</th><th style="text-align:right;">This week</th><th id="month-col" style="text-align:right;">This month</th></tr></thead>
@@ -286,12 +281,16 @@ function setGroup(name) {
 function family(name) {
   var n = String(name || "").toLowerCase();
 
-  // Strip standalone leading 'Extra + ' if present
-  if (/^extra\s*\+\s*/i.test(n)) {
-    n = n.replace(/^extra\s*\+\s*/i, "");
+  // Strip leading 'Extra +' or 'Extra' prefixes
+  if (/^extra\b/i.test(n)) {
+    n = n.replace(/^extra\s*\+\s*/i, "").replace(/^extra\s*/i, "");
   }
 
-  if (/^bbq-/.test(n)) return String(name || "").replace(/^bbq-\s*/i, "");
+  // Strip BBQ prefixes
+  if (/^bbq-/.test(n)) n = n.replace(/^bbq-\s*/i, "");
+
+  // Match menu groupings
+  if (/chimichurri|pork rib|ribs|brisket|pulled pork|hot dog|\bdog\b/i.test(n)) return String(name).replace(/^bbq-\s*/i, "").replace(/\s*\+.*/, "").trim();
   if (/spirit|barcadi|bacardi|sangsom|\brum\b|\bgin\b|martini|mojito/.test(n)) return "Spirit and mixer";
   if (/peri/.test(n)) return "Sandwich - Peri Peri Chicken Mayo";
   if (/tuna melt/.test(n)) return "Sandwich - Tuna Melt";
@@ -317,9 +316,12 @@ function fillTable(bodyId, items) {
   (items || []).forEach(function (p) {
     var units = unitsOf(p);
     if (!units) return;
-    if (p.category !== group) return;
+
+    var cat = categoriseLocal(p.name);
+    if (cat !== group) return;
+
     var name = family(p.name);
-    if (!totals[name]) totals[name] = { name: name, category: p.category, units: 0 };
+    if (!totals[name]) totals[name] = { name: name, category: cat, units: 0 };
     totals[name].units += units;
   });
 
@@ -406,20 +408,15 @@ function fetchDates() {
   fetchCounts("custom", fmt(new Date(dates[0])), fmt(new Date(dates[dates.length - 1])));
 }
 
-function sendReport() {
-  var email = document.getElementById("report-email").value.trim();
-  var note = document.getElementById("report-note");
-  if (!email) { note.textContent = "Enter an email"; return; }
-  note.textContent = "Sending...";
-  var script = document.createElement("script");
-  script.src = API_URL + "?action=sendReport&email=" + encodeURIComponent(email) + "&callback=handleReport&t=" + Date.now();
-  document.body.appendChild(script);
-  document.getElementById("report-email").value = "";
+function categoriseLocal(name) {
+  var n = String(name || '').toLowerCase();
+  if (!n) return 'Unsorted';
+  if (/^bbq-|bbq shack|bbq hut|chimichurri|pork rib|ribs|brisket|pulled pork|hot dog|\bdog\b|bbq/i.test(n)) return 'BBQ';
+  if (/espresso martini|mojito|margarita|pina colada|piña colada|tequila sunrise|tom collins|daiquiri|cuba libre|white russian|whisky sour|baileys|cosmopolitan|blue hawaii|singapore sling|mai tai|long island|san mig|stella|budweiser|singha|leo|chang|cider|sangsom|barcadi|bacardi|rum|gin|vodka|wine|beer|spirit/i.test(n)) return 'Alcohol';
+  if (/cappu|espresso|americano|flat\s*white|long\s*black|piccolo|latte|mocha|macchiato|affogato|matcha|\btea\b|\bchai\b|chocolate|smoothie|\bshakes?\b|lassi|\bsoda\b|milkshake|\bcoke\b|sprite|schweppes|tonic|\bwater\b|coconut|iced\s*chocolate/i.test(n)) return 'Soft drinks';
+  if (/porridge|porriddge|muesli|granola|fruit platter|french toast|pancake|muffin|bagel|croissant|benedict|sourdough|sourdought|omelette|eggs|avocado|curry|panang|massaman|fried rice|pad thai|basil|sweet.?sour|oyster|cashew|somtam|salad|tempura|spring roll|wings|fries|sticky rice|ice cream|sandwich|peri[\s-]*peri|chicken mayo|tuna melt|pesto|ham|cheddar|burger|wrap/i.test(n)) return 'Food';
+  return 'Unsorted';
 }
-
-window.handleReport = function (data) {
-  document.getElementById("report-note").textContent = data && data.status === "success" ? "Sent. Address cleared." : "Not sent";
-};
 
 fetchCounts("today");
 renderCalendar();

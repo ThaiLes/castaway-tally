@@ -28,8 +28,7 @@ def slip(kind):
     elif kind == "extra":
         body = "Pad Thai (Chicken) 180.001 x 180.00 Extra 70.001 x 0.00 + Chicken (70.00) Soda 60.001 x 60.00 !Amount due 310.00!"
     elif kind == "bbq":
-        body = "BBQ-Chimichurri dog chicken 220.001 x 220.00 BBQ-Pork rib 180.001 x 180.00 !Amount due 400.00!"
-        head = head.replace("Castaway beach bar", "BBQ shack")
+        return "@@t!! Mummy yy ! : : BBQ shack - - - - - - - - - - - - - - - - - - - - - - - -BBQ-Cheese Burger " + str(270 + (int(time.time()) % 7)) + ".001 x 220.00 + bacon (50.00) - - - - - - - - - - - - - - - - - - - - - - - -! 270.00! 270.00 - - - - - - - - - - - - - - - - - - - - - - - -" + time.strftime("%d/%m/%Y %H:%M") + " #1-00" + str(int(time.time()) % 90) + "dVB"
     elif kind == "charge":
         body = "Latte (Iced) 100.001 x 100.00 !Total 100.00! Cash 100.00"
         head = head.replace(" BILL ", " ")
