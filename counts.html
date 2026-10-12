@@ -291,7 +291,7 @@ function family(name) {
 
   // Match menu groupings
   if (/chimichurri|pork rib|ribs|brisket|pulled pork|hot dog|\bdog\b/i.test(n)) return String(name).replace(/^bbq-\s*/i, "").replace(/\s*\+.*/, "").trim();
-  if (/spirit|barcadi|bacardi|sangsom|\brum\b|\bgin\b|martini|mojito/.test(n)) return "Spirit and mixer";
+  if (/hoegaarden|summer ipa|\bipa\b|maitai|mai tai|daquiri|daiquiri|say play|spirit|barcadi|bacardi|sangsom|\brum\b|\bgin\b|martini|mojito/.test(n)) return String(name).replace(/\s*\([^)]*\)/g, "").replace(/\s*\+.*/, "").trim();
   if (/peri/.test(n)) return "Sandwich - Peri Peri Chicken Mayo";
   if (/tuna melt/.test(n)) return "Sandwich - Tuna Melt";
   if (/pesto/.test(n)) return "Sandwich - Basil Pesto V";
@@ -412,8 +412,8 @@ function categoriseLocal(name) {
   var n = String(name || '').toLowerCase();
   if (!n) return 'Unsorted';
   if (/^bbq-|bbq shack|bbq hut|chimichurri|pork rib|ribs|brisket|pulled pork|hot dog|\bdog\b|bbq/i.test(n)) return 'BBQ';
-  if (/espresso martini|mojito|margarita|pina colada|piña colada|tequila sunrise|tom collins|daiquiri|cuba libre|white russian|whisky sour|baileys|cosmopolitan|blue hawaii|singapore sling|mai tai|long island|san mig|stella|budweiser|singha|leo|chang|cider|sangsom|barcadi|bacardi|rum|gin|vodka|wine|beer|spirit/i.test(n)) return 'Alcohol';
-  if (/cappu|espresso|americano|flat\s*white|long\s*black|piccolo|latte|mocha|macchiato|affogato|matcha|\btea\b|\bchai\b|chocolate|smoothie|\bshakes?\b|lassi|\bsoda\b|milkshake|\bcoke\b|sprite|schweppes|tonic|\bwater\b|coconut|iced\s*chocolate/i.test(n)) return 'Soft drinks';
+  if (/hoegaarden|summer ipa|\bipa\b|maitai|mai tai|daquiri|daiquiri|say play|espresso martini|mojito|margarita|pina colada|piña colada|tequila sunrise|tom collins|cuba libre|white russian|whisky sour|baileys|cosmopolitan|blue hawaii|singapore sling|mai tai|long island|san mig|stella|budweiser|singha|leo|chang|cider|sangsom|barcadi|bacardi|rum|gin|vodka|wine|beer|spirit/i.test(n)) return 'Alcohol';
+  if (/cappu|espresso|americano|flat\s*white|long\s*black|piccolo|latte|mocha|macchiato|affogato|matcha|\btea\b|\bchai\b|chocolate|smoothie|\bshakes?\b|lassi|\bsoda\b|milkshake|\bcoke\b|sprite|schweppes|tonic|\bwater\b|coconut|iced\s*chocolate|juice|mango|passion|watermelon|lemonade/i.test(n)) return 'Soft drinks';
   if (/porridge|porriddge|muesli|granola|fruit platter|french toast|pancake|muffin|bagel|croissant|benedict|sourdough|sourdought|omelette|eggs|avocado|curry|panang|massaman|fried rice|pad thai|basil|sweet.?sour|oyster|cashew|somtam|salad|tempura|spring roll|wings|fries|sticky rice|ice cream|sandwich|peri[\s-]*peri|chicken mayo|tuna melt|pesto|ham|cheddar|burger|wrap/i.test(n)) return 'Food';
   return 'Unsorted';
 }
