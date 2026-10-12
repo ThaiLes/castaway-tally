@@ -1,47 +1,46 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Castaway Counts</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: #0f172a; color: #fff; padding: 16px; max-width: 680px; margin: 0 auto; }
-  .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-  .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
-  .status.bad { background: #7f1d1d; color: #fca5a5; }
-  .heart-icon { display: inline-block; margin-left: 6px; font-size: 16px; }
-  .heart-icon.pulse { animation: heartPulse 1.2s infinite ease-in-out; }
-  @keyframes heartPulse { 0%{transform:scale(1)} 15%{transform:scale(1.25)} 30%{transform:scale(1)} 45%{transform:scale(1.15)} 60%{transform:scale(1)} 100%{transform:scale(1)} }
-  .pay-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 14px; }
-  .two-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
-  .nav-btn { padding: 8px 4px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; }
-  .nav-btn.active { background: #06b6d4; color: #0f172a; border-color: #06b6d4; }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-  .note { font-size: 11px; color: #94a3b8; margin: 6px 0 12px; }
-  .table-container, .calendar-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; }
-  .table-container { overflow: hidden; margin-top: 10px; }
-  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .data-table th { background: #0f172a; color: #94a3b8; padding: 10px 8px; text-transform: uppercase; font-size: 10px; text-align: left; }
-  .data-table td { padding: 10px 8px; border-bottom: 1px solid #0f172a; }
-  .tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-  .tag-food { color: #f59e0b; background: #f59e0b22; }
-  .tag-soft { color: #38bdf8; background: #38bdf822; }
-  .tag-alc { color: #f472b6; background: #f472b622; }
-  .tag-bbq { color: #fb923c; background: #fb923c22; }
-  .tag-uns { color: #fca5a5; background: #7f1d1d; }
-  .calendar-card { padding: 16px; }
-  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .cal-btn, .btn-action { background: #0f172a; border: 1px solid #334155; color: #38bdf8; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-  .btn-action { width: 100%; background: #06b6d4; color: #0f172a; border: none; margin-top: 14px; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-  .cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; cursor: pointer; }
-  .cal-day.empty { background: transparent; }
-  .cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
-  .cal-day.in-range { background: #0e7490; color: #fff; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body { background: #0f172a; color: #fff; padding: 16px; max-width: 680px; margin: 0 auto; }
+.header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
+.status.bad { background: #7f1d1d; color: #fca5a5; }
+.heart-icon { display: inline-block; margin-left: 6px; font-size: 16px; }
+.heart-icon.pulse { animation: heartPulse 1.2s infinite ease-in-out; }
+@keyframes heartPulse { 0% {transform: scale(1)} 15%{transform:scale(1.25)} 30%{transform: scale(1)} 45%{transform: scale(1.15)} 60%{transform:scale(1)} 100%{transform:scale(1)}}
+.pay-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 14px; }
+.two-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+.nav-btn { padding: 8px 4px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; }
+.nav-btn.active { background: #06b6d4; color: #0f172a; border-color: #06b6d4; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.note { font-size: 11px; color: #94a3b8; margin: 6px 0 12px; }
+.table-container, .calendar-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; }
+.table-container { overflow: hidden; margin-top: 10px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th { background: #0f172a; color: #94a3b8; padding: 10px 8px; text-transform: uppercase; font-size: 10px; text-align: left; }
+.data-table td { padding: 10px 8px; border-bottom: 1px solid #0f172a; }
+.tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+.tag-food { color: #f59e0b; background: #f59e0b22; }
+.tag-soft { color: #38bdf8; background: #38bdf822; }
+.tag-alc { color: #f472b6; background: #f472b622; }
+.tag-bbq { color: #fb923c; background: #fb923c22; }
+.tag-uns { color: #fca5a5; background: #7f1d1d; }
+.calendar-card { padding: 16px; }
+.cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.cal-btn, .btn-action { background: #0f172a; border: 1px solid #334155; color: #38bdf8; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-action { width: 100%; background: #06b6d4; color: #0f172a; border: none; margin-top: 14px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; cursor: pointer; }
+.cal-day.empty { background: transparent; }
+.cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
+.cal-day.in-range { background: #0e7490; color: #fff; }
 </style>
 </head>
 <body>
@@ -49,11 +48,13 @@
   <h2 style="margin:0; font-size:18px;">Castaway Counts <span id="heart-status" class="heart-icon"></span></h2>
   <span id="status" class="status">Syncing...</span>
 </div>
+
 <div class="nav-grid">
   <button class="nav-btn active" id="btn-tab-dashboard" onclick="switchTab('dashboard')">DASHBOARD</button>
   <button class="nav-btn" id="btn-tab-lookup" onclick="switchTab('lookup')">DATE LOOKUP</button>
   <button class="nav-btn" id="btn-tab-decisions" onclick="switchTab('decisions')">DECISIONS</button>
 </div>
+
 <div id="tab-dashboard" class="tab-content active">
   <div class="pay-grid">
     <button class="nav-btn group-btn active" onclick="setGroup('Food')">FOOD</button>
@@ -63,8 +64,14 @@
     <button class="nav-btn group-btn" onclick="setGroup('Unsorted')">OTHER</button>
   </div>
   <h3 style="font-size:14px; color:#94a3b8;">Ranking, high to low</h3>
-  <div class="table-container"><table class="data-table"><thead><tr><th>#</th><th>Item</th><th>Group</th><th style="text-align:right;">Qty</th></tr></thead><tbody id="today-body"></tbody></table></div>
+  <div class="table-container">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Item</th><th>Group</th><th style="text-align:right;">Qty</th></tr></thead>
+      <tbody id="today-body"></tbody>
+    </table>
+  </div>
 </div>
+
 <div id="tab-lookup" class="tab-content">
   <div class="calendar-card">
     <div class="cal-header">
@@ -80,25 +87,37 @@
       <button class="btn-action" style="background:#1e293b; color:#94a3b8; border:1px solid #334155; margin-top:14px;" onclick="clearDates()">Clear selection</button>
     </div>
   </div>
-  <div class="pay-grid">
+  <div class="pay-grid" style="margin-top:14px;">
     <button class="nav-btn group-btn active" onclick="setGroup('Food')">FOOD</button>
     <button class="nav-btn group-btn" onclick="setGroup('BBQ')">BBQ</button>
     <button class="nav-btn group-btn" onclick="setGroup('Soft drinks')">SOFT DRINKS</button>
     <button class="nav-btn group-btn" onclick="setGroup('Alcohol')">ALCOHOL</button>
     <button class="nav-btn group-btn" onclick="setGroup('Unsorted')">OTHER</button>
   </div>
-  <div class="table-container"><table class="data-table"><thead><tr><th>#</th><th>Item</th><th>Group</th><th style="text-align:right;">Qty</th></tr></thead><tbody id="lookup-body"></tbody></table></div>
+  <div class="table-container">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Item</th><th>Group</th><th style="text-align:right;">Qty</th></tr></thead>
+      <tbody id="lookup-body"></tbody>
+    </table>
+  </div>
 </div>
+
 <div id="tab-decisions" class="tab-content">
   <p class="note">This week is Monday to today. This month is the calendar month. History from 6 Oct is included.</p>
   <select id="month-pick" onchange="pickMonth()" style="width:100%; padding:8px; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #334155; margin-bottom:8px;"></select>
   <div class="two-grid">
-    <input id="report-email" type="email" placeholder="Email for this report" style="padding:8px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#fff;">
+    <input id="report-email" type="email" placeholder="Email for this report" style="padding:8px; border-radius: 6px; border:1px solid #334155; background:#0f172a; color:#fff;">
     <button class="btn-action" style="margin-top:0;" onclick="sendReport()">Send report</button>
   </div>
   <p class="note" id="report-note">The address is cleared after sending.</p>
-  <div class="table-container"><table class="data-table"><thead><tr><th>Menu item</th><th style="text-align:right;">This week</th><th id="month-col" style="text-align:right;">This month</th></tr></thead><tbody id="decision-body"></tbody></table></div>
+  <div class="table-container">
+    <table class="data-table">
+      <thead><tr><th>Menu item</th><th style="text-align:right;">This week</th><th id="month-col" style="text-align:right;">This month</th></tr></thead>
+      <tbody id="decision-body"></tbody>
+    </table>
+  </div>
 </div>
+
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
 let calDate = new Date();
@@ -109,18 +128,21 @@ let lookupItems = [];
 let weekItems = [];
 let monthItems = [];
 let decisionSlot = "";
+
 function mondayOf(d) {
   var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   var day = x.getDay();
   x.setDate(x.getDate() - (day === 0 ? 6 : day - 1));
   return x;
 }
+
 function loadDecisions() {
   fillMonthPick();
   decisionSlot = "week";
   var now = new Date();
   fetchCounts("custom", fmt(mondayOf(now)), fmt(now));
 }
+
 function pickMonth() {
   var parts = document.getElementById("month-pick").value.split("-");
   var start = new Date(Number(parts[0]), Number(parts[1]) - 1, 1);
@@ -131,6 +153,7 @@ function pickMonth() {
   decisionSlot = "month";
   fetchCounts("custom", fmt(start), fmt(end));
 }
+
 function fillMonthPick() {
   var sel = document.getElementById("month-pick");
   if (sel.options.length) return;
@@ -144,6 +167,7 @@ function fillMonthPick() {
     sel.appendChild(opt);
   }
 }
+
 const MENU = [
   ["Sandwiches", "Sandwich - Peri Peri Chicken Mayo", /peri/i],
   ["Sandwiches", "Sandwich - Ham & Cheese", /ham/i],
@@ -180,19 +204,22 @@ const MENU = [
   ["Something sweet", "Mango sticky rice", /sticky rice/i],
   ["Something sweet", "Ice cream", /ice cream/i]
 ];
+
 function esc(s) {
   var out = "", text = String(s == null ? "" : s);
   for (var i = 0; i < text.length; i++) {
     var c = text.charAt(i);
-    if (c === "&") out += "&";
-    else if (c === "<") out += "<";
-    else if (c === ">") out += ">";
+    if (c === "&") out += "&amp;";
+    else if (c === "<") out += "&lt;";
+    else if (c === ">") out += "&gt;";
     else out += c;
   }
   return out;
 }
+
 function unitsOf(p) { return (p.cashUnits || 0) + (p.posUnits || 0); }
 function tag(cat) { return cat === "Food" ? "tag-food" : cat === "Soft drinks" ? "tag-soft" : cat === "Alcohol" ? "tag-alc" : cat === "BBQ" ? "tag-bbq" : "tag-uns"; }
+
 function switchTab(name) {
   document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
   document.querySelectorAll(".nav-btn:not(.group-btn)").forEach(el => el.classList.remove("active"));
@@ -201,6 +228,7 @@ function switchTab(name) {
   if (name === "lookup") renderCalendar();
   if (name === "decisions") loadDecisions();
 }
+
 function fetchCounts(range, startDate, endDate, quiet) {
   if (!quiet) document.getElementById("status").textContent = "Syncing...";
   var old = document.getElementById("jsonp-counts");
@@ -216,13 +244,15 @@ function fetchCounts(range, startDate, endDate, quiet) {
   };
   document.body.appendChild(script);
 }
+
 window.handleAdminData = function (data) {
   if (!data || data.status !== "success") return;
   document.getElementById("status").textContent = "Live";
   document.getElementById("status").classList.remove("bad");
   var heart = document.getElementById("heart-status");
-  heart.textContent = data.isOnline ? "❤️" : "💔";
+  heart.textContent = data.isOnline ? "❤️" : "🤍";
   heart.classList.toggle("pulse", !!data.isOnline);
+
   if (data.range === "custom" && decisionSlot) {
     if (decisionSlot === "week") weekItems = data.items || [];
     else monthItems = data.items || [];
@@ -232,20 +262,35 @@ window.handleAdminData = function (data) {
     if (next) pickMonth();
     return;
   }
-  if (data.range === "custom") { lookupItems = data.items || []; fillTable("lookup-body", lookupItems); return; }
+
+  if (data.range === "custom") {
+    lookupItems = data.items || [];
+    fillTable("lookup-body", lookupItems);
+    return;
+  }
+
   todayItems = data.items || [];
   fillTable("today-body", todayItems);
 };
+
 function setGroup(name) {
   group = name;
   document.querySelectorAll(".group-btn").forEach(function (btn) {
-    btn.classList.toggle("active", btn.textContent === { BBQ: "BBQ", Food: "FOOD", "Soft drinks": "SOFT DRINKS", Alcohol: "ALCOHOL", Unsorted: "OTHER" }[name]);
+    var matchName = { BBQ: "BBQ", Food: "FOOD", "Soft drinks": "SOFT DRINKS", Alcohol: "ALCOHOL", Unsorted: "OTHER" }[name];
+    btn.classList.toggle("active", btn.textContent === matchName);
   });
   fillTable("today-body", todayItems);
   fillTable("lookup-body", lookupItems);
 }
+
 function family(name) {
   var n = String(name || "").toLowerCase();
+
+  // Strip standalone leading 'Extra + ' if present
+  if (/^extra\s*\+\s*/i.test(n)) {
+    n = n.replace(/^extra\s*\+\s*/i, "");
+  }
+
   if (/^bbq-/.test(n)) return String(name || "").replace(/^bbq-\s*/i, "");
   if (/spirit|barcadi|bacardi|sangsom|\brum\b|\bgin\b|martini|mojito/.test(n)) return "Spirit and mixer";
   if (/peri/.test(n)) return "Sandwich - Peri Peri Chicken Mayo";
@@ -260,11 +305,13 @@ function family(name) {
   if (/flat\s*white/.test(n)) return "Flat white";
   if (/shake/.test(n)) return "Shakes";
   if (/lassi/.test(n)) return "Lassi";
-  if (/\btea\b|matcha/.test(n)) return "Tea";
+  if (/\btea\b|matcha|\bchai\b/.test(n)) return "Tea";
   if (/soda/.test(n)) return "Soda";
   if (/coconut/.test(n)) return "Fresh coconut";
+
   return String(name || "").replace(/\s*\([^)]*\)/g, "").replace(/\s*\+.*/, "").trim();
 }
+
 function fillTable(bodyId, items) {
   var totals = {};
   (items || []).forEach(function (p) {
@@ -275,14 +322,17 @@ function fillTable(bodyId, items) {
     if (!totals[name]) totals[name] = { name: name, category: p.category, units: 0 };
     totals[name].units += units;
   });
+
   var rows = Object.keys(totals).map(function (k) { return totals[k]; }).sort(function (a, b) { return b.units - a.units; });
   document.getElementById(bodyId).innerHTML = rows.length ? rows.map(function (p, i) {
     return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td><span class='tag " + tag(p.category) + "'>" + esc(p.category) + "</span></td><td style='text-align:right;'>" + p.units + "</td></tr>";
-  }).join("") : "<tr><td colspan='4' style='text-align:center; color:#64748b; padding:16px;'>No items in this view.</td></tr>";
+  }).join("") : "<tr><td colspan='4' style='text-align:center; color:#64748b; padding: 16px;'>No items in this view.</td></tr>";
 }
+
 function countFamily(items, re) {
   return (items || []).reduce(function (s, p) { return re.test(p.name) ? s + unitsOf(p) : s; }, 0);
 }
+
 function barbequeRows() {
   var names = {};
   [weekItems, monthItems].forEach(function (list, idx) {
@@ -293,12 +343,16 @@ function barbequeRows() {
       names[name][idx] += unitsOf(p);
     });
   });
+
   var keys = Object.keys(names).sort(function (a, b) { return names[b][1] - names[a][1]; });
   if (!keys.length) return "<tr><td colspan='3' style='color:#94a3b8; font-size:10px;'>BARBEQUE</td></tr><tr><td colspan='3' style='color:#64748b;'>No BBQ items yet</td></tr>";
-  return "<tr><td colspan='3' style='color:#94a3b8; font-size:10px;'>BARBEQUE</td></tr>" + keys.map(function (name) {
-    return "<tr><td>" + esc(name) + "</td><td style='text-align:right;'>" + names[name][0] + "</td><td style='text-align:right;'>" + names[name][1] + "</td></tr>";
-  }).join("");
+
+  return "<tr><td colspan='3' style='color:#94a3b8; font-size:10px;'>BARBEQUE</td></tr>" +
+    keys.map(function (name) {
+      return "<tr><td>" + esc(name) + "</td><td style='text-align:right;'>" + names[name][0] + "</td><td style='text-align:right;'>" + names[name][1] + "</td></tr>";
+    }).join("");
 }
+
 function renderDecisions() {
   var last = "";
   var menu = MENU.map(function (row) {
@@ -306,9 +360,12 @@ function renderDecisions() {
     last = row[0];
     return head + "<tr><td>" + esc(row[1]) + "</td><td style='text-align:right;'>" + countFamily(weekItems, row[2]) + "</td><td style='text-align:right;'>" + countFamily(monthItems, row[2]) + "</td></tr>";
   }).join("");
+
   document.getElementById("decision-body").innerHTML = barbequeRows() + menu;
 }
+
 function fmt(d) { return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear(); }
+
 function renderCalendar() {
   var y = calDate.getFullYear(), m = calDate.getMonth();
   document.getElementById("cal-month-title").textContent = ["January","February","March","April","May","June","July","August","September","October","November","December"][m] + " " + y;
@@ -321,6 +378,7 @@ function renderCalendar() {
   document.getElementById("cal-days-grid").innerHTML = html;
   document.getElementById("cal-selection-label").textContent = picked.length ? picked.join(", ") : "Click any days. Click a selected day to remove it.";
 }
+
 function selectDay(y, m, d) {
   var key = d + "/" + (m + 1) + "/" + y;
   var at = picked.indexOf(key);
@@ -328,7 +386,9 @@ function selectDay(y, m, d) {
   else picked.push(key);
   renderCalendar();
 }
+
 function changeMonth(n) { calDate.setMonth(calDate.getMonth() + n); renderCalendar(); }
+
 function clearDates() {
   picked = [];
   lookupItems = [];
@@ -336,6 +396,7 @@ function clearDates() {
   document.getElementById("cal-selection-label").textContent = "Click any days. Click a selected day to remove it.";
   renderCalendar();
 }
+
 function fetchDates() {
   if (!picked.length) return;
   var dates = picked.map(function (key) {
@@ -344,6 +405,7 @@ function fetchDates() {
   }).sort(function (a, b) { return a - b; });
   fetchCounts("custom", fmt(new Date(dates[0])), fmt(new Date(dates[dates.length - 1])));
 }
+
 function sendReport() {
   var email = document.getElementById("report-email").value.trim();
   var note = document.getElementById("report-note");
@@ -354,9 +416,11 @@ function sendReport() {
   document.body.appendChild(script);
   document.getElementById("report-email").value = "";
 }
+
 window.handleReport = function (data) {
   document.getElementById("report-note").textContent = data && data.status === "success" ? "Sent. Address cleared." : "Not sent";
 };
+
 fetchCounts("today");
 renderCalendar();
 setInterval(function () { fetchCounts("today", "", "", true); }, 45000);
