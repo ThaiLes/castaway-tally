@@ -5,85 +5,102 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Castaway Admin Portal</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: #0f172a; color: #fff; padding: 16px; max-width: 680px; margin: 0 auto; }
-  .header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-  .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
-  .status.bad { background: #7f1d1d; color: #fca5a5; }
-  .heart-icon { display: inline-block; margin-left: 6px; font-size: 16px; }
-  .heart-icon.pulse { animation: heartPulse 1.2s infinite ease-in-out; }
-  @keyframes heartPulse { 0%{transform:scale(1)} 15%{transform:scale(1.25)} 30%{transform:scale(1)} 45%{transform:scale(1.15)} 60%{transform:scale(1)} 100%{transform:scale(1)} }
-  .nav-grid, .pay-grid { display: grid; gap: 6px; margin-bottom: 14px; }
-  .nav-grid { grid-template-columns: repeat(3, 1fr); }
-  .pay-grid { grid-template-columns: repeat(3, 1fr); }
-  .nav-btn, .pay-btn { padding: 8px 4px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; }
-  .nav-btn.active, .pay-btn.active { background: #06b6d4; color: #0f172a; border-color: #06b6d4; }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
-  .kpi-card { background: #1e293b; padding: 12px 8px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
-  .kpi-val { font-size: 15px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
-  .kpi-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
-  .note { font-size: 11px; color: #94a3b8; margin: 6px 0 12px; }
-  .table-container, .chart-card, .calendar-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; }
-  .table-container { overflow: hidden; margin-top: 10px; }
-  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .data-table th { background: #0f172a; color: #94a3b8; padding: 10px 8px; text-transform: uppercase; font-size: 10px; text-align: left; }
-  .data-table td { padding: 10px 8px; border-bottom: 1px solid #0f172a; }
-  .tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-  .tag-food { color: #f59e0b; background: #f59e0b22; }
-  .tag-soft { color: #38bdf8; background: #38bdf822; }
-  .tag-alc { color: #f472b6; background: #f472b622; }
-  .tag-bbq { color: #ef4444; background: #ef444422; }
-  .tag-uns { color: #fca5a5; background: #7f1d1d; }
-  .chart-card { padding: 16px; margin-bottom: 16px; }
-  .chart-card h3 { font-size: 13px; margin-bottom: 10px; text-transform: uppercase; }
-  .line-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; font-size: 10px; }
-  .line-label { width: 36px; color: #94a3b8; }
-  .line-track { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-  .thin { height: 4px; border-radius: 2px; background: #334155; }
-  .thin > span { display: block; height: 100%; border-radius: 2px; }
-  .line-count { width: 72px; text-align: right; color: #cbd5e1; }
-  .food { background: #f59e0b; } .soft { background: #38bdf8; } .alc { background: #f472b6; } .bbq { background: #ef4444; }
-  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .cal-btn, .btn-action { background: #0f172a; border: 1px solid #334155; color: #38bdf8; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-  .btn-action { width: 100%; background: #06b6d4; color: #0f172a; border: none; margin-top: 14px; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-  .cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; cursor: pointer; }
-  .cal-day.empty { background: transparent; }
-  .cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
-  .two-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .grand { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px; text-align: center; margin-bottom: 8px; }
-  .grand b { display: block; font-size: 28px; color: #06b6d4; margin-top: 4px; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body { background: #0f172a; color: #fff; padding: 16px; max-width: 680px; margin: 0 auto; }
+.header { border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.status { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
+.status.bad { background: #7f1d1d; color: #fca5a5; }
+.heart-icon { display: inline-block; margin-left: 6px; font-size: 16px; }
+.heart-icon.pulse { animation: heartPulse 1.2s infinite ease-in-out; }
+@keyframes heartPulse { 0% {transform: scale(1)} 15%{transform: scale(1.25)} 30%{transform: scale(1)} 45%{transform: scale(1.15)} 60%{transform:scale(1)} 100%{transform:scale(1)}}
+.nav-grid, .pay-grid { display: grid; gap: 6px; margin-bottom: 14px; }
+.nav-grid { grid-template-columns: repeat(3, 1fr); }
+.pay-grid { grid-template-columns: repeat(3, 1fr); }
+.nav-btn, .pay-btn { padding: 8px 4px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 10px; cursor: pointer; }
+.nav-btn.active, .pay-btn.active { background: #06b6d4; color: #0f172a; border-color: #06b6d4; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+.kpi-card { background: #1e293b; padding: 12px 8px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
+.kpi-val { font-size: 15px; font-weight: bold; color: #06b6d4; margin-top: 4px; }
+.kpi-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
+.note { font-size: 11px; color: #94a3b8; margin: 6px 0 12px; }
+.table-container, .chart-card, .calendar-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; }
+.table-container { overflow: hidden; margin-top: 10px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th { background: #0f172a; color: #94a3b8; padding: 10px 8px; text-transform: uppercase; font-size: 10px; text-align: left; }
+.data-table td { padding: 10px 8px; border-bottom: 1px solid #0f172a; }
+.tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+.tag-food { color: #f59e0b; background: #f59e0b22; }
+.tag-soft { color: #38bdf8; background: #38bdf822; }
+.tag-alc { color: #f472b6; background: #f472b622; }
+.tag-bbq { color: #ef4444; background: #ef444422; }
+.tag-uns { color: #fca5a5; background: #7f1d1d; }
+.chart-card { padding: 16px; margin-bottom: 16px; }
+.chart-card h3 { font-size: 13px; margin-bottom: 10px; text-transform: uppercase; }
+.line-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; font-size: 10px; }
+.line-label { width: 36px; color: #94a3b8; }
+.line-track { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.thin { height: 4px; border-radius: 2px; background: #334155; }
+.thin > span { display: block; height: 100%; border-radius: 2px; }
+.line-count { width: 72px; text-align: right; color: #cbd5e1; }
+.food { background: #f59e0b; } .soft { background: #38bdf8; } .alc { background: #f472b6; } .bbq { background: #ef4444; }
+.cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.cal-btn, .btn-action { background: #0f172a; border: 1px solid #334155; color: #38bdf8; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-action { width: 100%; background: #06b6d4; color: #0f172a; border: none; margin-top: 14px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.cal-day { font-size: 12px; padding: 8px 0; border-radius: 6px; background: #0f172a; cursor: pointer; }
+.cal-day.empty { background: transparent; }
+.cal-day.selected { background: #06b6d4; color: #0f172a; font-weight: bold; }
+.two-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.grand { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px; text-align: center; margin-bottom: 8px; }
+.grand b { display: block; font-size: 28px; color: #06b6d4; margin-top: 4px; }
 </style>
 </head>
 <body>
 <div class="header">
-  <h2 style="margin:0; font-size:18px;">Castaway Admin <span id="heart-status" class="heart-icon"></span></h2>
+  <h2 style="margin:0; font-size: 18px;">Castaway Admin <span id="heart-status" class="heart-icon"></span></h2>
   <span id="status" class="status">Syncing...</span>
 </div>
+
 <div class="nav-grid">
   <button class="nav-btn active" id="btn-tab-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
   <button class="nav-btn" id="btn-tab-analytics" onclick="switchTab('analytics')">Analytics</button>
   <button class="nav-btn" id="btn-tab-lookup" onclick="switchTab('lookup')">Date Lookup</button>
 </div>
+
 <div id="tab-dashboard" class="tab-content active">
+  <div class="pay-grid">
+    <button class="pay-btn active" id="pay-all" onclick="setPay('all')">ALL SALES</button>
+    <button class="pay-btn" id="pay-cash" onclick="setPay('cash')">BILL (CASH)</button>
+    <button class="pay-btn" id="pay-pos" onclick="setPay('pos')">CHARGE (QR)</button>
+  </div>
+
   <div class="kpi-grid">
     <div class="kpi-card"><div class="kpi-lbl">Sales</div><div id="kpi-rev" class="kpi-val">฿0</div></div>
     <div class="kpi-card"><div class="kpi-lbl">BILL</div><div id="kpi-cash" class="kpi-val">฿0</div></div>
     <div class="kpi-card"><div class="kpi-lbl">CHARGE</div><div id="kpi-pos" class="kpi-val">฿0</div></div>
     <div class="kpi-card"><div class="kpi-lbl">BBQ</div><div id="kpi-bbq" class="kpi-val" style="color:#ef4444;">฿0</div></div>
   </div>
+
   <div class="kpi-grid">
     <div class="kpi-card"><div class="kpi-lbl">Food</div><div id="kpi-food" class="kpi-val" style="color:#f59e0b;">฿0</div></div>
     <div class="kpi-card"><div class="kpi-lbl">Soft drinks</div><div id="kpi-soft" class="kpi-val" style="color:#38bdf8;">฿0</div></div>
     <div class="kpi-card"><div class="kpi-lbl">Alcohol</div><div id="kpi-alc" class="kpi-val" style="color:#f472b6;">฿0</div></div>
     <div class="kpi-card"><div class="kpi-lbl">Other</div><div id="kpi-uns" class="kpi-val">฿0</div></div>
   </div>
-  <p class="note" id="dash-note"></p>
+
+  <p class="note" id="dash-note">BILL is cash. CHARGE is the QR sale. ALL includes both.</p>
+
   <h3 style="font-size:14px; color:#94a3b8;">Ranking, high to low</h3>
-  <div class="table-container"><table class="data-table"><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Group</th><th style="text-align:right;">Baht</th></tr></thead><tbody id="today-table-body"></tbody></table></div>
+  <div class="table-container">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Group</th><th style="text-align:right;">Baht</th></tr></thead>
+      <tbody id="today-table-body"></tbody>
+    </table>
+  </div>
 </div>
+
 <div id="tab-analytics" class="tab-content">
   <div id="best-lists"></div>
   <p class="note" id="peak-line">Peak hours load with today.</p>
@@ -93,8 +110,9 @@
     <div id="chart-hours"></div>
   </div>
 </div>
+
 <div id="tab-lookup" class="tab-content">
-  <div class="calendar-card" style="padding:16px;">
+  <div class="calendar-card" style="padding: 16px;">
     <div class="cal-header">
       <button class="cal-btn" onclick="changeMonth(-1)"><</button>
       <div id="cal-month-title"></div>
@@ -111,6 +129,7 @@
   <div id="lookup-results" style="margin-top:16px;"></div>
   <div id="lookup-detail"></div>
 </div>
+
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxSySBORWg8hOuiboEEHDY_EaryuyEwuDBerK8_iqeJnE7u67xcTYWguhFqXDMx5jOe/exec";
 let adminData = { items: [], hourly: {} };
@@ -119,21 +138,40 @@ let payMode = "all";
 let activeTab = "dashboard";
 let calDate = new Date();
 let picked = [];
+
 function baht(n) { return "฿" + (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
+
 function esc(s) {
   var out = "", text = String(s == null ? "" : s);
   for (var i = 0; i < text.length; i++) {
     var c = text.charAt(i);
-    if (c === "&") out += "&";
-    else if (c === "<") out += "<";
-    else if (c === ">") out += ">";
+    if (c === "&") out += "&amp;";
+    else if (c === "<") out += "&lt;";
+    else if (c === ">") out += "&gt;";
     else out += c;
   }
   return out;
 }
-function unitsOf(p) { return payMode === "cash" ? p.cashUnits : payMode === "pos" ? p.posUnits : (p.cashUnits || 0) + (p.posUnits || 0); }
-function moneyOf(p) { return payMode === "cash" ? p.cashRevenue : payMode === "pos" ? p.posRevenue : (p.cashRevenue || 0) + (p.posRevenue || 0); }
+
+function categoriseLocal(name) {
+  var n = String(name || '').toLowerCase();
+  if (!n) return 'Unsorted';
+  if (/^bbq-|bbq shack|bbq hut|chimichurri|pork rib|ribs|brisket|pulled pork|hot dog|\bdog\b|bbq/i.test(n)) return 'BBQ';
+  if (/hoegaa?rden|summer ipa|\bipa\b|maitai|mai tai|daquiri|daiquiri|say play|espresso martini|mojito|margarita|pina colada|piña colada|tequila sunrise|tom collins|cuba libre|white russian|whisky sour|baileys|cosmopolitan|blue hawaii|singapore sling|mai tai|long island|san mig|stella|budweiser|singha|leo|chang|cider|sangsom|barcadi|bacardi|rum|gin|vodka|wine|beer|spirit/i.test(n)) return 'Alcohol';
+  if (/cappu|espresso|americano|flat\s*white|long\s*black|piccolo|latte|mocha|macchiato|affogato|matcha|\btea\b|\bchai\b|chocolate|smoothie|\bshakes?\b|lassi|\bsoda\b|milkshake|\bcoke\b|sprite|schweppes|tonic|\bwater\b|coconut|iced\s*chocolate|juice|mango|passion|watermelon|lemonade/i.test(n)) return 'Soft drinks';
+  if (/porridge|porriddge|muesli|granola|fruit platter|french toast|pancake|muffin|bagel|croissant|benedict|sourdough|sourdought|omelette|eggs|avocado|curry|panang|massaman|fried rice|pad thai|basil|sweet.?sour|oyster|cashew|somtam|salad|tempura|spring roll|wings|fries|sticky rice|ice cream|sandwich|peri[\s-]*peri|chicken mayo|tuna melt|pesto|ham|cheddar|burger|wrap/i.test(n)) return 'Food';
+  return 'Unsorted';
+}
+
+function isBbq(p) {
+  var name = String((p && p.name) || '');
+  return categoriseLocal(name) === 'BBQ';
+}
+
+function unitsOf(p) { return payMode === "cash" ? (p.cashUnits || 0) : payMode === "pos" ? (p.posUnits || 0) : ((p.cashUnits || 0) + (p.posUnits || 0)); }
+function moneyOf(p) { return payMode === "cash" ? (p.cashRevenue || 0) : payMode === "pos" ? (p.posRevenue || 0) : ((p.cashRevenue || 0) + (p.posRevenue || 0)); }
 function tag(cat) { return cat === "Food" ? "tag-food" : cat === "Soft drinks" ? "tag-soft" : cat === "Alcohol" ? "tag-alc" : cat === "BBQ" ? "tag-bbq" : "tag-uns"; }
+
 function switchTab(name) {
   activeTab = name;
   document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
@@ -142,6 +180,7 @@ function switchTab(name) {
   document.getElementById("btn-tab-" + name).classList.add("active");
   if (name === "lookup") renderCalendar();
 }
+
 function setPay(mode) {
   payMode = mode;
   document.querySelectorAll(".pay-btn").forEach(el => el.classList.remove("active"));
@@ -149,6 +188,7 @@ function setPay(mode) {
   renderAll();
   if (lookupData) renderLookup();
 }
+
 function fetchAdminData(range, startDate, endDate, quiet) {
   if (!quiet) document.getElementById("status").textContent = "Syncing...";
   var old = document.getElementById("jsonp-fetch-script");
@@ -164,34 +204,43 @@ function fetchAdminData(range, startDate, endDate, quiet) {
   };
   document.body.appendChild(script);
 }
+
 window.handleAdminData = function (data) {
   if (!data || data.status !== "success") return;
   document.getElementById("status").textContent = "Live";
   document.getElementById("status").classList.remove("bad");
   var heart = document.getElementById("heart-status");
-  heart.textContent = data.isOnline ? "❤️" : "💔";
+  heart.textContent = data.isOnline ? "❤️" : "🤍";
   heart.classList.toggle("pulse", !!data.isOnline);
+
   if (data.range === "custom") { lookupData = data; renderLookup(); return; }
   adminData = data;
   renderAll();
 };
+
 function renderAll() { renderDashboard(); renderAnalytics(); }
+
 function splitMoney(items) {
   var food = 0, soft = 0, alc = 0, bbq = 0, uns = 0, cash = 0, pos = 0;
   (items || []).forEach(function (p) {
-    cash += p.cashRevenue || 0; pos += p.posRevenue || 0;
+    cash += p.cashRevenue || 0; 
+    pos += p.posRevenue || 0;
     var m = moneyOf(p);
-    if (p.category === "Food" && !isBbq(p)) food += m;
-    else if (p.category === "Soft drinks") soft += m;
-    else if (p.category === "Alcohol") alc += m;
-    else if (isBbq(p)) bbq += m;
+    var cat = categoriseLocal(p.name);
+
+    if (cat === "Food") food += m;
+    else if (cat === "Soft drinks") soft += m;
+    else if (cat === "Alcohol") alc += m;
+    else if (cat === "BBQ") bbq += m;
     else uns += m;
   });
   return { food: food, soft: soft, alc: alc, bbq: bbq, uns: uns, cash: cash, pos: pos };
 }
+
 function renderDashboard() {
   var items = adminData.items || [];
   var t = splitMoney(items);
+
   document.getElementById("kpi-rev").textContent = baht(payMode === "cash" ? t.cash : payMode === "pos" ? t.pos : t.cash + t.pos);
   document.getElementById("kpi-cash").textContent = baht(t.cash);
   document.getElementById("kpi-pos").textContent = baht(t.pos);
@@ -200,29 +249,39 @@ function renderDashboard() {
   document.getElementById("kpi-soft").textContent = baht(t.soft);
   document.getElementById("kpi-alc").textContent = baht(t.alc);
   document.getElementById("kpi-uns").textContent = baht(t.uns);
-  document.getElementById("dash-note").textContent = "BILL is cash. CHARGE is the QR sale. ALL includes both.";
+
   var rows = items.filter(p => unitsOf(p) || moneyOf(p)).sort((a, b) => moneyOf(b) - moneyOf(a));
   document.getElementById("today-table-body").innerHTML = rows.length ? rows.map(function (p, i) {
-    return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(isBbq(p) ? "BBQ" : p.category) + "'>" + esc(isBbq(p) ? "BBQ" : p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
-  }).join("") : "<tr><td colspan='5' style='text-align:center; color:#64748b; padding:16px;'>No sales in this view yet.</td></tr>";
+    var cat = categoriseLocal(p.name);
+    return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(cat) + "'>" + esc(cat) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>";
+  }).join("") : "<tr><td colspan='5' style='text-align:center; color:#64748b; padding: 16px;'>No sales in this view yet.</td></tr>";
 }
+
 function summaryBlock(data, title) {
   var t = splitMoney((data && data.items) || []);
   var rows = ((data && data.items) || []).filter(p => unitsOf(p) || moneyOf(p)).sort((a, b) => moneyOf(b) - moneyOf(a));
+
   return "<div class='grand'><div class='kpi-lbl'>" + esc(title) + "</div><b>" + baht(payMode === "cash" ? t.cash : payMode === "pos" ? t.pos : t.cash + t.pos) + "</b></div>"
     + "<div class='kpi-grid'><div class='kpi-card'><div class='kpi-lbl'>Food</div><div class='kpi-val' style='color:#f59e0b;'>" + baht(t.food) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>BBQ</div><div class='kpi-val' style='color:#ef4444;'>" + baht(t.bbq) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Soft drinks</div><div class='kpi-val' style='color:#38bdf8;'>" + baht(t.soft) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Alcohol</div><div class='kpi-val' style='color:#f472b6;'>" + baht(t.alc) + "</div></div></div>"
     + "<div class='table-container'><table class='data-table'><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Group</th><th style='text-align:right;'>Baht</th></tr></thead><tbody>"
-    + (rows.map(function (p, i) { return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(isBbq(p) ? "BBQ" : p.category) + "'>" + esc(isBbq(p) ? "BBQ" : p.category) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>"; }).join("") || "<tr><td colspan='5' style='text-align:center;color:#64748b;padding:16px;'>No sales in this view yet.</td></tr>")
+    + (rows.map(function (p, i) { 
+        var cat = categoriseLocal(p.name);
+        return "<tr><td>" + (i + 1) + "</td><td>" + esc(p.name) + "</td><td>" + unitsOf(p) + "</td><td><span class='tag " + tag(cat) + "'>" + esc(cat) + "</span></td><td style='text-align:right;'>" + baht(moneyOf(p)) + "</td></tr>"; 
+      }).join("") || "<tr><td colspan='5' style='text-align:center; color:#64748b; padding:16px;'>No sales in this view yet.</td></tr>")
     + "</tbody></table></div>";
 }
+
 function renderAnalytics() {
   var t = splitMoney(adminData.items || []);
   document.getElementById("best-lists").innerHTML = "<div class='grand'><div class='kpi-lbl'>Today</div><b>" + baht(payMode === "cash" ? t.cash : payMode === "pos" ? t.pos : t.cash + t.pos) + "</b></div>"
     + "<div class='kpi-grid'><div class='kpi-card'><div class='kpi-lbl'>Food</div><div class='kpi-val' style='color:#f59e0b;'>" + baht(t.food) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>BBQ</div><div class='kpi-val' style='color:#ef4444;'>" + baht(t.bbq) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Soft drinks</div><div class='kpi-val' style='color:#38bdf8;'>" + baht(t.soft) + "</div></div><div class='kpi-card'><div class='kpi-lbl'>Alcohol</div><div class='kpi-val' style='color:#f472b6;'>" + baht(t.alc) + "</div></div></div>";
+  
   drawCombined("chart-hours", adminData.hourly || {});
   document.getElementById("peak-line").textContent = peakSentence(adminData.hourly || {});
 }
+
 function series(bucket) { return bucket ? (bucket[payMode] || bucket.all || []) : []; }
+
 function drawCombined(id, hourly) {
   var food = series(hourly.food), soft = series(hourly.soft), alc = series(hourly.alcohol), bbq = series(hourly.bbq);
   var max = 1;
@@ -232,11 +291,14 @@ function drawCombined(id, hourly) {
     var f = food[hour] || 0, s = soft[hour] || 0, a = alc[hour] || 0, b = bbq[hour] || 0;
     html += "<div class='line-row'><div class='line-label'>" + (hour < 10 ? "0" : "") + hour + "</div><div class='line-track'>"
       + thin(f, max, "food") + thin(s, max, "soft") + thin(a, max, "alc") + thin(b, max, "bbq")
-      + "</div><div class='line-count'>" + f + " / " + s + " / " + a + " / " + b + "</div></div>";
+      + "</div><div class='line-count'>" + f + "/" + s + "/" + a + "/" + b + "</div></div>";
   }
-  document.getElementById(id).innerHTML = html;
+  var target = document.getElementById(id);
+  if (target) target.innerHTML = html;
 }
+
 function thin(val, max, cls) { return "<div class='thin'><span class='" + cls + "' style='width:" + Math.round(val / max * 100) + "%'></span></div>"; }
+
 function peakSentence(hourly) {
   function peak(bucket, label) {
     var arr = series(bucket), best = 0, hour = -1;
@@ -245,8 +307,10 @@ function peakSentence(hourly) {
   }
   return [peak(hourly.food, "Food"), peak(hourly.soft, "Soft drinks"), peak(hourly.alcohol, "Alcohol"), peak(hourly.bbq, "BBQ")].filter(Boolean).join(". ") || "No hourly sales in this view yet.";
 }
+
 function changeMonth(d) { calDate.setMonth(calDate.getMonth() + d); renderCalendar(); }
 function fmt(d) { return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear(); }
+
 function renderCalendar() {
   var y = calDate.getFullYear(), m = calDate.getMonth();
   document.getElementById("cal-month-title").textContent = ["January","February","March","April","May","June","July","August","September","October","November","December"][m] + " " + y;
@@ -259,6 +323,7 @@ function renderCalendar() {
   document.getElementById("cal-days-grid").innerHTML = html;
   document.getElementById("cal-selection-label").textContent = picked.length ? picked.join(", ") : "Click any days. Click a selected day to remove it.";
 }
+
 function selectDay(y, m, d) {
   var key = d + "/" + (m + 1) + "/" + y;
   var at = picked.indexOf(key);
@@ -266,6 +331,7 @@ function selectDay(y, m, d) {
   else picked.push(key);
   renderCalendar();
 }
+
 function clearDates() {
   picked = [];
   lookupData = null;
@@ -273,6 +339,7 @@ function clearDates() {
   document.getElementById("lookup-detail").innerHTML = "";
   renderCalendar();
 }
+
 function fetchCalendar() {
   if (!picked.length) return;
   var dates = picked.map(function (key) {
@@ -281,6 +348,7 @@ function fetchCalendar() {
   }).sort(function (a, b) { return a - b; });
   fetchAdminData("custom", fmt(new Date(dates[0])), fmt(new Date(dates[dates.length - 1])));
 }
+
 function renderLookup() {
   var label = lookupData.startDate + (lookupData.endDate && lookupData.endDate !== lookupData.startDate ? " to " + lookupData.endDate : "");
   document.getElementById("lookup-results").innerHTML = "<h3 style='font-size:14px; color:#94a3b8; margin-top:12px;'>Ranking, high to low</h3>" + summaryBlock(lookupData, label || "Selected days");
@@ -288,6 +356,7 @@ function renderLookup() {
   document.getElementById("lookup-detail").innerHTML = "<div class='chart-card'><h3>Sales by hour</h3><div class='note'>Food / soft drinks / alcohol / BBQ.</div><div id='lookup-hours'></div></div>";
   drawCombined("lookup-hours", hourly);
 }
+
 fetchAdminData("today");
 renderCalendar();
 setInterval(function () { fetchAdminData("today", "", "", true); }, 45000);
