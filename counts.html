@@ -286,6 +286,11 @@ function family(name) {
     n = n.replace(/^extra\s*\+\s*/i, "").replace(/^extra\s*/i, "");
   }
 
+  // Handle Chimichurri / Chimichuri spelling variants cleanly under BBQ
+  if (/chimichu?rri/i.test(n)) {
+    return "Chimichurri dog chicken";
+  }
+
   // Strip BBQ prefix if present
   if (/^bbq-/.test(n)) {
     return String(name).replace(/^bbq-\s*/i, "").replace(/\s*\+.*/, "").trim();
