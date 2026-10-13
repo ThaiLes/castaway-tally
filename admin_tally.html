@@ -153,13 +153,30 @@ function esc(s) {
   return out;
 }
 
-function categoriseLocal(name) {
+  function categoriseLocal(name) {
   var n = String(name || '').toLowerCase();
   if (!n) return 'Unsorted';
-  if (/^bbq-|bbq shack|bbq hut|chimichurri|pork rib|ribs|brisket|pulled pork|hot dog|\bdog\b|bbq/i.test(n)) return 'BBQ';
-  if (/hoegaa?rden|summer ipa|\bipa\b|maitai|mai tai|daquiri|daiquiri|say play|espresso martini|mojito|margarita|pina colada|piña colada|tequila sunrise|tom collins|cuba libre|white russian|whisky sour|baileys|cosmopolitan|blue hawaii|singapore sling|mai tai|long island|san mig|stella|budweiser|singha|leo|chang|cider|sangsom|barcadi|bacardi|rum|gin|vodka|wine|beer|spirit/i.test(n)) return 'Alcohol';
-  if (/cappu|espresso|americano|flat\s*white|long\s*black|piccolo|latte|mocha|macchiato|affogato|matcha|\btea\b|\bchai\b|chocolate|smoothie|\bshakes?\b|lassi|\bsoda\b|milkshake|\bcoke\b|sprite|schweppes|tonic|\bwater\b|coconut|iced\s*chocolate|juice|mango|passion|watermelon|lemonade/i.test(n)) return 'Soft drinks';
-  if (/porridge|porriddge|muesli|granola|fruit platter|french toast|pancake|muffin|bagel|croissant|benedict|sourdough|sourdought|omelette|eggs|avocado|curry|panang|massaman|fried rice|pad thai|basil|sweet.?sour|oyster|cashew|somtam|salad|tempura|spring roll|wings|fries|sticky rice|ice cream|sandwich|peri[\s-]*peri|chicken mayo|tuna melt|pesto|ham|cheddar|burger|wrap/i.test(n)) return 'Food';
+
+  // 1. BBQ Category (Only matches if explicitly prefixed with BBQ/BBQ Shack or specific BBQ items like chimichurri, brisket, etc.)
+  if (/^bbq-|bbq shack|bbq hut|chimichurri|brisket|pulled pork|hot dog|\bdog\b/i.test(n)) {
+    return 'BBQ';
+  }
+
+  // 2. Alcohol
+  if (/hoegaa?rden|summer ipa|\bipa\b|maitai|mai tai|daquiri|daiquiri|say play|espresso martini|mojito|margarita|pina colada|piña colada|tequila sunrise|tom collins|cuba libre|white russian|whisky sour|baileys|cosmopolitan|blue hawaii|singapore sling|mai tai|long island|san mig|stella|budweiser|singha|leo|chang|cider|sangsom|barcadi|bacardi|rum|gin|vodka|wine|beer|spirit/i.test(n)) {
+    return 'Alcohol';
+  }
+
+  // 3. Soft Drinks
+  if (/cappu|espresso|americano|flat\s*white|long\s*black|piccolo|latte|mocha|macchiato|affogato|matcha|\btea\b|\bchai\b|chocolate|smoothie|\bshakes?\b|lassi|\bsoda\b|milkshake|\bcoke\b|sprite|schweppes|tonic|\bwater\b|coconut|iced\s*chocolate|juice|mango|passion|watermelon|lemonade/i.test(n)) {
+    return 'Soft drinks';
+  }
+
+  // 4. Food (Includes Thai pork ribs and general pork ribs)
+  if (/porridge|porriddge|muesli|granola|fruit platter|french toast|pancake|muffin|bagel|croissant|benedict|sourdough|sourdought|omelette|eggs|avocado|curry|panang|massaman|fried rice|pad thai|basil|sweet.*sour|oyster|cashew|somtam|salad|tempura|spring roll|wings|pork rib|ribs|fries|sticky rice|ice cream|sandwich|peri[\s-]*peri|chicken mayo|tuna melt|pesto|ham|cheddar|burger|wrap/i.test(n)) {
+    return 'Food';
+  }
+
   return 'Unsorted';
 }
 
