@@ -153,12 +153,12 @@ function esc(s) {
   return out;
 }
 
-  function categoriseLocal(name) {
+function categoriseLocal(name) {
   var n = String(name || '').toLowerCase();
   if (!n) return 'Unsorted';
 
-  // 1. Strict BBQ Rule: Must start with "bbq-" or explicitly match venue headers
-  if (/^bbq-|bbq shack|bbq hut/i.test(n)) {
+  // 1. Strict BBQ Rule: matches bbq- prefix OR chimichuri/chimichurri spelling variants
+  if (/^bbq-|bbq shack|bbq hut|chimichu?rri/i.test(n)) {
     return 'BBQ';
   }
 
@@ -172,7 +172,7 @@ function esc(s) {
     return 'Soft drinks';
   }
 
-  // 4. Food (Handles Thai pork ribs, pork ribs, etc.)
+  // 4. Food
   if (/porridge|porriddge|muesli|granola|fruit platter|french toast|pancake|muffin|bagel|croissant|benedict|sourdough|sourdought|omelette|eggs|avocado|curry|panang|massaman|fried rice|pad thai|basil|sweet.*sour|oyster|cashew|somtam|salad|tempura|spring roll|wings|pork rib|ribs|fries|sticky rice|ice cream|sandwich|peri[\s-]*peri|chicken mayo|tuna melt|pesto|ham|cheddar|burger|wrap/i.test(n)) {
     return 'Food';
   }
