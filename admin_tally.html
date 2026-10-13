@@ -193,14 +193,11 @@ function fetchAdminData(range, startDate, endDate, quiet) {
   if (!quiet) document.getElementById("status").textContent = "Syncing...";
   var old = document.getElementById("jsonp-fetch-script");
   if (old) old.remove();
-  
   var script = document.createElement("script");
   script.id = "jsonp-fetch-script";
-  // Added extra random token to prevent CDN caching on github.io
   script.src = API_URL + "?action=getAdminData&range=" + encodeURIComponent(range)
     + "&startDate=" + encodeURIComponent(startDate || "") + "&endDate=" + encodeURIComponent(endDate || "")
     + "&callback=handleAdminData&t=" + Date.now() + "&r=" + Math.random();
-    
   script.onerror = function () {
     document.getElementById("status").textContent = "Error";
     document.getElementById("status").classList.add("bad");
